@@ -10,11 +10,21 @@ const UserRoute=require("./routes/userRoute");
 const WishlistRoute=require("./routes/wishlistRoute");
 const MessageRoute=require("./routes/messageRoute");
 const TestimonalRoute=require("./routes/testimonialRoute");
+
 require("dotenv").config();
-app.use(bodyParser.json({ limit: "50mb" })); // Replace "50mb" with your required limit
+app.use(bodyParser.json({ limit: "50mb" })); 
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
-app.use(cors());
+
+app.use(
+  cors({
+    origin: ["https://srisairam.co.in", "https://www.srisairam.co.in"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.options("*", cors());
+
 
 // app.use(bodyParser.json({ limit: "Infinity" }));
 cloudinary.config({
