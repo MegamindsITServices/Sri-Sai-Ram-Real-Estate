@@ -98,7 +98,7 @@ const Projects = () => {
 
   if (products !== null) {
     // Filter products
-    filteredProducts = products.filter(product => {
+    filteredProducts = products?.filter(product => {
       const matchesSearch = product.title.toLowerCase().includes(filters.searchQuery.toLowerCase());
       const matchesStatus = filters.status ? product.status === filters.status : true;
       const matchesBHK = filters.bhk ? product.bhk.includes(filters.bhk) : true;
@@ -130,10 +130,10 @@ const Projects = () => {
     }
 
     // Pagination
-    totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    totalPages = Math.ceil(filteredProducts?.length / itemsPerPage);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    currentProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+    currentProducts = filteredProducts?.slice(indexOfFirstItem, indexOfLastItem);
   }
 
   return (
