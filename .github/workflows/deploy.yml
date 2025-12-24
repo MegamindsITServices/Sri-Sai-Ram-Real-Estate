@@ -32,7 +32,7 @@ jobs:
             nvm use 20.16.0 || nvm install 20.16.0
 
             echo "📥 Pulling latest code..."
-            cd /root/badri
+            cd /root/badri_srisairam
             git pull origin main
 
             # ---------------- FRONTEND ----------------
