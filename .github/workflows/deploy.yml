@@ -60,11 +60,11 @@ jobs:
 
             echo "🔁 Restarting PM2..."
             pm2 delete srisairam-api || true
-            PORT=5007 pm2 start index.js --name srisairam-api
+            PORT=5432 pm2 start index.js --name srisairam-api
             pm2 save
 
             echo "🧪 Verifying backend..."
             sleep 3
-            curl -I http://localhost:5007 || pm2 logs srisairam-api --lines 20
+            curl -I http://localhost:5432 || pm2 logs srisairam-api --lines 20
 
             echo "🎉 Deployment successful!"
