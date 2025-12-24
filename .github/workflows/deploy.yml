@@ -1,0 +1,70 @@
+name: Deploy Sri Sai Ram (Badri) to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy MERN App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script_stop: true
+          script: |
+            set -e
+            echo "✅ Connected to VPS"
+
+            # Load Node
+            export NVM_DIR="/root/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            nvm use 20.16.0 || nvm install 20.16.0
+
+            echo "📥 Pulling latest code..."
+            cd /root/badri
+            git pull origin main
+
+            # ---------------- FRONTEND ----------------
+            echo "🧱 Building frontend..."
+            cd frontend
+            npm install --legacy-peer-deps
+            npm run build
+
+            echo "📤 Deploying frontend..."
+            sudo mkdir -p /var/www/srisairam
+            sudo rm -rf /var/www/srisairam/*
+            sudo cp -R dist/* /var/www/srisairam/
+            sudo chown -R www-data:www-data /var/www/srisairam
+            sudo chmod -R 755 /var/www/srisairam
+
+            # ---------------- BACKEND ----------------
+            echo "🧩 Setting up backend..."
+            cd ../server
+            npm install --legacy-peer-deps
+
+            if [ ! -f ".env" ]; then
+              echo "❌ .env missing – aborting"
+              exit 1
+            fi
+
+            echo "🔁 Restarting PM2..."
+            pm2 delete srisairam-api || true
+            PORT=5007 pm2 start index.js --name srisairam-api
+            pm2 save
+
+            echo "🧪 Verifying backend..."
+            sleep 3
+            curl -I http://localhost:5007 || pm2 logs srisairam-api --lines 20
+
+            echo "🎉 Deployment successful!"
