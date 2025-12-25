@@ -14,10 +14,8 @@ const transporter = nodemailer.createTransport({
 
 async function sendEmail(options) {
   try {
-    console.log(process.env.SMTP_MAIL_PASS)
-    console.log(options)
     await transporter.sendMail({
-      from: `no.reply@placedIn.com`,
+      from: `no.reply@srisairam.co.in`,
       to: options.to,
       subject: options.subject,
       html: options.html,

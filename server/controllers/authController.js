@@ -6,6 +6,8 @@ const path = require("path");
 const { sendEmail } = require("../utils/sendMail.js");
 const crypto = require("crypto");
 const { uploadFile } = require("../utils/cloudinary.js");
+const Admin = require("../models/AdminModel.js");
+const e = require("express");
 
 const createActivationToken = (user) => {
   const token = jwt.sign(user, process.env.ACTIVATION_SECRET, {
@@ -53,13 +55,17 @@ const login = async (req, res) => {
   try {
     /* Take the infomation from the form */
     const { email, password } = req.body;
-   console.log(email)
+    console.log(email);
     /* Check if user exists */
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
+    let role = "user";
     if (!user) {
-      return res
-        .status(404)
-        .json({ status: false, message: "user does not exist" });
+      user = await Admin.findOne({ email });
+      if (user) role = "admin";
+    }
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
     /* Compare the password with the hashed password */
@@ -70,9 +76,15 @@ const login = async (req, res) => {
         .json({ status: false, message: "Invalid Credentials" });
     }
 
-    const userData = await User.findById(user._id).select("-password");
+    const userDoc =
+      role === "user"
+        ? await User.findById(user._id).select("-password")
+        : await Admin.findById(user._id).select("-password");
+
+    const userData = userDoc.toObject();
+    userData.role = role;
     // Generate The token
-    const token = user.generateToken();
+    const token = user.generateToken(userData);
     res.json({
       success: true,
       message: "User logged in Successfully",
@@ -81,7 +93,7 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Error while logging in" });
   }
 };
 
@@ -109,13 +121,19 @@ const signToken = (data) => {
 
 const getCurrentUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password");
-    if (!user) {
+    let userData;
+    if (req.user.role === "admin") {
+      userData = await Admin.findById(req.user._id).select("-password");
+    } else {
+      userData = await User.findById(req.user._id).select("-password");
+    }
+    if (!userData) {
       return res
         .status(404)
         .json({ status: false, message: "user does not exist" });
     }
-
+    const user = userData.toObject();
+    user.role = req.user.role;
     res.json({
       success: true,
       message: "User logged in Successfully",
@@ -123,7 +141,6 @@ const getCurrentUser = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-
     res
       .status(500)
       .json({ success: false, message: "Failed to get Current User" });
@@ -139,8 +156,8 @@ const updatePassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    console.log(currentPassword) ;
-    console.log(user.password)
+    console.log(currentPassword);
+    console.log(user.password);
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid password" });

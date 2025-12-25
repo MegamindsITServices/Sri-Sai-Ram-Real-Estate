@@ -37,8 +37,8 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 
 // Generate JWT token
 
-userSchema.methods.generateToken = function () {
-  const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+userSchema.methods.generateToken = function (payload) {
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
   return token;

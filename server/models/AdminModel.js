@@ -38,12 +38,12 @@ const adminSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// adminSchema.pre("save", async function (next) {
-//   if (this.isModified("password")) {
-//     this.password = await bcrypt.hash(this.password, 10);
-//   }
-//   next();
-// });
+adminSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
 
 
 adminSchema.methods.comparePassword = async function (candidatePassword) {
@@ -52,8 +52,8 @@ adminSchema.methods.comparePassword = async function (candidatePassword) {
 
 // Generate JWT token
 
-adminSchema.methods.generateToken = function () {
-  const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
+adminSchema.methods.generateToken = function (payload) {
+  const token = jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "7d",
   });
   return token;

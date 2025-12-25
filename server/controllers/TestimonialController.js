@@ -1,85 +1,125 @@
-const Testimonial =require("../models/Testimonials");
-const cloudinary=require("cloudinary");
+const Testimonial = require("../models/Testimonials");
+const { uploadFile } = require("../utils/cloudinary");
 
-const add=async(req,res)=>{
-    try{
-        const { name, job, feedback,profileImage,star } = req.body;
-       
-    
-           const picture=await cloudinary.uploader.upload(profileImage,{
-             folder:"avatars",
-             width:150,
-             crop:"scale"
-           });
-        // Create new testimonial
-        const newTestimonial = new Testimonial({
-          name,
-          job,
-          feedback,
-          profileImage: picture.secure_url, // Store Cloudinary URL in DB
-          star
-        });
-    
-        await newTestimonial.save();
-        res.json({ message: "Testimonial added successfully", newTestimonial,status:true });
-    }catch(err){
-        console.log(err.message);
+// ADD
+const add = async (req, res) => {
+  try {
+    const { name, job, feedback, star } = req.body;
+    const file = req.file;
+
+    if (!file)
+      return res.status(400).json({ message: "Profile image required" });
+
+    if (!name || !feedback || !job) {
+      return res
+        .status(400)
+        .json({ message: "name, feedback and job/Profession required" });
     }
-}
 
-const allTestimonial= async (req, res) => {
-    try {
-      const testimonial = await Testimonial.find({});
-  
-      if (!testimonial || testimonial.length == 0) {
-        return res.json({ status: false, message: "No Courses Found" });
-      }
-      return res.json({status:true, testimonial });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: error.message });
+    const imageUrl = await uploadFile(file.buffer, "srisai-testimonials");
+
+    const newTestimonial = new Testimonial({
+      name,
+      job,
+      feedback,
+      profileImage: imageUrl,
+      star: Number(star),
+    });
+
+    await newTestimonial.save();
+
+    res.json({
+      status: true,
+      message: "Testimonial added",
+      testimonial: newTestimonial,
+    });
+  } catch (err) {
+    console.error(err);
+    res
+      .status(500)
+      .json({ message: "Failed to add testimonial", error: err.message });
+  }
+};
+
+// GET ALL
+const allTestimonial = async (req, res) => {
+  try {
+    const testimonials = await Testimonial.find({}).sort({ createdAt: -1 });
+    res.json({ status: true, testimonials });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+const getPaginatedTestimonials = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // current page
+    const limit = parseInt(req.query.limit) || 9; // items per page
+    const skip = (page - 1) * limit;
+
+    const total = await Testimonial.countDocuments(); // total count
+    const testimonials = await Testimonial.find({})
+      .sort({ createdAt: -1 }) // newest first
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      status: true,
+      testimonials,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: total,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// DELETE
+const deleteTestimonial = async (req, res) => {
+  try {
+    const { _id } = req.body;
+    await Testimonial.findByIdAndDelete(_id);
+    res.json({ status: true, message: "Deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// EDIT
+const edit = async (req, res) => {
+  try {
+    const { _id, name, job, feedback, star } = req.body;
+    const file = req.file;
+
+    const updateData = { name, job, feedback, star: Number(star) };
+
+    if (file) {
+      updateData.profileImage = await uploadFile(file.buffer, "srisai-testimonials");
     }
-  }
 
-const deleteTestimonial=async(req,res)=>{
-    try{
-        const {_id}=req.body;
-        console.log(_id)
-       await Testimonial.deleteOne({ _id});
-       res.json({status:true})
-    }catch(err){
-      console.log(err.message);
-    }
-  }
+    const updated = await Testimonial.findByIdAndUpdate(_id, updateData, {
+      new: true,
+    });
 
-const edit=async(req,res)=>{
-  try{
-    const { name, job, feedback,profileImage,id,star } = req.body;
-       
-      let profileImageUrl;
-      const isCloudinaryUrl = (url) => url.startsWith("http") && url.includes("cloudinary");
-          if (isCloudinaryUrl(profileImage)) {
-            profileImageUrl = profileImage; // Use the existing URL if already a Cloudinary URL
-          } else {
-            const uploadedThumbnail = await cloudinary.uploader.upload(profileImage, {
-              folder: "avatars",
-              width: 150,
-              crop: "scale",
-            });
-            profileImageUrl = uploadedThumbnail.url;
-          }
-   
- // Create new testimonial
- await Testimonial.findByIdAndUpdate({_id:id},{
-  name,
-  job,
-  feedback,
-  profileImage: profileImageUrl,
-  star
- })
- res.json({ message: "Testimonial Edit successfully",status:true });
-  }catch(err){
-    console.log(err.message);
+    if (!updated) return res.status(404).json({ message: "Not found" });
+
+    res.json({
+      status: true,
+      message: "Updated successfully",
+      testimonial: updated,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
-}
-module.exports={add,deleteTestimonial,allTestimonial,edit};
+};
+
+module.exports = { add, allTestimonial, deleteTestimonial, getPaginatedTestimonials, edit };

@@ -30,11 +30,11 @@ const HomePage = () => {
     <>
     <Navbar />
     <Helmet>
-  <title>Home - SRI SAI ESTATE</title>
-  <meta name="description" content="Explore top-rated properties for sale and rent with SRI SAI Real Estate. From luxury apartments to family homes, we help you find the perfect property in your desired location." />
-  <meta name="keywords" content="real estate, buy home, rent property, luxury apartments, family houses, commercial spaces, SRI SAI Real Estate" />
-  <meta name="author" content="SRI SAI Real Estate" />
-</Helmet>
+      <title>Home - SRI SAI ESTATE</title>
+      <meta name="description" content="Explore top-rated properties for sale and rent with SRI SAI Real Estate. From luxury apartments to family homes, we help you find the perfect property in your desired location." />
+      <meta name="keywords" content="real estate, buy home, rent property, luxury apartments, family houses, commercial spaces, SRI SAI Real Estate" />
+      <meta name="author" content="SRI SAI Real Estate" />
+    </Helmet>
 
 <Layout title="Home - SRI SAI ESTATE">
  <div className="bg-[#E9E9FB] p-0 m-0 md:h-[1250px] lg:h-[1200px] overflow-hidden ">

@@ -167,7 +167,7 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-2 rounded-md text-white bg-primary hover:bg-primary-dark transition-all ${
+              className={`w-full py-2 rounded-md text-white bg-blue-600 hover:bg-primary-dark transition-all ${
                 loading ? "opacity-60 cursor-not-allowed" : ""
               }`}
             >
@@ -179,7 +179,7 @@ const Register = () => {
               <span>Already have an account? </span>
               <button
                 type="button"
-                className="text-primary hover:underline"
+                className="text-blue-400 underline hover:underline"
                 onClick={() => navigate("/login")}
               >
                 Log In

@@ -1,24 +1,18 @@
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
 
-const testimonial =new mongoose.Schema({
-    name:{
-        type:String,
+const testimonialSchema = new mongoose.Schema(
+  {
+    name: { type: String,  trim: true, required: true },
+    job: { type: String,  trim: true },
+    feedback: { type: String,  trim: true, required: true },
+    profileImage: { type: String,  trim: true },
+    star: {
+      type: Number,
+      min: 1,
+      max: 5,
     },
-    job:{
-        type:String,
-    },
-    feedback:{
-        type:String
-    },
-    profileImage:{
-        type:String
-    },
-    star:{
-        type:Number
-    }
-})
+  },
+  { timestamps: true }
+);
 
-
-const Testimonial = mongoose.model('Testimonal',testimonial);
-
-module.exports=Testimonial;
+module.exports = mongoose.model("Testimonial", testimonialSchema);

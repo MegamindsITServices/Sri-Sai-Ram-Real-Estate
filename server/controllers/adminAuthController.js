@@ -49,75 +49,6 @@ const register = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
-  try {
-    /* Take the infomation from the form */
-    const { email, password } = req.body;
-
-    /* Check if user exists */
-    const user = await AdminModel.findOne({ email });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ status: false, message: "user does not exist" });
-    }
-
-    /* Compare the password with the hashed password */
-    console.log(user.password);
-    
-    console.log(password)
-    // const isMatch = await bcrypt.compare(password, user.password);
-    // console.log(isMatch);
-    const isMatch= password === user.password ? true : false;
-    if (!isMatch) {
-       return res
-    .status(401)
-    .json({ status: false, message: "Invalid Credentials" });
-    }
-   
-    const userData = await AdminModel.findById(user._id).select("-password");
-    // Generate The token
-    const token = user.generateToken();
-    res.json({
-      success: true,
-      message: "User logged in Successfully",
-      token,
-      user: userData,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const signToken = (data) => {
-  const token = jwt.sign(data, process.env.JWT_SECRET, { expiresIn: "10d" });
-  return token;
-};
-
-const getCurrentUser = async (req, res) => {
-  try {
-    const user = await AdminModel.findById(req.user._id).select("-password");
-    if (!user) {
-      return res
-        .status(404)
-        .json({ status: false, message: "user does not exist" });
-    }
-
-    res.json({
-      success: true,
-      message: "User logged in Successfully",
-      user,
-    });
-  } catch (error) {
-    console.log(error);
-
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to get Current User" });
-  }
-};
-
 const updatePassword = async (req, res) => {
   try {
     const id = req.user._id;
@@ -127,14 +58,10 @@ const updatePassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    // const isMatch = await bcrypt.compare(currentPassword, user.password);
-    const isMatch= currentPassword === user.password ? true:false;
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid password" });
     }
-    // const hashed = bcrypt.hash(newPassword, 10); 
-    // user.password = hashed;
-    console.log(newPassword);    
    
     user.password=newPassword;
     await user.save();
@@ -148,25 +75,25 @@ const updatePassword = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const id = req.user._id;
-    console.log(req.body)
-    // Decode Base64 string to buffer
-    if (req.body.image) {
-      const base64Data = req.body.image.split(";base64,").pop();
-      const buffer = Buffer.from(base64Data, "base64");
+    const admin = await AdminModel.findById(req.user._id);
+    console.log(req.body);
 
-      const image = await uploadFile(buffer, "placedIn/teacher/exam");
-      req.body.avatar = image.url;
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
     }
 
-    const user = await AdminModel.findById(id);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    // Update name
+    if (req.body.name) {
+      admin.name = req.body.name;
     }
 
-    await AdminModel.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    // Update avatar
+    if (req.file) {
+      const avatarUrl = await uploadFile(req.file.buffer, "admin-avatars");
+      admin.avatar = avatarUrl;
+    }
+
+    await admin.save();
 
     res.json({ success: true, message: "Profile updated successfully" });
   } catch (error) {
@@ -247,11 +174,8 @@ const resetPassword = async (req, res, next) => {
 
 module.exports = {
   register,
-  login,
   updatePassword,
   resetPassword,
   sendResetPassword,
-
-  getCurrentUser,
   updateProfile,
 };
