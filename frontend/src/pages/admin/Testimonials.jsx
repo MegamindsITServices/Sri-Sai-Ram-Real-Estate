@@ -158,7 +158,7 @@ const AdminTestimonials = () => {
           testimonials.map((t) => (
             <div
               key={t._id}
-              className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden flex flex-col"
+              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col"
             >
               <div className="p-4 flex items-center gap-4 border-b">
                 <img

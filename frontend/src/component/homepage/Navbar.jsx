@@ -32,7 +32,6 @@ const Navbar = ({ setModel }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user);
-  console.log(user);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [timeoutId, setTimeoutId] = useState(null);
   const [search, setSearch] = useState("");
