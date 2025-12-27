@@ -23,7 +23,7 @@ app.use(
     origin: [
       "https://srisairam.co.in",
       "https://www.srisairam.co.in",
-      "http://localhost:5173",
+      // "http://localhost:5173",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,

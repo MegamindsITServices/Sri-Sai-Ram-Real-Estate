@@ -2,57 +2,45 @@ const Listing = require("../models/ProjectModel");
 const cloudinary = require("cloudinary");
 const View = require("../models/View"); // Path to your Listing model
 const Show = require("../models/Showcase");
-const { uploadFile } = require("../utils/cloudinary");
+const { uploadFile, deleteFromCloudinary } = require("../utils/cloudinary");
 
 const create = async (req, res) => {
   try {
-    const formFields = JSON.parse(req.body.formFields || "{}"); // frontend sends formFields as JSON string
+    const formFields = JSON.parse(req.body.formFields || "{}");
     const files = req.files;
-    console.log("Form Fields:", formFields);
 
-    // Required validation
-    if (
-      !formFields.title ||
-      !formFields.price ||
-      !formFields.totalArea ||
-      !formFields.unit
-    ) {
+    if (!formFields.title || !formFields.price || !formFields.totalArea) {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
-    // Handle thumbnail (required)
     if (!files?.thumbnail?.[0]) {
       return res.status(400).json({ message: "Thumbnail image is required" });
     }
-    const thumbnailUrl = await uploadFile(files.thumbnail[0].buffer);
+
+    // Upload Thumbnail - returns {url, public_id}
+    const thumbnailData = await uploadFile(files.thumbnail[0].buffer);
 
     // Handle floorImage (optional)
-    let floorImageUrl = "";
+    let floorImageData = null;
     if (files?.floorImage?.[0]) {
-      floorImageUrl = await uploadFile(files.floorImage[0].buffer);
+      floorImageData = await uploadFile(files.floorImage[0].buffer);
     }
 
-    // Handle multiple listing photos (required at least 1)
-    const listingPhotoUrls = [];
-    if (!files?.listingPhotos || files.listingPhotos.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "At least one listing photo is required" });
+    // Handle gallery photos
+    const listingPhotosData = [];
+    if (files?.listingPhotos) {
+      for (const photo of files.listingPhotos) {
+        const uploaded = await uploadFile(photo.buffer);
+        listingPhotosData.push(uploaded);
+      }
     }
 
-    for (const photo of files.listingPhotos) {
-      const url = await uploadFile(photo.buffer);
-      listingPhotoUrls.push(url);
-    }
-
-    // Create new document
     const newListing = new Listing({
       ...formFields,
-      creator: req.user?._id || "admin", // if you have auth middleware
-      thumbnail: thumbnailUrl,
-      floorImage: floorImageUrl,
-      listingPhotoPaths: listingPhotoUrls,
-      price: Number(formFields.price), // better as number
+      thumbnail: thumbnailData,
+      floorImage: floorImageData,
+      listingPhotoPaths: listingPhotosData,
+      price: Number(formFields.price),
       totalArea: Number(formFields.totalArea),
       plotNumber: Number(formFields.plotNumber) || undefined,
       plot: Number(formFields.plot) || 1,
@@ -66,67 +54,82 @@ const create = async (req, res) => {
       project: newListing,
     });
   } catch (err) {
-    console.error("Create project error:", err);
-    res.status(500).json({
-      message: "Failed to create project",
-      error: err.message,
-    });
+    console.error("Create error:", err);
+    res
+      .status(500)
+      .json({ message: "Failed to create project", error: err.message });
   }
 };
-
 // UPDATE Project
 const update = async (req, res) => {
   try {
-    const { _id, formFields: formFieldsJson } = req.body;
+    const {
+      _id,
+      formFields: formFieldsJson,
+      deletedImages: deletedImagesJson,
+    } = req.body;
     const formFields = JSON.parse(formFieldsJson || "{}");
+
+    // This expects an array of public_ids to delete: ["id1", "id2"]
+    const deletedImages = JSON.parse(deletedImagesJson || "[]");
     const files = req.files;
 
-    if (!_id) {
-      return res.status(400).json({ message: "_id is required for update" });
-    }
+    if (!_id) return res.status(400).json({ message: "_id is required" });
+
+    const existing = await Listing.findById(_id);
+    if (!existing)
+      return res.status(404).json({ message: "Project not found" });
 
     const updateData = { ...formFields };
 
-    // Handle thumbnail (if new file uploaded)
+    // --- 1. HANDLE DELETION OF SPECIFIC GALLERY IMAGES ---
+    let currentGallery = existing.listingPhotoPaths || [];
+
+    if (deletedImages.length > 0) {
+      // Delete from Cloudinary
+      const deletePromises = deletedImages.map((id) =>
+        deleteFromCloudinary(id)
+      );
+      await Promise.all(deletePromises);
+
+      // Filter them out of the database array
+      currentGallery = currentGallery.filter(
+        (img) => !deletedImages.includes(img.public_id)
+      );
+    }
+
+    // --- 2. HANDLE THUMBNAIL UPDATE ---
     if (files?.thumbnail?.[0]) {
-      updateData.thumbnail = await uploadFile(
-        files.thumbnail[0].buffer
-      );
-    }
-
-    // Handle floorImage (if new file uploaded)
-    if (files?.floorImage?.[0]) {
-      updateData.floorImage = await uploadFile(
-        files.floorImage[0].buffer
-      );
-    }
-
-    // Handle listing photos (append new ones, keep old ones)
-    if (files?.listingPhotos?.length > 0) {
-      const newUrls = [];
-      for (const photo of files.listingPhotos) {
-        const url = await uploadFile(photo.buffer);
-        newUrls.push(url);
+      if (existing.thumbnail?.public_id) {
+        await deleteFromCloudinary(existing.thumbnail.public_id);
       }
-
-      // Get existing project to merge photos
-      const existing = await Listing.findById(_id);
-      if (!existing)
-        return res.status(404).json({ message: "Project not found" });
-
-      updateData.listingPhotoPaths = [
-        ...(existing.listingPhotoPaths || []),
-        ...newUrls,
-      ];
+      updateData.thumbnail = await uploadFile(files.thumbnail[0].buffer);
     }
 
-    // Convert numbers
+    // --- 3. HANDLE FLOOR IMAGE UPDATE ---
+    if (files?.floorImage?.[0]) {
+      if (existing.floorImage?.public_id) {
+        await deleteFromCloudinary(existing.floorImage.public_id);
+      }
+      updateData.floorImage = await uploadFile(files.floorImage[0].buffer);
+    }
+
+    // --- 4. HANDLE NEW GALLERY UPLOADS ---
+    const newPhotos = [];
+    if (files?.listingPhotos?.length > 0) {
+      for (const photo of files.listingPhotos) {
+        const uploaded = await uploadFile(photo.buffer);
+        newPhotos.push(uploaded);
+      }
+    }
+
+    // Final merge: (Old photos - deleted photos) + New photos
+    updateData.listingPhotoPaths = [...currentGallery, ...newPhotos];
+
+    // Data Sanitization
     if (formFields.price) updateData.price = Number(formFields.price);
     if (formFields.totalArea)
       updateData.totalArea = Number(formFields.totalArea);
-    if (formFields.plotNumber)
-      updateData.plotNumber = Number(formFields.plotNumber);
-    if (formFields.plot) updateData.plot = Number(formFields.plot);
 
     const updatedListing = await Listing.findByIdAndUpdate(
       _id,
@@ -134,32 +137,152 @@ const update = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    if (!updatedListing) {
-      return res.status(404).json({ message: "Project not found" });
-    }
-
     res.json({
       status: true,
       message: "Project updated successfully",
       project: updatedListing,
     });
   } catch (err) {
-    console.error("Update project error:", err);
-    res.status(500).json({
-      message: "Failed to update project",
-      error: err.message,
+    console.error("Update error:", err);
+    res.status(500).json({ message: "Failed to update project" });
+  }
+};
+
+const getPaginatedProjects = async (req, res) => {
+  try {
+    // Pagination
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+    const skip = (page - 1) * limit;
+
+    // Filters
+    const {
+      admin,
+      search,
+      status,
+      category,
+      area,
+      sort = "newest",
+      minPrice,
+      maxPrice,
+    } = req.query;
+
+    const filter = {};
+
+    // 🔐 Public vs Admin
+    if (admin !== "true") {
+      filter.live = true;
+    }
+
+    // 🔍 Search (text-like search)
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+        { locationTitle: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // 🏷 Status filter
+    if (status) {
+      filter.status = status; // available | sold-out
+    }
+
+    // 🏠 Category filter
+    if (category) {
+      filter.category = category;
+    }
+
+    // 💰 Price range filter
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    if (area) {
+      filter.totalArea = { $gte: Number(area) };
+    }
+
+    let sortQuery = { createdAt: -1 };
+
+    switch (sort) {
+      case "price-asc":
+        sortQuery = { price: 1 };
+        break;
+
+      case "price-desc":
+        sortQuery = { price: -1 };
+        break;
+
+      case "newest":
+      default:
+        sortQuery = { createdAt: -1 };
+        break;
+    }
+
+    // Fetch data
+    const [projects, total] = await Promise.all([
+      Listing.find(filter).sort(sortQuery).skip(skip).limit(limit),
+      Listing.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.json({
+      status: true,
+      projects,
+      pagination: {
+        totalItems: total,
+        totalPages,
+        currentPage: page,
+        itemsPerPage: limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
     });
+  } catch (error) {
+    console.error("Pagination Error:", error);
+    res.status(500).json({
+      status: false,
+      message: "Error fetching paginated projects",
+    });
+  }
+};
+
+const getAlsoLikeProjects = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { category } = req.query;
+
+    // Build query: exclude current project and must be live
+    let query = { _id: { $ne: id }, live: true };
+
+    // Optional: Filter by same category for better "similarity"
+    if (category) {
+      query.category = category;
+    }
+
+    const projects = await Listing.find(query).limit(8).sort({ createdAt: -1 }); // Show newest first
+
+    res.json({
+      status: true,
+      projects,
+    });
+  } catch (error) {
+    res.status(500).json({ status: false, message: error.message });
   }
 };
 
 const allProjects = async (req, res) => {
   try {
-    const courses = await Listing.find({ live: true });
+    const projects = await Listing.find({ live: true });
 
-    if (!courses || courses.length == 0) {
-      return res.json({ status: false, message: "No Courses Found" });
+    if (!projects || projects.length == 0) {
+      return res.json({ status: false, message: "No Projects Found" });
     }
-    return res.status(200).json({ courses });
+    return res.status(200).json({ projects });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
@@ -168,74 +291,87 @@ const allProjects = async (req, res) => {
 
 const adminAllProjects = async (req, res) => {
   try {
-    const courses = await Listing.find({});
+    const projects = await Listing.find({});
 
-    if (!courses || courses.length == 0) {
-      return res.json({ status: false, message: "No Courses Found" });
+    if (!projects || projects.length == 0) {
+      return res.json({ status: false, message: "No Projects Found" });
     }
-    return res.status(200).json({ courses });
+    return res.status(200).json({ projects });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
 
-
 const deleteProject = async (req, res) => {
   try {
     const { _id } = req.body;
-    console.log(_id);
-    await Listing.deleteOne({ _id });
-    res.json({ status: true });
+    if (!_id) return res.status(400).json({ message: "_id required" });
+
+    const project = await Listing.findById(_id);
+    if (!project) return res.status(404).json({ message: "Project not found" });
+
+    // 🔥 1. Delete Thumbnail
+    if (project.thumbnail?.public_id) {
+      await deleteFromCloudinary(project.thumbnail.public_id);
+    }
+
+    // 🔥 2. Delete Floor Image
+    if (project.floorImage?.public_id) {
+      await deleteFromCloudinary(project.floorImage.public_id);
+    }
+
+    // 🔥 3. Delete All Gallery Photos
+    if (project.listingPhotoPaths?.length > 0) {
+      const deletePromises = project.listingPhotoPaths.map((img) =>
+        deleteFromCloudinary(img.public_id)
+      );
+      await Promise.all(deletePromises);
+    }
+
+    // 4. Delete DB Record
+    await Listing.findByIdAndDelete(_id);
+
+    res.json({
+      status: true,
+      message: "Project and all assets deleted successfully",
+    });
   } catch (err) {
-    console.log(err.message);
+    console.error("Delete error:", err);
+    res.status(500).json({ message: "Delete operation failed" });
   }
 };
-
 // Controller to handle project views
 const incrementProjectView = async (req, res) => {
   try {
     const { userId, projectId } = req.body;
-
-    // Check if the userId and projectId are provided
-    if (!userId || !projectId) {
+    if (!userId || !projectId)
       return res
         .status(400)
         .json({ message: "userId and projectId are required." });
-    }
 
-    // Check if a view record exists for the given userId and projectId
     const existingView = await View.findOne({ userID: userId, projectId });
+    if (existingView)
+      return res.status(200).json({ message: "Already viewed." });
 
-    if (existingView) {
-      return res
-        .status(200)
-        .json({ message: "User has already viewed this project." });
-    }
+    // Use findByIdAndUpdate with $inc for atomic operations
+    const project = await Listing.findByIdAndUpdate(
+      projectId,
+      { $inc: { view: 1 } },
+      { new: true }
+    );
 
-    // Increment the project's view count
-    const project = await Listing.findById(projectId);
-    if (!project) {
+    if (!project)
       return res.status(404).json({ message: "Project not found." });
-    }
 
-    project.view += 1;
-    await project.save();
+    await View.create({ userID: userId, projectId });
 
-    // Add a new view record
-    const newView = new View({ userID: userId, projectId });
-    await newView.save();
-
-    res
-      .status(200)
-      .json({ message: "View count updated successfully.", project });
+    res.status(200).json({ message: "View count updated.", project });
   } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "An error occurred while updating the view count." });
+    res.status(500).json({ message: "Server error" });
   }
 };
+
 
 const getProject = async (req, res) => {
   try {
@@ -246,7 +382,7 @@ const getProject = async (req, res) => {
     if (project) {
       return res.json({ status: true, project });
     }
-    res.json({ statu: false, message: "Project Not Found" });
+    res.json({ status: false, message: "Project Not Found" });
   } catch (err) {
     console.log(err.message);
   }
@@ -262,12 +398,10 @@ const showcase = async (req, res) => {
       { show },
       { new: true, upsert: true } // Create if not exists
     );
-    res
-      .status(200)
-      .json({
-        message: "Showcase updated successfully",
-        data: updatedShowcase,
-      });
+    res.status(200).json({
+      message: "Showcase updated successfully",
+      data: updatedShowcase,
+    });
   } catch (error) {
     console.error("Error updating showcase:", error);
     res.status(500).json({ error: "Failed to update showcase" });
@@ -291,6 +425,8 @@ module.exports = {
   incrementProjectView,
   getProject,
   showcase,
+  getPaginatedProjects,
   getShowcase,
+  getAlsoLikeProjects,
   adminAllProjects,
 };

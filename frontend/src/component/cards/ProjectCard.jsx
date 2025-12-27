@@ -1,50 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import { FaMapMarkerAlt, FaHome, FaMap, FaShareAlt, FaHeart } from 'react-icons/fa';
-import { BiBed } from 'react-icons/bi';
-import { useSelector } from 'react-redux';
-import API from '../../utils/API';
-import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import Share from '../models/Share';
+import React, { useState, useEffect } from "react";
+import {
+  FaMapMarkerAlt,
+  FaHome,
+  FaMap,
+  FaShareAlt,
+  FaHeart,
+} from "react-icons/fa";
+import { BiBed } from "react-icons/bi";
+import { useSelector } from "react-redux";
+import API from "../../utils/API";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import Share from "../models/Share";
 import stickerImage from "../../assets/Star 6.png";
 import sold from "../../assets/sold.png";
 
-const ProjectCard = ({ product, viewMode = 'list' }) => {
+const ProjectCard = ({ product, viewMode = "list" }) => {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const navigate = useNavigate();
   const [shareModel, setShareModel] = useState(false);
   const user = useSelector((state) => state.user.user);
 
   useEffect(() => {
-    try {
-      const fetchWishlistStatus = async () => {
-        try {
-          const response = await API.get(`/wishlist/getWishlist`, {
-            params: {
-              userId: user._id,
-              listingId: product._id,
-            },
-          });
-          setIsInWishlist(response.data.isInWishlist);
-        } catch (error) {
-          console.error("Failed to fetch wishlist status", error);
-        }
-      };
+    const fetchWishlistStatus = async () => {
+      try {
+        const response = await API.get(`/wishlist/getWishlist`, {
+          params: {
+            userId: user?._id, // Fixed: added optional chaining
+            listingId: product._id,
+          },
+        });
+        setIsInWishlist(response.data.isInWishlist);
+      } catch (error) {
+        console.error("Failed to fetch wishlist status", error);
+      }
+    };
 
+    if (user?._id && product._id) {
       fetchWishlistStatus();
-    } catch (err) {
-      console.log(err.message);
     }
-  }, []);
+  }, [user, product._id]); // Fixed: added dependencies
 
   const incrementProjectView = async (id) => {
     await API.post("/projects/incrementProjectView", {
-      userId: user._id,
-      projectId: id
+      userId: user?._id,
+      projectId: id,
     });
   };
 
   const handleWishlistToggle = async () => {
+    if (!user?._id) {
+      toast.error("Please login to add to wishlist");
+      return;
+    }
+
     try {
       const response = await API.post(`/wishlist/postWishlist`, {
         userId: user._id,
@@ -52,17 +61,56 @@ const ProjectCard = ({ product, viewMode = 'list' }) => {
       });
       if (response.data.success) {
         setIsInWishlist(!isInWishlist);
-        toast.success('wishlist updated');
+        toast.success("Wishlist updated");
       }
     } catch (error) {
       console.error("Failed to update wishlist", error);
+      toast.error("Failed to update wishlist");
     }
   };
 
   const handleCardClick = () => {
     incrementProjectView(product._id);
-    navigate(`/projectDetail/${product.title}/${product._id}`, { state: product });
+    navigate(
+      `/projectDetail/${encodeURIComponent(product.title)}/${product._id}`,
+      {
+        state: product,
+      }
+    );
   };
+
+  // Get thumbnail URL - it's an object with url property in schema
+  const thumbnailUrl = product.thumbnail?.url || product.thumbnail || "";
+
+  // Get description safely
+  const description = product.description || "No description available";
+
+  // Get price safely and format it
+  const price = product.price
+    ? Number(product.price).toLocaleString("en-IN")
+    : "Price not available";
+
+  // Get location title
+  const locationTitle = product.locationTitle || "Location not specified";
+
+  // Get total area
+  const totalArea = product.totalArea || 0;
+
+  // Get unit
+  const unit = product.unit || "";
+
+  // Get BHK
+  const bhk = product.bhk || "";
+
+  // Get balcony and terrace
+  const hasBalcony = product.balcony || false;
+  const hasTerrace = product.terrace || false;
+
+  // Get category
+  const category = product.category || "";
+
+  // Get status
+  const status = product.status || "available";
 
   return (
     <div
@@ -73,7 +121,7 @@ const ProjectCard = ({ product, viewMode = 'list' }) => {
       }`}
     >
       {/* Sticker - same for both views */}
-      {product.status !== "sold-out" ? (
+      {status !== "sold-out" ? (
         <div className="absolute -top-6 -left-6 z-10 w-20 h-20 flex items-center justify-center">
           <img
             src={stickerImage}
@@ -98,7 +146,7 @@ const ProjectCard = ({ product, viewMode = 'list' }) => {
       {/* Share Modal - same for both views */}
       {shareModel && (
         <Share
-          image={product.thumbnail}
+          image={thumbnailUrl}
           title={product.title}
           url={`https://srisairam.co.in/projectDetail/${encodeURIComponent(
             product.title
@@ -116,70 +164,95 @@ const ProjectCard = ({ product, viewMode = 'list' }) => {
         }
         onClick={handleCardClick}
       >
-        <img
-          src={product.thumbnail}
-          alt={product.title}
-          className={`object-cover rounded-md ${
-            viewMode === "list"
-              ? "w-full h-52 mb-4 mt-3 md:mt-0"
-              : "w-full h-48 mb-3"
-          }`}
-        />
+        {thumbnailUrl ? (
+          <img
+            src={thumbnailUrl}
+            alt={product.title}
+            className={`object-cover rounded-md ${
+              viewMode === "list"
+                ? "w-full h-52 mb-4 mt-3 md:mt-0"
+                : "w-full h-48 mb-3"
+            }`}
+          />
+        ) : (
+          <div
+            className={`bg-gray-200 rounded-md flex items-center justify-center ${
+              viewMode === "list"
+                ? "w-full h-52 mb-4 mt-3 md:mt-0"
+                : "w-full h-48 mb-3"
+            }`}
+          >
+            <FaHome className="text-gray-400 text-4xl" />
+          </div>
+        )}
       </div>
 
       {/* Content */}
       <div className="flex flex-col gap-2 flex-grow" onClick={handleCardClick}>
         <h2 className="text-xl font-bold flex items-center gap-2 font-[firaSans]">
-          <FaHome /> {product.title}
+          <FaHome /> {product.title || "Untitled Property"}
         </h2>
         <p className="flex items-center gap-2 font-[Montserrat]">
-          <FaMapMarkerAlt /> {product.locationTitle}
+          <FaMapMarkerAlt /> {locationTitle}
         </p>
-        <p className="flex items-center gap-2 font-[Montserrat]">
-          <FaMap />
-          {product.unit === "sqft"
-            ? `${product.totalArea} Sq.ft `
-            : product.unit === "Acre"
-            ? `${product.totalArea} Acre`
-            : `${product.totalArea} Cents`}
-        </p>
-        {product.category === "house" && (
+        {unit && totalArea > 0 && (
           <p className="flex items-center gap-2 font-[Montserrat]">
-            <BiBed className="font-semibold" />
-            {`${product.bhk} BHK${product.balcony ? " - Balcony" : ""}${
-              product.terrace ? " - Terrace" : ""
-            }`}
+            <FaMap />
+            {unit === "sqft"
+              ? `${totalArea} Sq.ft `
+              : unit === "Acre"
+              ? `${totalArea} Acre`
+              : unit === "Cents"
+              ? `${totalArea} Cents`
+              : `${totalArea} ${unit}`}
           </p>
         )}
-        <p className="font-[Montserrat] font-semibold">
-          ₹ {Number(product.price).toLocaleString("en-IN")}
-        </p>
+        {category === "house" && bhk && (
+          <p className="flex items-center gap-2 font-[Montserrat]">
+            <BiBed className="font-semibold" />
+            {`${bhk} BHK`}
+            {hasBalcony && " - Balcony"}
+            {hasTerrace && " - Terrace"}
+          </p>
+        )}
+        <p className="font-[Montserrat] font-semibold">₹ {price}</p>
 
         {/* Conditionally truncate description based on view mode */}
-        <p className="font-[Montserrat]">
+        <p className="font-[Montserrat] text-gray-600">
           {viewMode === "list"
-            ? product.description.length > 142
-              ? `${product.description.substring(0, 143)}...`
-              : product.description
-            : product.description.length > 80
-            ? `${product.description.substring(0, 80)}...`
-            : product.description}
+            ? description.length > 142
+              ? `${description.substring(0, 142)}...`
+              : description
+            : description.length > 80
+            ? `${description.substring(0, 80)}...`
+            : description}
         </p>
+
+        {/* Status indicator */}
+        <div className="mt-2">
+          <span
+            className={`px-2 py-1 text-xs font-semibold rounded-full ${
+              status === "available"
+                ? "bg-green-100 text-green-800"
+                : "bg-red-100 text-red-800"
+            }`}
+          >
+            {status === "available" ? "Available" : "Sold Out"}
+          </span>
+
+          {/* Live status indicator for admin */}
+          {product.live === false && (
+            <span className="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+              Draft
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Action Icons */}
-      <div className="absolute top-4 right-4 flex gap-3">
-        {/* <FaHeart
-          className={`text-xl cursor-pointer ${
-            isInWishlist ? 'text-red-500' : 'text-gray-400'
-          }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            handleWishlistToggle();
-          }}
-        /> */}
+      <div className="absolute top-5 right-5 flex gap-3">
         <FaShareAlt
-          className="text-xl cursor-pointer text-black hover:text-black"
+          className="text-3xl bg-gray-200 p-1 rounded-full cursor-pointer text-green-600 hover:text-green-800"
           onClick={(e) => {
             e.stopPropagation();
             setShareModel(true);

@@ -1,6 +1,17 @@
 const router=require('express').Router();
 
-const {create,allProjects,update,deleteProject,incrementProjectView,getProject,showcase,getShowcase,adminAllProjects}=require("../controllers/projectController");
+const {
+  create,
+  allProjects,
+  update,
+  deleteProject,
+  incrementProjectView,
+  getProject,
+  getPaginatedProjects,showcase,
+  getShowcase,
+  adminAllProjects,
+  getAlsoLikeProjects,
+} = require("../controllers/projectController");
 
 
 router.post('/create',create);
@@ -12,4 +23,6 @@ router.post("/incrementProjectView",incrementProjectView)
 router.post("/getProject",getProject);
 router.post("/showcase",showcase);
 router.get("/getShowcase",getShowcase)
+router.get("/paginated", getPaginatedProjects);
+router.get("/also-like/:id", getAlsoLikeProjects);
 module.exports=router;

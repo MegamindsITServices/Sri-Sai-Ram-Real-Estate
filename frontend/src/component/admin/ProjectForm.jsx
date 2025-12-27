@@ -1,22 +1,23 @@
-// src/pages/admin/ProjectForm.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { FaSpinner, FaPlus, FaTrash } from "react-icons/fa";
 import API from "../../utils/API";
 
 const ProjectForm = () => {
-  const { id } = useParams(); // if id exists → edit mode
+  const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
 
   const [formData, setFormData] = useState({
+    creator: "", // Added as per schema
     title: "",
     description: "",
     price: "",
     totalArea: "",
     unit: "sqft",
     category: "",
-    bhk: "",
+    bhk: "", // Added as per schema
     plotNumber: "",
     plot: 1,
     locationTitle: "",
@@ -28,9 +29,10 @@ const ProjectForm = () => {
     approved: "pending",
   });
 
-  const [thumbnail, setThumbnail] = useState(null); // File or existing URL
+  const [thumbnail, setThumbnail] = useState(null);
   const [floorImage, setFloorImage] = useState(null);
-  const [listingPhotos, setListingPhotos] = useState([]); // array of files or URLs
+  const [listingPhotos, setListingPhotos] = useState([]);
+  const [deletedImages, setDeletedImages] = useState([]);
   const [previewImages, setPreviewImages] = useState({
     thumbnail: null,
     floorImage: null,
@@ -40,7 +42,6 @@ const ProjectForm = () => {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEditMode);
 
-  // Fetch project data if editing
   useEffect(() => {
     if (isEditMode) {
       const fetchProject = async () => {
@@ -49,6 +50,7 @@ const ProjectForm = () => {
           if (res.data.status) {
             const project = res.data.project;
             setFormData({
+              creator: project.creator || "",
               title: project.title || "",
               description: project.description || "",
               price: project.price || "",
@@ -67,11 +69,13 @@ const ProjectForm = () => {
               approved: project.approved || "pending",
             });
 
-            // Set previews for existing images
+            setListingPhotos(project.listingPhotoPaths || []);
+
             setPreviewImages({
-              thumbnail: project.thumbnail,
-              floorImage: project.floorImage || null,
-              listingPhotos: project.listingPhotoPaths || [],
+              thumbnail: project.thumbnail?.url || project.thumbnail,
+              floorImage: project.floorImage?.url || null,
+              listingPhotos:
+                project.listingPhotoPaths?.map((img) => img.url) || [],
             });
           }
         } catch (err) {
@@ -80,7 +84,6 @@ const ProjectForm = () => {
           setFetchLoading(false);
         }
       };
-
       fetchProject();
     }
   }, [id, isEditMode]);
@@ -114,8 +117,6 @@ const ProjectForm = () => {
 
   const handleMultiplePhotos = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length === 0) return;
-
     setListingPhotos((prev) => [...prev, ...files]);
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviewImages((prev) => ({
@@ -125,6 +126,10 @@ const ProjectForm = () => {
   };
 
   const removeListingPhoto = (index) => {
+    const photoToRemove = listingPhotos[index];
+    if (photoToRemove?.public_id) {
+      setDeletedImages((prev) => [...prev, photoToRemove.public_id]);
+    }
     setListingPhotos((prev) => prev.filter((_, i) => i !== index));
     setPreviewImages((prev) => ({
       ...prev,
@@ -138,48 +143,28 @@ const ProjectForm = () => {
 
     try {
       const payload = new FormData();
-
-      // 1. Wrap text data into a "formFields" object as the backend expects
-      // We stringify it because FormData only sends strings or Blobs/Files
       payload.append("formFields", JSON.stringify(formData));
 
-      // 2. Append individual files
-      if (thumbnail && thumbnail instanceof File) {
-        payload.append("thumbnail", thumbnail);
-      } else if (isEditMode && typeof thumbnail === "string") {
-        // If editing and no new file, we pass the existing URL inside formFields
-        // (Handled by JSON.stringify(formData) above if you add it to state)
-      }
+      payload.append("deletedImages", JSON.stringify(deletedImages));
 
-      if (floorImage && floorImage instanceof File) {
-        payload.append("floorImage", floorImage);
-      }
+      if (thumbnail instanceof File) payload.append("thumbnail", thumbnail);
+      if (floorImage instanceof File) payload.append("floorImage", floorImage);
 
-      // 3. Append Multiple Photos
       listingPhotos.forEach((photo) => {
-        if (photo instanceof File) {
-          payload.append("listingPhotos", photo);
-        }
+        if (photo instanceof File) payload.append("listingPhotos", photo);
       });
 
-      // 4. Send ID separately if editing
-      if (isEditMode) {
-        payload.append("_id", id);
-      }
+      if (isEditMode) payload.append("_id", id);
 
       const endpoint = isEditMode ? "/projects/update" : "/projects/create";
-
-      const res = await API.post(endpoint, payload, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await API.post(endpoint, payload);
 
       if (res.data.status) {
         toast.success(isEditMode ? "Project updated!" : "Project created!");
         navigate("/admin/projects");
       }
     } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Something went wrong");
+      toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setLoading(false);
     }
@@ -187,26 +172,29 @@ const ProjectForm = () => {
 
   if (fetchLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#F5BE86]"></div>
+      <div className="flex flex-col justify-center items-center h-64">
+        <FaSpinner className="animate-spin text-4xl text-[#F5BE86] mb-4" />
+        <p className="text-gray-500 font-medium">Fetching Project Details...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <h1 className="text-2xl md:text-3xl font-bold fira-sans text-gray-800 mb-6">
+    <div className="max-w-7xl mx-auto pb-20 px-4">
+      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
         {isEditMode ? "Edit Project" : "Add New Project"}
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Basic Info */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+        {/* Ownership & Identity */}
+        <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-[#F5BE86]">
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">
+            Identification
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title *
+                Project Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -214,10 +202,32 @@ const ProjectForm = () => {
                 value={formData.title}
                 onChange={handleInputChange}
                 required
+                placeholder="e.g. Skyline Apartments"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F5BE86]"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Creator / Developer Name
+              </label>
+              <input
+                type="text"
+                name="creator"
+                value={formData.creator}
+                onChange={handleInputChange}
+                placeholder="Person or Company Name"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F5BE86]"
+              />
+            </div>
+          </div>
+        </div>
 
+        {/* Property Specs */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">
+            Specifications & Pricing
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Category
@@ -226,19 +236,18 @@ const ProjectForm = () => {
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F5BE86]"
               >
-                <option value="">Select Category</option>
+                <option value="">Select Type</option>
                 <option value="residential">Residential Plots</option>
                 <option value="commercial">Commercial Plots</option>
-                <option value="house">House/Villa</option>
-                <option value="agricultural">Agricultural Land</option>
+                <option value="apartment">Apartment</option>
+                <option value="villa">House/Villa</option>
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price (₹) *
+                Price (₹) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -249,48 +258,71 @@ const ProjectForm = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Total Area *
-                </label>
-                <input
-                  type="number"
-                  name="totalArea"
-                  value={formData.totalArea}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Unit *
-                </label>
-                <select
-                  name="unit"
-                  value={formData.unit}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                >
-                  <option value="sqft">Sq.ft</option>
-                  <option value="Acre">Acre</option>
-                  <option value="Cents">Cents</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                BHK Type
+              </label>
+              <input
+                type="text"
+                name="bhk"
+                value={formData.bhk}
+                onChange={handleInputChange}
+                placeholder="e.g. 3BHK or N/A"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Total Area <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                name="totalArea"
+                value={formData.totalArea}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Unit
+              </label>
+              <select
+                name="unit"
+                value={formData.unit}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+              >
+                <option value="sqft">Sq.ft</option>
+                <option value="Acre">Acre</option>
+                <option value="Cents">Cents</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Plot Number
+              </label>
+              <input
+                type="number"
+                name="plotNumber"
+                value={formData.plotNumber}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+              />
             </div>
           </div>
         </div>
 
-        {/* Location */}
+        {/* Location Section */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Location</h2>
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">
+            Location Information
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location Title *
+                Location Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -298,6 +330,7 @@ const ProjectForm = () => {
                 value={formData.locationTitle}
                 onChange={handleInputChange}
                 required
+                placeholder="e.g. Jubilee Hills, Hyderabad"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
@@ -310,212 +343,229 @@ const ProjectForm = () => {
                 name="locationLink"
                 value={formData.locationLink}
                 onChange={handleInputChange}
+                placeholder="https://goo.gl/maps/..."
                 className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
           </div>
         </div>
 
-        {/* Features */}
+        {/* Visuals Section */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Features</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <label className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">
+            Property Visuals
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Thumbnail */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Main Thumbnail <span className="text-red-500">*</span>
+              </label>
+              <div className="border-2 border-dashed border-gray-300 p-4 rounded-md text-center">
+                <input
+                  type="file"
+                  onChange={(e) => handleFileChange(e, "thumbnail")}
+                  className="hidden"
+                  id="thumbnail"
+                  required={!isEditMode}
+                />
+                <label
+                  htmlFor="thumbnail"
+                  className="cursor-pointer text-[#2B2BD9] hover:underline"
+                >
+                  Click to upload main image
+                </label>
+                {previewImages.thumbnail && (
+                  <img
+                    src={previewImages.thumbnail}
+                    alt="Preview"
+                    className="mt-4 h-40 w-full object-cover rounded shadow-md"
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Floor Image */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Floor Plan
+              </label>
+              <div className="border-2 border-dashed border-gray-300 p-4 rounded-md text-center">
+                <input
+                  type="file"
+                  onChange={(e) => handleFileChange(e, "floorImage")}
+                  className="hidden"
+                  id="floorImage"
+                />
+                <label
+                  htmlFor="floorImage"
+                  className="cursor-pointer text-[#2B2BD9] hover:underline"
+                >
+                  Click to upload floor plan
+                </label>
+                {previewImages.floorImage && (
+                  <img
+                    src={previewImages.floorImage}
+                    alt="Floor preview"
+                    className="mt-4 h-40 w-full object-contain rounded shadow-md"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Multiple Photos */}
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <h2 className="text-lg font-bold text-gray-800 mb-6">
+              Gallery Images
+            </h2>
+            <div className="flex items-center gap-4 mb-6">
+              <input
+                type="file"
+                multiple
+                onChange={handleMultiplePhotos}
+                className="hidden"
+                id="listingPhotos"
+              />
+              <label
+                htmlFor="listingPhotos"
+                className="cursor-pointer bg-[#2B2BD9] text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition flex items-center gap-2"
+              >
+                <FaPlus /> Add Photos
+              </label>
+              <p className="text-xs text-gray-400 font-semibold uppercase">
+                Existing and new photos will appear below
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              {previewImages.listingPhotos.map((src, idx) => (
+                <div
+                  key={idx}
+                  className="relative group rounded-xl overflow-hidden shadow-sm border border-gray-100"
+                >
+                  <img
+                    src={src}
+                    alt="Gallery"
+                    className="w-full h-32 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() => removeListingPhoto(idx)}
+                      className="bg-red-500 text-white p-2 rounded-full hover:scale-110 transition"
+                    >
+                      <FaTrash size={12} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Features & Description */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">
+            Details & Features
+          </h2>
+          <div className="flex gap-8 mb-6">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 name="balcony"
                 checked={formData.balcony}
                 onChange={handleInputChange}
-                className="h-5 w-5 text-[#F5BE86] focus:ring-[#F5BE86]"
+                className="h-5 w-5 rounded text-[#2B2BD9]"
               />
-              Balcony
+              <span className="text-sm font-medium text-gray-700">
+                Has Balcony
+              </span>
             </label>
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 name="terrace"
                 checked={formData.terrace}
                 onChange={handleInputChange}
-                className="h-5 w-5 text-[#F5BE86] focus:ring-[#F5BE86]"
+                className="h-5 w-5 rounded text-[#2B2BD9]"
               />
-              Terrace
+              <span className="text-sm font-medium text-gray-700">
+                Has Terrace
+              </span>
             </label>
           </div>
-        </div>
-
-        {/* Images */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Images</h2>
-
-          {/* Thumbnail */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Thumbnail *
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, "thumbnail")}
-              className="hidden"
-              id="thumbnail"
-              required={!isEditMode}
-            />
-            <label
-              htmlFor="thumbnail"
-              className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded inline-block"
-            >
-              Choose Thumbnail
-            </label>
-            {previewImages.thumbnail && (
-              <div className="mt-3">
-                <img
-                  src={previewImages.thumbnail}
-                  alt="Thumbnail preview"
-                  className="h-32 w-48 object-cover rounded shadow"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Floor Plan */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Floor Plan
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFileChange(e, "floorImage")}
-              className="hidden"
-              id="floorImage"
-            />
-            <label
-              htmlFor="floorImage"
-              className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded inline-block"
-            >
-              Upload Floor Plan
-            </label>
-            {previewImages.floorImage && (
-              <div className="mt-3">
-                <img
-                  src={previewImages.floorImage}
-                  alt="Floor plan preview"
-                  className="h-48 w-full object-contain rounded shadow"
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Multiple Listing Photos */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Listing Photos
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleMultiplePhotos}
-              className="hidden"
-              id="listingPhotos"
-            />
-            <label
-              htmlFor="listingPhotos"
-              className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded inline-block"
-            >
-              Add Photos
-            </label>
-
-            {previewImages.listingPhotos.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {previewImages.listingPhotos.map((src, idx) => (
-                  <div key={idx} className="relative">
-                    <img
-                      src={src}
-                      alt={`preview-${idx}`}
-                      className="w-full h-32 object-cover rounded shadow"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeListingPhoto(idx)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Description</h2>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleInputChange}
-            rows={6}
+            rows={5}
+            placeholder="Write a detailed description about the property..."
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F5BE86]"
           />
         </div>
 
-        {/* Status & Visibility */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Status & Visibility</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
-              </label>
+        {/* Admin Controls */}
+        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+          <div className="flex flex-wrap gap-10 items-center">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-bold text-gray-700">Status:</label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                className="border rounded px-2 py-1 bg-white"
               >
                 <option value="available">Available</option>
                 <option value="sold-out">Sold Out</option>
               </select>
             </div>
-
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 name="live"
                 checked={formData.live}
                 onChange={handleInputChange}
-                className="h-5 w-5 text-[#F5BE86]"
+                className="h-5 w-5"
               />
-              <span>Live / Published</span>
+              <span className="text-sm font-bold text-gray-700">Make Live</span>
             </label>
-
-            <div className="text-sm text-gray-600">
-              Approved: {formData.approved === "approved" ? "Yes" : "Pending"}
+            <div className="text-sm font-medium">
+              {/* Approval Status:{" "}
+              <span
+                className={
+                  formData.approved === "approved"
+                    ? "text-green-600"
+                    : "text-orange-500"
+                }
+              >
+                {formData.approved === "approved" ? "Approved" : "Pending"}
+              </span> */}
             </div>
           </div>
         </div>
 
-        {/* Submit */}
+        {/* Submit Buttons */}
         <div className="flex justify-end gap-4">
           <button
             type="button"
             onClick={() => navigate("/admin/projects")}
-            className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="bg-[#F5BE86] hover:bg-[#e0a76f] text-white px-8 py-2.5 rounded-lg font-medium shadow-md transition disabled:opacity-50"
+            className="bg-[#2B2BD9] hover:bg-blue-800 text-white px-10 py-2 rounded-md font-bold shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
           >
+            {loading && <FaSpinner className="animate-spin" />}
             {loading
               ? "Saving..."
               : isEditMode
-              ? "Update Project"
-              : "Create Project"}
+              ? "Update Listing"
+              : "Create Listing"}
           </button>
         </div>
       </form>

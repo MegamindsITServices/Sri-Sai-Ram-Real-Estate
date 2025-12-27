@@ -147,7 +147,7 @@ const AdminTestimonials = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="py-4 md:py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold fira-sans text-gray-800">
           Manage Testimonials
