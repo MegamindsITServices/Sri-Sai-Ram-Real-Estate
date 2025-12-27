@@ -124,7 +124,7 @@ const Navbar = ({ setModel }) => {
             >
               Contact Us
             </button>
-            {user ? (
+            {/* {user ? (
               <button
                 className="hover:cursor-pointer hover:border-b-2"
                 onClick={() => logout()}
@@ -138,7 +138,7 @@ const Navbar = ({ setModel }) => {
               >
                 Login
               </button>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -254,7 +254,7 @@ const Navbar = ({ setModel }) => {
             >
               Contact Us
             </button>
-            {user ? (
+            {/* {user ? (
               <button
                 className="hover:cursor-pointer hover:border-b-2"
                 onClick={() => logout()}
@@ -268,7 +268,7 @@ const Navbar = ({ setModel }) => {
               >
                 Login
               </button>
-            )}
+            )} */}
             {/* </div> */}
           </div>
         </div>
