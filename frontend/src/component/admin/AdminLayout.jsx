@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setLogOut } from "../../redux/UserSlice";
@@ -22,12 +22,25 @@ const AdminLayout = () => {
 
   // Mobile menu state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const pageTitles = {
+    "/admin": "Dashboard",
+    "/admin/projects": "Projects",
+    "/admin/testimonials": "Testimonials",
+    "/admin/messages": "Enquiries",
+    "/admin/profile": "Profile",
+  };
+
 
   const handleLogout = () => {
     dispatch(setLogOut());
     localStorage.removeItem("token");
     navigate("/login");
   };
+
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
 
   const navItems = [
     { path: "/admin", label: "Dashboard", icon: FaChartBar },
@@ -125,7 +138,7 @@ const AdminLayout = () => {
               <FaBars size={24} />
             </button>
             <h2 className="text-lg md:text-xl font-semibold fira-sans text-gray-800 truncate">
-              {location.pathname === "/admin" ? "Dashboard" : "Admin Panel"}
+              {pageTitles[location.pathname] || "Admin Panel"}
             </h2>
           </div>
 

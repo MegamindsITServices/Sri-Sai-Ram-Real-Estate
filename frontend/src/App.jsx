@@ -28,6 +28,7 @@ import AdminMessages from "./pages/admin/Messages";
 import useAuthInit from "./redux/UserAuthInit";
 import Loader from "./component/Loader";
 import Profile from "./pages/admin/Profile";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 function App() {
   return (
@@ -74,7 +75,7 @@ const LoadingRoutes = () => {
               path="/auth/reset-password/:token"
               element={<ResetPassword />}
             />
-            <Route path="/login" element={<Login />} />
+            {/* <Route path="/login" element={<Login />} /> */}
             <Route path="/" element={<HomePage />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/about" element={<AboutUs />} />
@@ -86,6 +87,7 @@ const LoadingRoutes = () => {
             />
             <Route path="/Testimonials" element={<Testimonial />} />
 
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route element={<ProtectedAdminRoute />}>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />{" "}

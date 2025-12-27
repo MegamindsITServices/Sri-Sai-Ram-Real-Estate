@@ -39,6 +39,7 @@ const AdminTestimonials = () => {
   }, [currentPage]);
 
   const fetchTestimonials = async (page = 1) => {
+    setLoading(true);
     try {
       const res = await API.get("/testimonial/paginated", {
         params: { page, limit: 9 },
@@ -103,14 +104,17 @@ const AdminTestimonials = () => {
     if (editMode) payload.append("_id", currentTestimonial._id);
 
     try {
-      const endpoint = editMode ? "/testimonial/edit" : "/testimonial/add";
-      const res = await API.post(endpoint, payload);
+       const endpoint = editMode ? "/testimonial/edit" : "/testimonial/add";
+      await toast.promise(API.post(endpoint, payload), {
+        loading: editMode ? "Updating testimonial..." : "Adding testimonial...",
+        success: editMode
+          ? "Testimonial updated successfully!"
+          : "Testimonial added successfully!",
+        error: (err) => err.response?.data?.message || "Operation failed",
+      });
 
-      if (res.data.status) {
-        toast.success(editMode ? "Testimonial Updated!" : "Testimonial Added!");
-        setModalOpen(false);
-        fetchTestimonials();
-      }
+      setModalOpen(false);
+      fetchTestimonials(currentPage);
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed");
     } finally {
@@ -120,17 +124,25 @@ const AdminTestimonials = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this testimonial?")) return;
+
     setDeleteLoadingId(id);
+
     try {
-      await API.post("/testimonial/deleteTestimonial", { _id: id });
-      toast.success("Testimonial Deleted Successfully");
-      fetchTestimonials();
-    } catch (err) {
-      toast.error("Delete failed");
+      await toast.promise(
+        API.post("/testimonial/deleteTestimonial", { _id: id }),
+        {
+          loading: "Deleting testimonial...",
+          success: "Testimonial deleted successfully!",
+          error: "Delete failed",
+        }
+      );
+
+      fetchTestimonials(currentPage);
     } finally {
       setDeleteLoadingId(null);
     }
   };
+
 
   if (loading) return <Loader />;
 
@@ -338,18 +350,30 @@ const AdminTestimonials = () => {
                 <div className="flex justify-end gap-4">
                   <button
                     type="button"
-                    onClick={() => setModalOpen(false)}
+                    onClick={() => !submitLoading && setModalOpen(false)}
                     disabled={submitLoading}
-                    className="px-6 py-2 border rounded-lg hover:bg-gray-50"
+                    className={`px-6 py-2 border rounded-lg hover:bg-gray-50 ${submitLoading ? "cursor-not-allowed" : ""}`}
                   >
                     Cancel
                   </button>
+
                   <button
                     type="submit"
                     disabled={submitLoading}
-                    className="bg-[#FFC13B] hover:bg-yellow-400 text-white px-6 py-2 rounded-lg"
+                    className={`flex items-center justify-center gap-2 px-6 py-2 rounded-lg text-white
+                        ${
+                          submitLoading
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-[#FFC13B] hover:bg-yellow-400"
+                        }`}
                   >
-                    {editMode ? "Update" : "Add"}
+                    {submitLoading
+                      ? editMode
+                        ? "Updating..."
+                        : "Adding..."
+                      : editMode
+                      ? "Update"
+                      : "Add"}
                   </button>
                 </div>
               </form>

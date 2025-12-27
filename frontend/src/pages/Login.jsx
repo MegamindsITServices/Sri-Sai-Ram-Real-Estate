@@ -79,16 +79,8 @@ const Login = () => {
 
       localStorage.setItem("token", response.data.token);
 
-      // Role-based redirect
-      const userRole = response.data.user.role;
-
-      if (userRole === "admin") {
-        navigate("/admin"); // or '/admin/dashboard'
-        toast.success("Welcome Admin!");
-      } else {
-        navigate("/");
-        toast.success("Login successful!");
-      }
+      toast.success("Login successful!");
+      navigate("/");
     } catch (err) {
       console.log(err);
     } finally {

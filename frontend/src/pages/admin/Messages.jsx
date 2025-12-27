@@ -10,6 +10,7 @@ const AdminMessages = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [deleteLoadingId, setDeleteLoadingId] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
 
   const itemsPerPage = 10;
@@ -39,14 +40,21 @@ const AdminMessages = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this message?")) return;
 
+    setDeleteLoadingId(id);
+
     try {
-      await API.post("/msg/deleteMsg", { _id: id }); // You'll need to add delete endpoint
-      toast.success("Message deleted");
+      await toast.promise(API.post("/msg/deleteMsg", { _id: id }), {
+        loading: "Deleting message...",
+        success: "Message deleted successfully",
+        error: "Delete failed",
+      });
+
       fetchMessages(currentPage);
-    } catch (err) {
-      toast.error("Delete failed");
+    } finally {
+      setDeleteLoadingId(null);
     }
   };
+
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -129,10 +137,15 @@ const AdminMessages = () => {
                     </button>
                     <button
                       onClick={() => handleDelete(msg._id)}
-                      className="text-red-600 hover:text-red-900"
+                      disabled={deleteLoadingId === msg._id}
+                      className="text-red-600 hover:text-red-900 disabled:opacity-50"
                       title="Delete"
                     >
-                      <FaTrash />
+                      {deleteLoadingId === msg._id ? (
+                        <Loader size="sm" text={null} />
+                      ) : (
+                        <FaTrash />
+                      )}
                     </button>
                   </td>
                 </tr>
@@ -168,9 +181,19 @@ const AdminMessages = () => {
                 </button>
                 <button
                   onClick={() => handleDelete(msg._id)}
-                  className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                  disabled={deleteLoadingId === msg._id}
+                  className="text-red-600 hover:text-red-800 flex items-center gap-1 disabled:opacity-50"
                 >
-                  <FaTrash /> Delete
+                  {deleteLoadingId === msg._id ? (
+                    <>
+                      <Loader size="sm" text={null} />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <FaTrash /> Delete
+                    </>
+                  )}
                 </button>
               </div>
             </div>

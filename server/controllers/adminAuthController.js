@@ -49,6 +49,36 @@ const register = async (req, res) => {
   }
 };
 
+const loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const admin = await AdminModel.findOne({ email });
+    if (!admin) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const userData = admin.toObject();
+    userData.role = "admin";
+
+    const token = admin.generateToken(userData);
+
+    res.json({
+      success: true,
+      token,
+      user: userData,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 const updatePassword = async (req, res) => {
   try {
     const id = req.user._id;
@@ -174,6 +204,7 @@ const resetPassword = async (req, res, next) => {
 
 module.exports = {
   register,
+  loginAdmin,
   updatePassword,
   resetPassword,
   sendResetPassword,

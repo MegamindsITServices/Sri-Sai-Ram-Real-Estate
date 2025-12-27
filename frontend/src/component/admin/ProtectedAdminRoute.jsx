@@ -7,7 +7,7 @@ const ProtectedAdminRoute = () => {
 
   // If not logged in at all → go to login
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin-login" replace />;
   }
 
   // If logged in but not admin → go to home

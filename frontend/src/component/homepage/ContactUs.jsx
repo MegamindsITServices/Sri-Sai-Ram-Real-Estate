@@ -11,6 +11,8 @@ const ContactUs = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
+  const [submitLoading, setSubmitLoading] = useState(false);
+
   const user = useSelector((state) => state.user.user);
   const navigate = useNavigate();
 
@@ -49,47 +51,48 @@ const ContactUs = () => {
 
   const submitMsg = async (e) => {
     e.preventDefault();
-    
-    if (!validate()) {
-      return;
-    }
-    
+
+    if (!validate()) return;
+
+    setSubmitLoading(true);
+
     try {
-      const data = await API.post("/msg/putMsg", {
-        name,
-        email,
-        message
-      });
-      
-      if (data.data.status) {
-        toast.success('Response submitted');
-        setName("");
-        setEmail("");
-        setMessage("");
-        setErrors({});
-        toggleSidebar(); // Close the form after successful submission
-      }
-    } catch (err) {
-      toast.error('Failed to submit message. Please try again.');
-      console.log(err.message);
+      await toast.promise(
+        API.post("/msg/putMsg", {
+          name,
+          email,
+          message,
+        }),
+        {
+          loading: "Sending message...",
+          success: "Message sent successfully!",
+          error: "Failed to submit message. Please try again.",
+        }
+      );
+
+      setName("");
+      setEmail("");
+      setMessage("");
+      setErrors({});
+      toggleSidebar();
+    } finally {
+      setSubmitLoading(false);
     }
   };
+
 
   return (
     <div className="flex flex-col lg:flex-row items-start justify-between p-5 md:p-8 lg:p-10 min-h-64 relative md:pl-20">
       {/* Left Section */}
       <div className="lg:w-1/2 w-full p-4 space-y-6 md:pl-20">
-        <h2
-          className="text-4xl md:text-4xl font-bold text-gray-800 fira-sans"
-        >
+        <h2 className="text-4xl md:text-4xl font-bold text-gray-800 fira-sans">
           Contact Us
         </h2>
-        <p
-          className="text-sm md:text-base lg:text-lg text-black font-[Montserrat]"
-        >
+        <p className="text-sm md:text-base lg:text-lg text-black font-[Montserrat]">
           <strong>Better yet, See us in person!</strong>
           <br />
-          We love our customers, so feel free to visit during normal business hours.
+          We love our customers, so feel free to visit during normal business
+          hours.
         </p>
         <div>
           <h3
@@ -135,13 +138,12 @@ const ContactUs = () => {
 
       {/* Right Section (Map) */}
       <div className="lg:w-1/2 w-full p-4">
-      <iframe 
-    className="w-full h-[300px] md:h-[350px] lg:h-[400px] rounded-xl border border-gray-300"
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3914.7447897750445!2d79.9279747!3d13.131686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a528f6cd1eeeb73%3A0xdd165de74773170!2sSRI%20SAI%20RAM%20REAL%20ESTATE%20%26%20CONSTRUCTION!5e0!3m2!1sen!2sin!4v1710527264123!5m2!1sen!2sin"
-    loading="lazy"
-    allowFullScreen
-></iframe>
-
+        <iframe
+          className="w-full h-[300px] md:h-[350px] lg:h-[400px] rounded-xl border border-gray-300"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3914.7447897750445!2d79.9279747!3d13.131686!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a528f6cd1eeeb73%3A0xdd165de74773170!2sSRI%20SAI%20RAM%20REAL%20ESTATE%20%26%20CONSTRUCTION!5e0!3m2!1sen!2sin!4v1710527264123!5m2!1sen!2sin"
+          loading="lazy"
+          allowFullScreen
+        ></iframe>
       </div>
 
       {/* Sidebar */}
@@ -171,7 +173,9 @@ const ContactUs = () => {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={`w-full border ${errors.name ? 'border-red-500' : 'border-gray-300'}  px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full border ${
+                errors.name ? "border-red-500" : "border-gray-300"
+              }  px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
               placeholder="Your Name"
             />
             {/* {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>} */}
@@ -189,7 +193,9 @@ const ContactUs = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full border ${errors.email ? 'border-red-500' : 'border-gray-300'}  px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full border ${
+                errors.email ? "border-red-500" : "border-gray-300"
+              }  px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
               placeholder="Your Email"
             />
             {/* {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>} */}
@@ -207,7 +213,9 @@ const ContactUs = () => {
               rows="4"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className={`w-full border ${errors.message ? 'border-red-500' : 'border-gray-300'}  px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full border ${
+                errors.message ? "border-red-500" : "border-gray-300"
+              }  px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
               placeholder="Enter Your Message"
             ></textarea>
             {/* {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>} */}
@@ -215,18 +223,22 @@ const ContactUs = () => {
           <div className="flex justify-end">
             <button
               type="button"
-              onClick={toggleSidebar}
-              className="text-sm md:text-base text-gray-700 px-4 py-2 mr-2 border border-gray-300  hover:bg-gray-100 transition-all"
-              style={{ fontFamily: "Montserrat" }}
+              onClick={() => !submitLoading && toggleSidebar()}
+              disabled={submitLoading}
+              className="text-sm md:text-base text-gray-700 px-4 py-2 mr-2 border 
+             disabled:opacity-50"
             >
               Cancel
             </button>
+
             <button
               type="submit"
-              className="text-sm md:text-base text-white px-4 py-2 bg-blue-600   hover:bg-blue-700 transition-all"
+              disabled={submitLoading}
+              className="flex items-center gap-2 text-sm md:text-base text-white px-4 py-2 
+             bg-blue-600 hover:bg-blue-700 transition-all disabled:opacity-50"
               style={{ fontFamily: "Montserrat" }}
             >
-              Send
+              {submitLoading ? "Sending..." : "Send"}
             </button>
           </div>
         </form>

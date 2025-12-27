@@ -134,7 +134,7 @@ const Navbar = ({ setModel }) => {
             ) : (
               <button
                 className="hover:cursor-pointer hover:border-b-2"
-                onClick={() => handleNavigation("/login")}
+                onClick={() => handleNavigation("/admin-login")}
               >
                 Login
               </button>
@@ -264,7 +264,7 @@ const Navbar = ({ setModel }) => {
             ) : (
               <button
                 className="hover:cursor-pointer hover:border-b-2"
-                onClick={() => handleNavigation("/login")}
+                onClick={() => handleNavigation("/admin-login")}
               >
                 Login
               </button>

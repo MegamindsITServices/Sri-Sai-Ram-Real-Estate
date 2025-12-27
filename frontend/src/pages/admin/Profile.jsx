@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import API from "../../utils/API";
 import { updateName, updateAvatar, setLogin } from "../../redux/UserSlice";
+import Loader from "../../component/Loader";
 
 const AdminProfile = () => {
   const dispatch = useDispatch();
@@ -18,8 +19,11 @@ const AdminProfile = () => {
   });
 
   const [preview, setPreview] = useState(user?.avatar || "/images/avatar.png");
-  const [loading, setLoading] = useState(false);
+
   const [fetchLoading, setFetchLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
 
   useEffect(() => {
     // Always load fresh user data on mount
@@ -56,34 +60,31 @@ const AdminProfile = () => {
 
   const handleSubmitProfile = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setProfileLoading(true);
 
     try {
       const payload = new FormData();
       payload.append("name", formData.name);
       if (formData.avatarFile) {
-        payload.append("avatar", formData.avatarFile); // your backend expects "image"
+        payload.append("avatar", formData.avatarFile);
       }
-      console.log(payload);
 
-      const res = await API.post("/admin-auth/update-profile", payload);
+      await toast.promise(API.post("/admin-auth/update-profile", payload), {
+        loading: "Updating profile...",
+        success: "Profile updated successfully!",
+        error: "Profile update failed",
+      });
 
-      if (res.data.success) {
-        // Refresh full user data (gets latest avatar URL from server)
-        const freshRes = await API.get("/auth/current-user");
-        if (freshRes.data.success) {
-          dispatch(setLogin({ user: freshRes.data.user }));
-          setPreview(freshRes.data.user.avatar);
-        }
-
-        toast.success("Profile updated successfully!");
+      const freshRes = await API.get("/auth/current-user");
+      if (freshRes.data.success) {
+        dispatch(setLogin({ user: freshRes.data.user }));
+        setPreview(freshRes.data.user.avatar);
       }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Profile update failed");
     } finally {
-      setLoading(false);
+      setProfileLoading(false);
     }
   };
+
 
   const handleSubmitPassword = async (e) => {
     e.preventDefault();
@@ -96,33 +97,37 @@ const AdminProfile = () => {
       return toast.error("New password must be at least 6 characters");
     }
 
-    setLoading(true);
+    setPasswordLoading(true);
 
     try {
-      const res = await API.put("/admin-auth/update-password", {
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword,
-      });
+      await toast.promise(
+        API.put("/admin-auth/update-password", {
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        }),
+        {
+          loading: "Updating password...",
+          success: "Password updated successfully!",
+          error: "Password update failed",
+        }
+      );
 
-      if (res.data.success) {
-        toast.success("Password updated successfully!");
-        setFormData((prev) => ({
-          ...prev,
-          currentPassword: "",
-          newPassword: "",
-          confirmPassword: "",
-        }));
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Password update failed");
+      setFormData((prev) => ({
+        ...prev,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      }));
     } finally {
-      setLoading(false);
+      setPasswordLoading(false);
     }
   };
 
+
   if (fetchLoading) {
-    return <div className="text-center py-20">Loading profile...</div>;
+    return <Loader text="Loading profile..." />;
   }
+
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
@@ -176,10 +181,10 @@ const AdminProfile = () => {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={profileLoading}
               className="w-full hover:bg-[#F5BE86] bg-[#e0a76f] text-white py-2.5 rounded-lg font-medium transition disabled:opacity-50"
             >
-              {loading ? "Updating..." : "Save Profile"}
+              {profileLoading ? "Updating..." : "Save Profile"}
             </button>
           </form>
         </div>
@@ -233,10 +238,10 @@ const AdminProfile = () => {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={passwordLoading}
               className="w-full bg-[#2B2BD9] hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition disabled:opacity-50"
             >
-              {loading ? "Updating..." : "Update Password"}
+              {passwordLoading ? "Updating..." : "Update Password"}
             </button>
           </form>
         </div>

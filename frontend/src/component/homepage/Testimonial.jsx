@@ -1,241 +1,250 @@
-import React, { useState } from "react";
-import man1 from '../../assets/man1.jpg'
-import man2 from '../../assets/man2.jpg'
-import man3 from '../../assets/man3.jpg'
-import man4 from '../../assets/man4.jpg'
-import man5 from '../../assets/man5.jpg'
+import React, { useState, useEffect, useRef } from "react";
 import Review from "../models/Review";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import GiveReviewButton from "../button/GiveReviewButton"
-const testimonials=[
-    {
-      id: 1,
-      name: "Karan rawat",
-      profession: "Software Engineer",
-      feedback: "An exceptional experience with excellent results! The entire process was smooth, from placing the order to receiving the final product. The quality was far beyond what I anticipated, and the speed of service was unmatched. I appreciate the professionalism and effort put into every detail. Highly recommend to anyone in need of top-tier service!",
-      rating: 5,
-      image: man1, // Replace with actual image URL
-    },
-    {
-      id: 2,
-      name: "Mahesh",
-      profession: "Doctor",
-      feedback: "A flawless experience from start to finish! The speed of delivery was impressive, and the quality was second to none. Every detail was carefully considered, making the results even better than expected. It’s refreshing to find such professionalism and dedication. I will be a repeat customer for sure!",
-      rating: 4,
-      image: man2, // Replace with actual image URL
-    },
-    {
-      id: 3,
-      name: "Vamshi",
-      profession: "Store Manager",
-      feedback: "Fast, reliable, and absolutely worth it! The team delivered exceptional results in record time without sacrificing quality. Every step of the process was smooth, and customer service was incredibly helpful. I couldn't be happier with the outcome. If you need great service with top-notch quality, look no further!",
-      rating: 5,
-      image: man3, // Replace with actual image URL
-    },
-    {
-      id: 4,
-      name: "vaibhav Negi",
-      profession: "Businessman",
-      feedback: "Top-notch service with quick turnaround! The team exceeded my expectations with their attention to detail. Everything was handled professionally, making the entire process smooth and stress-free. I’m beyond satisfied with the results and will definitely be a returning customer. If you’re looking for quality and efficiency, this is the perfect choice!",
-      rating: 5,
-      image: man4, // Replace with actual image URL
-    },
-    {
-      id: 5,
-      name: "Ajay singh bartwal",
-      profession: "Freelancer",
-      feedback: "Brilliant service and outstanding results! The attention to detail was remarkable, and the final product surpassed my expectations. The speed of delivery was impressive, yet quality was never compromised. It’s rare to find such reliability and expertise in one place. I’m so pleased and will surely be back for more!",
-      rating: 4,
-      image: man5, // Replace with actual image URL
-    },
-  ];
+import GiveReviewButton from "../button/GiveReviewButton";
+import API from "../../utils/API";
+import Loading from "../../component/Loading";
+import toast from "react-hot-toast";
 
 const Testimonial = () => {
-  const navigate=useNavigate();
-  const user=useSelector((state)=>state.user.user);
-  const [currentIndex, setCurrentIndex] = useState(1); // Start with the second card as the center one
-  const [reviewModel,setReviewModel]=useState(false);
+  const navigate = useNavigate();
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [reviewModel, setReviewModel] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const autoScrollTimer = useRef(null);
+  const MIN_HEIGHT = 450; 
+
+  const cardRefs = useRef([]);
+  const [containerHeight, setContainerHeight] = useState(0);
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await API.get("/testimonial/paginated");
+        if (response.data.status) {
+          setTestimonials(response.data.testimonials);
+          setCurrentIndex(0);
+        }
+      } catch (err) {
+        console.error("Error fetching testimonials:", err);
+        toast.error("Failed to load testimonials");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
+  // FIXED AUTO-SCROLL: Proper cleanup and dependency handling
+  useEffect(() => {
+    if (!loading && testimonials.length > 1 && !isPaused) {
+      autoScrollTimer.current = setInterval(() => {
+        handleNext();
+      }, 5000);
+    }
+    return () => clearInterval(autoScrollTimer.current);
+  }, [loading, testimonials.length, isPaused, currentIndex]); // Added currentIndex to keep timer fresh
+
+  useEffect(() => {
+    const activeCard = cardRefs.current[currentIndex];
+    if (activeCard) {
+      const cardHeight = activeCard.offsetHeight + 40; // padding buffer
+      setContainerHeight(Math.max(cardHeight, MIN_HEIGHT));
+    }
+  }, [currentIndex, testimonials]);
+
   const handlePrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
+    setCurrentIndex((prev) =>
+      prev === 0 ? testimonials.length - 1 : prev - 1
     );
   };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
+    setCurrentIndex((prev) =>
+      prev === testimonials.length - 1 ? 0 : prev + 1
     );
   };
 
-  const getVisibleTestimonials = () => {
-    const prevIndex =
-      currentIndex === 0 ? testimonials.length - 1 : currentIndex - 1;
-    const nextIndex =
-      currentIndex === testimonials.length - 1 ? 0 : currentIndex + 1;
+  if (loading)
+    return (
+      <div className="min-h-[400px] flex items-center justify-center bg-[#E9E9FB]">
+        <Loading />
+      </div>
+    );
 
-    return [
-      testimonials[prevIndex],
-      testimonials[currentIndex],
-      testimonials[nextIndex],
-    ];
-  };
+  if (testimonials.length === 0)
+    return (
+      <div className="py-20 text-center bg-[#E9E9FB]">
+        <p className="text-gray-500 font-[Montserrat]">No reviews yet.</p>
+        <div className="mt-5" onClick={() => navigate("/Testimonials")}>
+          <GiveReviewButton />
+        </div>
+      </div>
+    );
 
   return (
-    <div className="relative w-full bg-[#E9E9FB] py-12 px-4 sm:px-6 lg:px-16 xl:px-24 2xl:px-36 ">
-    {/* Top Section */}
-    {reviewModel && <Review setReviewModel={setReviewModel} />}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
-      <div className="text-left mb-6 sm:mb-0">
-        <h2 className="text-2xl sm:text-4xl lg:text-4xl text-gray-900 fira-sans leading-snug">
-        Testimonials
-        </h2>
-        <p className="text-base sm:text-lg text-gray-600 font-[Montserrat] mt-2 ">
-        This is What Our Clients Say about us
-        </p>
+    <div className="relative w-full bg-[#E9E9FB] py-12 px-4 overflow-hidden">
+      {reviewModel && <Review setReviewModel={setReviewModel} />}
+
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 px-6">
+        <div className="text-left">
+          <h2 className="text-2xl sm:text-4xl text-gray-900 font-bold leading-snug">
+            Testimonials
+          </h2>
+          <p className="text-base sm:text-lg text-gray-600 font-[Montserrat] mt-2">
+            This is What Our Clients Say about us
+          </p>
+        </div>
+        <div className="mt-4 sm:mt-0" onClick={() => navigate("/Testimonials")}>
+          <GiveReviewButton />
+        </div>
       </div>
-       
+
       <div
-        className="text-center sm:ml-4 cursor-pointer mt-3 md:mt-0 "
-        // onClick={() => (user !== null ? setReviewModel(true) : navigate("/login"))}
-        onClick={()=>navigate("/Testimonials")}
+        className="relative max-w-7xl mx-auto flex items-center justify-center transition-all duration-500"
+        style={{ height: containerHeight }}
       >
-        <GiveReviewButton/>
-        {/* <div className=" ">
-       
-          <div className="relative text-black py-2 px-6 text-base sm:text-lg font-[Montserrat] after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-[#E6AE35] after:transition-transform after:duration-300 after:scale-x-100 group-hover:after:scale-x-0 whitespace-nowrap">
-            Give Review
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center bg-[#E6AE35] text-black py-2 px-6 text-base sm:text-lg font-[Montserrat] opacity-0 transition-opacity duration-1000 group-hover:opacity-100 whitespace-nowrap">
-            Give Review
-          </div>
-        </div> */}
-      </div>
-    </div>
-  
-    {/* Arrows */}
-    <button
-      onClick={handlePrev}
-      className="absolute left-3 top-1/2 transform -translate-y-1/2 p-3 rounded-full z-20 transition duration-300 bg-white shadow-lg hover:shadow-xl"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 text-gray-800"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M15 19l-7-7 7-7"
-        />
-      </svg>
-    </button>
-    <button
-      onClick={handleNext}
-      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-3 rounded-full z-20 transition duration-300 bg-white shadow-lg hover:shadow-xl"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6 text-gray-800"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M9 5l7 7-7 7"
-        />
-      </svg>
-    </button>
-  
-    {/* Testimonial Cards */}
-    <div className="flex flex-col sm:flex-row justify-center items-center gap-9 overflow-hidden">
-      {getVisibleTestimonials().map((testimonial, index) => {
-        const isCenterCard = index === 1;
-  
-        return (
-          <div
-            key={testimonial.id}
-            className={`transition-all duration-500 transform bg-white p-6   ${
-              isCenterCard
-                ? "scale-105 shadow-xl z-10 w-11/12 sm:w-4/5 lg:max-w-[36%]  rounded-lg "
-                : "scale-90 opacity-75 flex flex-col items-center w-full sm:w-2/5 lg:w-1/4"
-            }`}
+        {/* Navigation Arrows */}
+        <button
+          onClick={handlePrev}
+          className="absolute left-0 z-40 p-3 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all  md:block"
+        >
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            {isCenterCard ? (
-              <div className="flex rounded-lg flex-col  justify-center">
-                <div className="flex flex-row  space-x-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-16 h-16 sm:w-32 sm:h-28 object-center  mb-4 sm:mb-0"
-                  />
-                  <div className="flex flex-col text-left">
-                    <p className="text-base sm:text-lg  text-gray-900 font-[Montserrat]">
-                      {testimonial.name}
-                    </p>
-                    <p className="text-sm  text-gray-500 font-[Montserrat]">
-                      {testimonial.profession}
-                    </p>
-                    <div className="flex space-x-1 mt-1">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                    <span key={i} className="bg-gradient-to-b from-[#faf8e9] via-[#F5BE86] to-[#8f6f4e] text-transparent bg-clip-text">
-                    ★
-                  </span>
-                  
-                      ))}
-                      {[...Array(5 - testimonial.rating)].map((_, i) => (
-                        <span key={i} className="text-gray-300">
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <button
+          onClick={handleNext}
+          className="absolute right-0 z-40 p-3 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-all md:block"
+        >
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
+
+        <div className="relative w-full h-full flex items-center justify-center">
+          {testimonials.map((testimonial, index) => {
+            let position = "hiddenCard";
+
+            if (index === currentIndex) {
+              position = "activeCard";
+            } else if (
+              index ===
+              (currentIndex - 1 + testimonials.length) % testimonials.length
+            ) {
+              position = "prevCard";
+            } else if (index === (currentIndex + 1) % testimonials.length) {
+              position = "nextCard";
+            }
+
+            // DYNAMIC STYLE CALCULATIONS
+            const baseClasses =
+              "absolute transition-all duration-700 ease-in-out bg-white p-8 rounded-2xl flex flex-col items-center text-center select-none";
+            let dynamicStyles = {
+              opacity: 0,
+              transform: "translateX(0) scale(0.7)",
+              zIndex: 0,
+              visibility: "hidden",
+              width: "min(90%, 450px)",
+            };
+
+            if (position === "activeCard") {
+              dynamicStyles = {
+                transform: "translateX(0) scale(1)",
+                opacity: 1,
+                zIndex: 30, // Highest
+                visibility: "visible",
+                width: "min(90%, 450px)",
+                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+              };
+            } else if (position === "prevCard") {
+              dynamicStyles = {
+                transform: "translateX(-100%) scale(0.8)", // Reduced translate to prevent overlaps
+                opacity: 0.6,
+                zIndex: 20, // Lower than active
+                visibility: "visible",
+                width: "min(80%, 400px)",
+              };
+            } else if (position === "nextCard") {
+              dynamicStyles = {
+                transform: "translateX(100%) scale(0.8)",
+                opacity: 0.6,
+                zIndex: 20, // Lower than active
+                visibility: "visible",
+                width: "min(80%, 400px)",
+              };
+            }
+
+            return (
+              <div
+                ref={(el) => (cardRefs.current[index] = el)}
+                key={testimonial._id || index}
+                className={baseClasses}
+                style={dynamicStyles}
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+              >
+                <img
+                  src={testimonial.profileImage}
+                  alt={testimonial.name}
+                  className="w-20 h-20 rounded-full object-cover mb-4 border-4 border-[#E9E9FB]"
+                />
+                <h3 className="font-bold text-lg text-gray-800">
+                  {testimonial.name}
+                </h3>
+                <p className="text-sm text-blue-600 mb-2">{testimonial.job}</p>
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={
+                        i < testimonial.star
+                          ? "text-yellow-400"
+                          : "text-gray-300"
+                      }
+                    >
+                      ★
+                    </span>
+                  ))}
                 </div>
-                <p className="text-sm sm:text-base text-gray-600 mt-4 italic  text-center font-[Montserrat] ">
-                  {testimonial.feedback}
+                <p
+                  className={`text-gray-600 italic transition-opacity duration-500 ${
+                    position === "activeCard"
+                      ? "opacity-100"
+                      : "opacity-0 line-clamp-4"
+                  }`}
+                >
+                  "{testimonial.feedback}"
                 </p>
               </div>
-            ) : (
-              <>
-                <img
-                  src={testimonial.image}
-                  alt={testimonial.name}
-                  className="w-20 h-16 sm:w-48 sm:h-48  object-center mb-4 "
-                />
-                <div className="flex space-x-1 mb-3">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <span key={i} className="bg-gradient-to-b from-[#faf8e9] via-[#F5BE86] to-[#8f6f4e] text-transparent bg-clip-text">
-                      ★
-                    </span>
-                  ))}
-                  {[...Array(5 - testimonial.rating)].map((_, i) => (
-                    <span key={i} className="text-gray-300">
-                      ★
-                    </span>
-                  ))}
-                </div>
-                <p className="text-base sm:text-lg text-gray-900 font-[Montserrat]">
-                  {testimonial.name}
-                </p>
-                <p className="text-sm  text-gray-500 font-[Montserrat]">
-                  {testimonial.profession}
-                </p>
-              </>
-            )}
-          </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      </div>
     </div>
-  </div>
-  
-  
-  
   );
 };
 

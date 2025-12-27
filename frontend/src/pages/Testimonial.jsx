@@ -9,6 +9,8 @@ import Navbar from "../component/homepage/Navbar";
 import Footer from "../component/homepage/Footer";
 import background from "../assets/project.jpeg";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import Loader from "../component/Loader";
+import SEO from "../component/SEO";
 
 const Testimonials = () => {
   const navigate = useNavigate();
@@ -57,6 +59,13 @@ const Testimonials = () => {
     <>
       <Navbar />
 
+      <SEO
+        title="Client Testimonials | Sri Sai Ram Real Estate & Construction"
+        description="Read genuine client testimonials and reviews about Sri Sai Ram Real Estate & Construction and our commitment to quality and trust."
+        keywords="real estate testimonials, construction reviews, client reviews Sri Sai Ram"
+        url="https://srisairam.co.in/Testimonials"
+      />
+
       {/* Hero Banner */}
       <div
         className="w-full min-h-72 max-h-72 bg-cover bg-center"
@@ -88,9 +97,7 @@ const Testimonials = () => {
 
       {/* Testimonials Content */}
       {loading ? (
-        <div className="mb-24 mt-24">
-          <Loading />
-        </div>
+        <Loader />
       ) : testimonials.length === 0 ? (
         <div className="text-center py-20 text-gray-500">
           No testimonials available yet.
@@ -98,7 +105,7 @@ const Testimonials = () => {
       ) : (
         <>
           <div className="relative w-full bg-white px-6 sm:px-14 py-10 sm:py-16">
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {testimonials.map((testimonial, index) => (
                 <div
                   key={testimonial._id}
@@ -174,7 +181,7 @@ const Testimonials = () => {
             </div>
           )}
         </>
-      )}      
+      )}
 
       <Footer />
     </>

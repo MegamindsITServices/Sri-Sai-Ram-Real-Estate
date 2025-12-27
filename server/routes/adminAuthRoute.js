@@ -5,10 +5,12 @@ const {
   sendResetPassword,
   updatePassword,
   updateProfile,
+  loginAdmin,
 } = require("../controllers/adminAuthController");
 const { isAuth, authoriseRoles } = require("../middlewares/auth");
 
 router.post("/register", register);
+router.post("/login", loginAdmin);
 
 router.put("/update-password", isAuth, updatePassword);
 router.post("/update-profile", isAuth, updateProfile);

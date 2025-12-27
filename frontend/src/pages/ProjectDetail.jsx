@@ -33,6 +33,7 @@ import toast from "react-hot-toast";
 import Loading from "../component/Loading";
 import Alsolike from "../component/Alsolike";
 import Layout from "../component/layout/Layout";
+import SEO from "../component/SEO";
 const ProjectDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -127,6 +128,16 @@ const ProjectDetail = () => {
   return (
     <>
       <Navbar />
+
+      <SEO
+        title={`${project?.title} | Sri Sai Ram Real Estate`}
+        description={`Explore ${project?.title} located in ${project?.locationTitle}. ${project?.totalArea} ${project?.unit} ${project?.category} available at ₹${project?.price}.`}
+        keywords={`${project?.title}, plots in ${project?.locationTitle}, buy ${project?.category}, ${project?.unit} land`}
+        image={project?.thumbnail} // Crucial: This shows the property image on WhatsApp/Facebook
+        url={window.location.href}
+        type="article" // Better for specific items
+      />
+
       <Layout
         title={`${project ? project.title : "Project"} - SRI SAI ESTATE`}
         description={`Explore ${project?.title} – ${
