@@ -43,7 +43,7 @@ const AdminLogin = () => {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <div
         className="flex items-center justify-center p-3 bg-cover bg-center min-h-screen relative"
         style={{ backgroundImage: `url(${loginBg})` }}
@@ -56,6 +56,9 @@ const AdminLogin = () => {
             <h2 className="text-3xl font-bold fira-sans text-white uppercase tracking-wider">
               Admin Portal
             </h2>
+            <p className="text-xl font-bold fira-sans text-white">
+              Sri Sai Ram Real Estate & Construction
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
