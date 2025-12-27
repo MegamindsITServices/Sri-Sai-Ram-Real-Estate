@@ -56,7 +56,7 @@ const AdminLogin = () => {
             <h2 className="text-3xl font-bold fira-sans text-white uppercase tracking-wider">
               Admin Portal
             </h2>
-            <p className="text-xl font-bold fira-sans text-white">
+            <p className="text-lg text-[#F4BE85] fira-sans">
               Sri Sai Ram Real Estate & Construction
             </p>
           </div>
