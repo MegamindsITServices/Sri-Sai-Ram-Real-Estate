@@ -11,6 +11,8 @@ import {
   FaBars,
   FaTimes,
 } from "react-icons/fa";
+import { IoPeopleSharp } from "react-icons/io5";
+
 import { CgProfile } from "react-icons/cg";
 
 
@@ -47,6 +49,7 @@ const AdminLayout = () => {
     { path: "/admin/projects", label: "Projects", icon: FaBuilding },
     { path: "/admin/testimonials", label: "Testimonials", icon: FaStar },
     { path: "/admin/messages", label: "Enquiries", icon: FaEnvelope },
+    { path: "/admin/admins", label: "Admin Management", icon: IoPeopleSharp },
     { path: "/admin/profile", label: "Profile", icon: CgProfile },
   ];
 

@@ -29,6 +29,7 @@ import useAuthInit from "./redux/UserAuthInit";
 import Loader from "./component/Loader";
 import Profile from "./pages/admin/Profile";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminAdmins from "./pages/admin/AdminManagement";
 
 function App() {
   return (
@@ -88,6 +89,7 @@ const LoadingRoutes = () => {
             <Route path="/Testimonials" element={<Testimonial />} />
 
             <Route path="/admin-login" element={<AdminLogin />} />
+
             <Route element={<ProtectedAdminRoute />}>
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />{" "}
@@ -96,6 +98,7 @@ const LoadingRoutes = () => {
                 <Route path="projects/edit/:id" element={<ProjectForm />} />
                 <Route path="testimonials" element={<AdminTestimonials />} />
                 <Route path="messages" element={<AdminMessages />} />
+                <Route path="admins" element={<AdminAdmins />} />
                 <Route path="profile" element={<Profile />} />
               </Route>
             </Route>
