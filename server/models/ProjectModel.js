@@ -14,6 +14,7 @@ const listingSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      trim: true,
     },
     bhk: {
       type: String,
@@ -62,7 +63,6 @@ const listingSchema = new mongoose.Schema(
     plotNumber: {
       type: Number,
     },
-    numberOfPlots: { type: Number },
     approvalType: {
       type: String,
       enum: ["CMDA", "DCTP", "Not Applicable"],

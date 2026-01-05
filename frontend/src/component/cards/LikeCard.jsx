@@ -7,7 +7,7 @@ const LikeCard = ({ property }) => {
   const handleCardClick = () => {
     // Navigate to detail page
     navigate(
-      `/projectDetail/${encodeURIComponent(property.title)}/${property._id}`
+      `/projectDetail/${property.title}/${property._id}`
     );
     // Smooth scroll to top instead of window.reload for better UX
     window.scrollTo({ top: 0, behavior: "smooth" });

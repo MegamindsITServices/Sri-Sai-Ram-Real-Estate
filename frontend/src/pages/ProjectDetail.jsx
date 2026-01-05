@@ -33,6 +33,7 @@ import toast from "react-hot-toast";
 import Loading from "../component/Loading";
 import Alsolike from "../component/Alsolike";
 import Layout from "../component/layout/Layout";
+import Loader from "../component/Loader";
 const ProjectDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -46,8 +47,17 @@ const ProjectDetail = () => {
   const [listingPhoto, setListingPhot] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+
+  const isHome = project?.category === "villa" || project?.category === "apartment";
+
+  const isLayout = project?.category === "layout";
+
+  const isPlot = project?.category === "residential" || project?.category === "commercial";
+
   const handlePrev = () => {
     setCurrentIndex((prev) =>
       prev === 0 ? listingPhoto.length - 1 : prev - 1
@@ -66,38 +76,39 @@ const ProjectDetail = () => {
 
   useEffect(() => {
     const call = async () => {
+      setProject(null);
+      setListingPhot([]);
+      setLoading(true);
       try {
         const data = await API.post("/projects/getProject", {
           _id: id,
         });
         if (data.data.status) {
           setProject(data.data.project);
-          console.log(data.data.project._id);
 
           const project = data.data.project;
 
           const photos = [
-            ...project.listingPhotoPaths,
+            ...(project.listingPhotoPaths || []),
             project.thumbnail,
             ...(project.floorImage ? [project.floorImage] : []),
           ];
 
           setListingPhot(photos);
-          console.log(photos)
 
-          console.log(data.data.project.locationLink);
-          setListingPhot(photos);
         } else {
           console.log(data.data.message);
         }
       } catch (err) {
         console.log(err.message);
+      }finally {
+        setLoading(false);
       }
     };
     if (location) {
       call();
     }
-  }, []);
+  }, [id,location]);
 
   useEffect(() => {
     const fetchWishlistStatus = async () => {
@@ -275,7 +286,7 @@ const ProjectDetail = () => {
 
                   <p className=" mt-2 flex gap-2 items-center font-thin  pl-[0.5px] ">
                     <FaMapMarked className="text-xl" />
-                    Project Size :{"  "}
+                    {isLayout ? "Starting Plot Size : " : "Total Area : "}
                     {project.unit === "sqft"
                       ? `${project.totalArea} Sq.ft `
                       : project.unit === "Acre"
@@ -283,73 +294,30 @@ const ProjectDetail = () => {
                       : `${project.totalArea} Cents`}
                   </p>
 
-                  <p className=" flex gap-2 items-center mt-2  font-thin ">
-                    <FaThLarge className="text-xl" />{" "}
-                    <a
-                      href={project.locationLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-black flex gap-1"
-                    >
-                      Number of plots : {project.plotNumber}
-                    </a>
-                  </p>
-                  <p className="mt-2 flex gap-2 items-center font-thin">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="23"
-                      height="23"
-                      viewBox="0 0 25 25"
-                      fill="none"
-                      className="mt-1 relative -left-[2px]"
-                    >
-                      <g
-                        id="gis:location-man"
-                        clip-path="url(#clip0_2521_12329)"
-                      >
-                        <path
-                          id="Vector"
-                          d="M12.45 5.89795C10.4915 5.8982 8.55103 6.73995 8.75503 8.42195L9.25503 12.0779C9.34278 12.7212 9.77753 13.7499 10.4268 13.7499H10.473L11.0048 19.8827C11.0278 20.1587 11.2278 20.3827 11.5048 20.3827H13.5048C13.7818 20.3827 13.9818 20.1587 14.0048 19.8827L14.5365 13.7499H14.583C15.2323 13.7499 15.6668 12.7212 15.7548 12.0782L16.2548 8.4217C16.3858 6.73845 14.4088 5.89745 12.45 5.89795Z"
-                          fill="black"
-                        />
-                        <path
-                          id="Vector_2"
-                          d="M12.5061 12.7271L12.4941 12.7586C12.4981 12.7491 12.5009 12.7393 12.5049 12.7298L12.5061 12.7271Z"
-                          fill="black"
-                        />
-                        <path
-                          id="Vector_3"
-                          d="M12.5 5.25C13.9497 5.25 15.125 4.07475 15.125 2.625C15.125 1.17525 13.9497 0 12.5 0C11.0503 0 9.875 1.17525 9.875 2.625C9.875 4.07475 11.0503 5.25 12.5 5.25Z"
-                          fill="black"
-                        />
-                        <path
-                          id="Vector_4"
-                          d="M15.2305 17.2729C15.2093 17.5159 15.1867 17.7584 15.1655 18.0014C17.4035 18.3174 19.0625 19.0344 19.25 19.9214C19.5292 21.2404 15.2145 21.8339 12.435 21.8062C9.6555 21.7784 5.42025 21.2404 5.7905 19.9212C6.0335 19.0554 7.6685 18.3527 9.848 18.0254C9.82625 17.7817 9.8015 17.5379 9.7805 17.2944C6.979 17.6034 4.645 18.3642 3.7125 19.3559H0.55725L0 20.5117H3.2915C3.54725 21.8717 6.39825 23.0457 10.475 23.3422L10.3355 24.9999H14.3705L14.33 23.3424C18.4275 23.0457 21.3592 21.8717 21.7085 20.5117H25L24.5225 19.3559H21.3673C20.4815 18.3392 18.1052 17.5659 15.2305 17.2729Z"
-                          fill="black"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_2521_12329">
-                          <rect width="25" height="25" fill="white" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                    Starting Plot size: {"  "}
-                    {project.plot}
-                  </p>
-                  {project.category === "house" && (
-                    <p className="mt-2 mb-2 flex gap-2 items-center font-thin relative -left-[0.9px]">
-                      <BiBed className="text-2xl " /> {project.bhk} BHK -{" "}
-                      {project.balcony && "Balcony"},{" "}
-                      {project.terrace && "Terrace"}
+                  {(isPlot || isLayout) && project.plotNumber && (
+                    <p className="flex gap-2 items-center mt-2 font-thin">
+                      <FaThLarge className="text-xl" />
+                      Number of Plots : {project.plotNumber}
                     </p>
                   )}
 
-                  <p className="  flex gap-3 items-center pl-1 ">
-                    <p className="text-2xl ">₹</p>
-                    <p className="font-thin">
-                      {Number(project.price).toLocaleString("en-IN")}
+                  {isHome && project.bhk && (
+                    <p className="mt-2 mb-2 flex gap-2 items-center font-thin relative -left-[0.9px]">
+                      <BiBed className="text-2xl" />
+                      {project.bhk} BHK
+                      {project.balcony && " • Balcony"}
+                      {project.terrace && " • Terrace"}
                     </p>
+                  )}
+
+                  <p className="flex gap-3 items-center pl-1 ">
+                    <span className="text-2xl">₹</span>
+                    <span className="font-thin">
+                      {Number(project.price).toLocaleString("en-IN")}
+                      {isLayout && (
+                        <span className="text-sm ml-1">(Starting Price)</span>
+                      )}
+                    </span>
                   </p>
 
                   <button
@@ -387,9 +355,11 @@ const ProjectDetail = () => {
             </div>
           </div>
         ) : (
-          <div className="min-h-[50vh] flex items-center justify-center">
-            <Loading className="" />
-          </div>
+          loading && (
+            <div className="min-h-[50vh] flex items-center justify-center">
+              <Loading className="" />
+            </div>
+          )
         )}
 
         <div className="w-[95%] px-5 mdx:-8 mx-auto ">
@@ -472,18 +442,19 @@ const ProjectDetail = () => {
           </div>
         )}
 
-        <div className="w-full max-w-5xl mx-auto p-6">          
-
+        <div className="w-full max-w-5xl mx-auto p-6">
           {/* Main Image Slider */}
           {project && (
             <div id="gallery">
               <div className="w-full flex justify-center">
-                <div className="relative w-[80%] md:w-[60%] overflow-visible">
-                  <img
-                    src={listingPhoto[currentIndex].url}
-                    alt={`Image ${currentIndex + 1}`}
-                    className="w-full object-center"
-                  />
+                <div className="relative w-[90%] md:w-[80%] aspect-video flex items-center justify-center overflow-visible">
+                  {listingPhoto.length > 0 && (
+                    <img
+                      src={listingPhoto[currentIndex]?.url}
+                      alt={`Image ${currentIndex + 1}`}
+                      className="min-h-full object-center"
+                    />
+                  )}
                   {/* Left Button */}
                   <button
                     onClick={handlePrev}

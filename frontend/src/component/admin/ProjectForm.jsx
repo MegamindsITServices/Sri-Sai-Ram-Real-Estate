@@ -25,7 +25,6 @@ const ProjectForm = () => {
     terrace: false,
     live: false,
     approvalType: "Not Applicable", // new field
-    numberOfPlots: "", // for Layout category
   });
 
   const [thumbnail, setThumbnail] = useState(null);
@@ -65,7 +64,6 @@ const ProjectForm = () => {
               terrace: project.terrace || false,
               live: project.live || false,
               approvalType: project.approvalType || "Not Applicable",
-              numberOfPlots: project.numberOfPlots || "",
             });
 
             setListingPhotos(project.listingPhotoPaths || []);
@@ -87,24 +85,22 @@ const ProjectForm = () => {
     }
   }, [id, isEditMode]);
 
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const val = type === "checkbox" ? checked : value;
 
- const handleInputChange = (e) => {
-   const { name, value, type, checked } = e.target;
-   const val = type === "checkbox" ? checked : value;
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: val };
 
-   setFormData((prev) => {
-     const updated = { ...prev, [name]: val };
-
-     // If user switches TO layout, clear residential-only fields manually
-     if (name === "category" && val === "layout") {
-       updated.bhk = "";
-       updated.balcony = false;
-       updated.terrace = false;
-       updated.totalArea = "";
-     }
-     return updated;
-   });
- };
+      // If user switches TO layout, clear residential-only fields manually
+      if (name === "category" && val === "layout") {
+        updated.bhk = "";
+        updated.balcony = false;
+        updated.terrace = false;
+      }
+      return updated;
+    });
+  };
 
   const handleFileChange = (e, field) => {
     const file = e.target.files[0];
@@ -263,11 +259,11 @@ const ProjectForm = () => {
                   BHK Type
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   name="bhk"
                   value={formData.bhk}
                   onChange={handleInputChange}
-                  placeholder="e.g. 2BHK, 3BHK"
+                  placeholder="e.g. 2, 3"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md"
                 />
               </div>
@@ -311,8 +307,8 @@ const ProjectForm = () => {
                 </label>
                 <input
                   type="number"
-                  name="numberOfPlots"
-                  value={formData.numberOfPlots}
+                  name="plotNumber"
+                  value={formData.plotNumber}
                   onChange={handleInputChange}
                   placeholder="e.g. 85"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md"
@@ -337,7 +333,6 @@ const ProjectForm = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-md"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Unit
@@ -353,19 +348,21 @@ const ProjectForm = () => {
                   <option value="Cents">Cents</option>
                 </select>
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Plot Number
-                </label>
-                <input
-                  type="number"
-                  name="plotNumber"
-                  value={formData.plotNumber}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                />
-              </div>
+              {!["villa", "apartment"].includes(formData.category) && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Number of Plots
+                  </label>
+                  <input
+                    type="number"
+                    name="plotNumber"
+                    value={formData.plotNumber}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 85"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
