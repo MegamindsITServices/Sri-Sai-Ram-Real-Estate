@@ -10,7 +10,6 @@ const ProjectForm = () => {
   const isEditMode = !!id;
 
   const [formData, setFormData] = useState({
-    creator: "", // Added as per schema
     title: "",
     description: "",
     price: "",
@@ -19,14 +18,14 @@ const ProjectForm = () => {
     category: "",
     bhk: "", // Added as per schema
     plotNumber: "",
-    plot: 1,
     locationTitle: "",
     locationLink: "",
     status: "available",
     balcony: false,
     terrace: false,
     live: false,
-    approved: "pending",
+    approvalType: "Not Applicable", // new field
+    numberOfPlots: "", // for Layout category
   });
 
   const [thumbnail, setThumbnail] = useState(null);
@@ -41,6 +40,7 @@ const ProjectForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEditMode);
+  const isLayout = formData.category === "layout";
 
   useEffect(() => {
     if (isEditMode) {
@@ -50,7 +50,6 @@ const ProjectForm = () => {
           if (res.data.status) {
             const project = res.data.project;
             setFormData({
-              creator: project.creator || "",
               title: project.title || "",
               description: project.description || "",
               price: project.price || "",
@@ -59,21 +58,21 @@ const ProjectForm = () => {
               category: project.category || "",
               bhk: project.bhk || "",
               plotNumber: project.plotNumber || "",
-              plot: project.plot || 1,
               locationTitle: project.locationTitle || "",
               locationLink: project.locationLink || "",
               status: project.status || "available",
               balcony: project.balcony || false,
               terrace: project.terrace || false,
               live: project.live || false,
-              approved: project.approved || "pending",
+              approvalType: project.approvalType || "Not Applicable",
+              numberOfPlots: project.numberOfPlots || "",
             });
 
             setListingPhotos(project.listingPhotoPaths || []);
 
             setPreviewImages({
               thumbnail: project.thumbnail?.url || project.thumbnail,
-              floorImage: project.floorImage?.url || null,
+              floorImage: project.floorImage?.url || project.floorImage || null,
               listingPhotos:
                 project.listingPhotoPaths?.map((img) => img.url) || [],
             });
@@ -88,13 +87,24 @@ const ProjectForm = () => {
     }
   }, [id, isEditMode]);
 
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+
+ const handleInputChange = (e) => {
+   const { name, value, type, checked } = e.target;
+   const val = type === "checkbox" ? checked : value;
+
+   setFormData((prev) => {
+     const updated = { ...prev, [name]: val };
+
+     // If user switches TO layout, clear residential-only fields manually
+     if (name === "category" && val === "layout") {
+       updated.bhk = "";
+       updated.balcony = false;
+       updated.terrace = false;
+       updated.totalArea = "";
+     }
+     return updated;
+   });
+ };
 
   const handleFileChange = (e, field) => {
     const file = e.target.files[0];
@@ -191,7 +201,7 @@ const ProjectForm = () => {
           <h2 className="text-xl font-semibold mb-4 border-b pb-2">
             Identification
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Project Title <span className="text-red-500">*</span>
@@ -203,19 +213,6 @@ const ProjectForm = () => {
                 onChange={handleInputChange}
                 required
                 placeholder="e.g. Skyline Apartments"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F5BE86]"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Creator / Developer Name
-              </label>
-              <input
-                type="text"
-                name="creator"
-                value={formData.creator}
-                onChange={handleInputChange}
-                placeholder="Person or Company Name"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F5BE86]"
               />
             </div>
@@ -243,11 +240,13 @@ const ProjectForm = () => {
                 <option value="commercial">Commercial Plots</option>
                 <option value="apartment">Apartment</option>
                 <option value="villa">House/Villa</option>
+                <option value="layout">Layout</option>
               </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price (₹) <span className="text-red-500">*</span>
+                {isLayout ? "Starting Price" : "Price"} (₹){" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -258,60 +257,117 @@ const ProjectForm = () => {
                 className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                BHK Type
-              </label>
-              <input
-                type="text"
-                name="bhk"
-                value={formData.bhk}
-                onChange={handleInputChange}
-                placeholder="e.g. 3BHK or N/A"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Total Area <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                name="totalArea"
-                value={formData.totalArea}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Unit
-              </label>
-              <select
-                name="unit"
-                value={formData.unit}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
-              >
-                <option value="sqft">Sq.ft</option>
-                <option value="Acre">Acre</option>
-                <option value="Cents">Cents</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Plot Number
-              </label>
-              <input
-                type="number"
-                name="plotNumber"
-                value={formData.plotNumber}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
+            {["villa", "apartment"].includes(formData.category) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  BHK Type
+                </label>
+                <input
+                  type="text"
+                  name="bhk"
+                  value={formData.bhk}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 2BHK, 3BHK"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            )}
           </div>
+          {isLayout && (
+            <div className="mt-8 pt-6 border-t grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Starting Plot Size
+                </label>
+                <input
+                  type="number"
+                  name="totalArea"
+                  value={formData.totalArea}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 1200"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Unit
+                </label>
+                <select
+                  name="unit"
+                  value={formData.unit}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F5BE86]"
+                >
+                  <option value="sqft">Sq.ft</option>
+                  <option value="Acre">Acre</option>
+                  <option value="Cents">Cents</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Number of Plots
+                </label>
+                <input
+                  type="number"
+                  name="numberOfPlots"
+                  value={formData.numberOfPlots}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 85"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Common Area fields for non-layout */}
+          {!isLayout && (
+            <div className="mt-8 pt-6 border-t grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Total Area <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  name="totalArea"
+                  value={formData.totalArea}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Unit
+                </label>
+                <select
+                  name="unit"
+                  value={formData.unit}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                >
+                  <option value="sqft">Sq.ft</option>
+                  <option value="Acre">Acre</option>
+                  <option value="Cents">Cents</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Plot Number
+                </label>
+                <input
+                  type="number"
+                  name="plotNumber"
+                  value={formData.plotNumber}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Location Section */}
@@ -470,32 +526,34 @@ const ProjectForm = () => {
           <h2 className="text-xl font-semibold mb-4 border-b pb-2">
             Details & Features
           </h2>
-          <div className="flex gap-8 mb-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="balcony"
-                checked={formData.balcony}
-                onChange={handleInputChange}
-                className="h-5 w-5 rounded text-[#2B2BD9]"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                Has Balcony
-              </span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                name="terrace"
-                checked={formData.terrace}
-                onChange={handleInputChange}
-                className="h-5 w-5 rounded text-[#2B2BD9]"
-              />
-              <span className="text-sm font-medium text-gray-700">
-                Has Terrace
-              </span>
-            </label>
-          </div>
+          {["villa", "apartment"].includes(formData.category) && (
+            <div className="flex gap-8 mb-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="balcony"
+                  checked={formData.balcony}
+                  onChange={handleInputChange}
+                  className="h-5 w-5 rounded text-[#2B2BD9]"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Has Balcony
+                </span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="terrace"
+                  checked={formData.terrace}
+                  onChange={handleInputChange}
+                  className="h-5 w-5 rounded text-[#2B2BD9]"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Has Terrace
+                </span>
+              </label>
+            </div>
+          )}
           <textarea
             name="description"
             value={formData.description}
@@ -510,12 +568,28 @@ const ProjectForm = () => {
         <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
           <div className="flex flex-wrap gap-10 items-center">
             <div className="flex items-center gap-2">
+              <label className="text-sm font-bold text-gray-700">
+                Approval Type:
+              </label>
+              <select
+                name="approvalType"
+                value={formData.approvalType}
+                onChange={handleInputChange}
+                className="px-2 py-1 border border-gray-300 rounded"
+              >
+                <option value="CMDA">CMDA</option>
+                <option value="DCTP">DCTP</option>
+                <option value="Not Applicable">Not Applicable</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
               <label className="text-sm font-bold text-gray-700">Status:</label>
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="border rounded px-2 py-1 bg-white"
+                className="border rounded border-gray-300 px-2 py-1"
               >
                 <option value="available">Available</option>
                 <option value="sold-out">Sold Out</option>

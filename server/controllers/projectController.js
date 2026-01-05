@@ -372,21 +372,27 @@ const incrementProjectView = async (req, res) => {
   }
 };
 
-
 const getProject = async (req, res) => {
   try {
     const { _id } = req.body;
 
     const project = await Listing.findById(_id);
 
-    if (project) {
-      return res.json({ status: true, project });
+    if (!project) {
+      return res.json({ status: false, message: "Project Not Found" });
     }
-    res.json({ status: false, message: "Project Not Found" });
+
+    const formattedProject = {
+      ...project.toObject(),
+    };
+
+    res.json({ status: true, project: formattedProject });
   } catch (err) {
-    console.log(err.message);
+    console.error(err);
+    res.status(500).json({ status: false, message: "Server error" });
   }
 };
+
 
 const showcase = async (req, res) => {
   const { show } = req.body;

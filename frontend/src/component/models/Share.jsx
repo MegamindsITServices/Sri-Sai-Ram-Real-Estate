@@ -21,18 +21,16 @@ const Share = ({ setShareModel, image, title, url }) => {
         {/* Image */}
         {image && (
           <div className="mb-4">
-            <img src={image} alt={title} className="w-full rounded-lg" />
+            <img src={image} alt={title} className="w-full" />
           </div>
         )}
 
         {/* Project title and description */}
         <div className="mb-4">
-          <p className="text-gray-800 font-medium">
-            Sri Sai Shakthi Nagar (Poondi Project)
-          </p>
-          <p className="text-gray-500">
+          <p className="text-gray-800 font-medium">{title}</p>
+          {/* <p className="text-gray-500">
             big name next line and then dfhasjhaurhga
-          </p>
+          </p> */}
         </div>
 
         {/* URL with copy button */}

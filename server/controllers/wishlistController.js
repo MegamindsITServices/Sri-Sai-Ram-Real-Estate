@@ -25,7 +25,6 @@ const postWishlist=async (req, res) => {
 
 const getWishlist=async (req, res) => {
     const { userId, listingId } = req.query;
-    console.log('hello')
     try {
       // Check if the wishlist entry exists
       const existingItem = await Wishlist.findOne({ userId, id: listingId });

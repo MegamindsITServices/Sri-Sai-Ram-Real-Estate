@@ -10,9 +10,6 @@ const imageSchema = new mongoose.Schema(
 
 const listingSchema = new mongoose.Schema(
   {
-    creator: {
-      type: String,
-    },
     thumbnail: imageSchema,
     title: {
       type: String,
@@ -40,26 +37,11 @@ const listingSchema = new mongoose.Schema(
       type: String,
       enum: ["sqft", "Acre", "Cents"], // Specify allowed units
     },
-    //   sqft: {
-    //     type: Number,
-    //   },
-    //   width: {
-    //     type: Number,
-    //   },
-    //   length: {
-    //     type: Number,
-    //   },
-    //   Acre: {
-    //     type: Number,
-    // },
     status: {
       type: String,
       enum: ["available", "sold-out"],
       default: "available",
     },
-    // year: {
-    //     type: Number
-    // },
     listingPhotoPaths: [imageSchema],
     view: {
       type: Number,
@@ -80,20 +62,11 @@ const listingSchema = new mongoose.Schema(
     plotNumber: {
       type: Number,
     },
-    //     Cents:{
-    //         type:Number,
-    //     },
-    // landType:{
-    //     type:String,
-    //     default:'dry'
-    // },
-    plot: {
-      type: Number,
-      default: 1,
-    },
-    approved: {
+    numberOfPlots: { type: Number },
+    approvalType: {
       type: String,
-      default: "notapproved",
+      enum: ["CMDA", "DCTP", "Not Applicable"],
+      default: "Not Applicable",
     },
     live: {
       type: Boolean,

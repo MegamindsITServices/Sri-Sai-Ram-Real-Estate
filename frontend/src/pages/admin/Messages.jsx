@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import API from "../../utils/API";
-import { FaTrash, FaEnvelopeOpen, FaEye } from "react-icons/fa";
+import { FaTrash, FaEnvelopeOpen, FaEye, FaReply } from "react-icons/fa";
 import Loader from "../../component/Loader";
 
 const AdminMessages = () => {
@@ -35,6 +35,17 @@ const AdminMessages = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleReply = (email, name) => {
+    const subject = encodeURIComponent(
+      `Reply to your enquiry - Sri Sai Ram Real Estate`
+    );
+    const body = encodeURIComponent(
+      `Hello ${name},\n\nThank you for reaching out to us regarding...`
+    );
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    
   };
 
   const handleDelete = async (id) => {
@@ -136,6 +147,13 @@ const AdminMessages = () => {
                       <FaEye />
                     </button>
                     <button
+                      onClick={() => handleReply(msg.email, msg.name)}
+                      className="text-green-600 hover:text-green-900 mr-3"
+                      title="Reply Email"
+                    >
+                      <FaReply />
+                    </button>
+                    <button
                       onClick={() => handleDelete(msg._id)}
                       disabled={deleteLoadingId === msg._id}
                       className="text-red-600 hover:text-red-900 disabled:opacity-50"
@@ -178,6 +196,12 @@ const AdminMessages = () => {
                   className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
                 >
                   <FaEye /> View
+                </button>
+                <button
+                  onClick={() => handleReply(msg.email, msg.name)}
+                  className="text-green-600 flex items-center gap-1"
+                >
+                  <FaReply /> Reply
                 </button>
                 <button
                   onClick={() => handleDelete(msg._id)}
@@ -250,7 +274,15 @@ const AdminMessages = () => {
                   </p>
                 </div>
               </div>
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() =>
+                    handleReply(selectedMessage.email, selectedMessage.name)
+                  }
+                  className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
+                >
+                  <FaReply /> Reply via Email
+                </button>
                 <button
                   onClick={() => setSelectedMessage(null)}
                   className="px-6 py-2 bg-gray-200 rounded hover:bg-gray-300"

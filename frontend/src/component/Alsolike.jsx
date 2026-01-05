@@ -49,8 +49,8 @@ const Alsolike = ({ id, category }) => {
   if (products && products.length === 0) return null; // Hide if no suggestions
 
   return (
-    <div className="bg-amber-50/50 p-6 px-4 md:px-12 rounded-2xl mt-10 border border-amber-100">
-      <h2 className="text-3xl font-bold mb-8 fira-sans text-gray-800">
+    <div className="bg-amber-50/50 p-6 px-4 md:px-12 mt-10 border border-amber-100">
+      <h2 className="text-3xl font-bold mb-5 fira-sans text-gray-800">
         You May Also Like
       </h2>
       {products ? (

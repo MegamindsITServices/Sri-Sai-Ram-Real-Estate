@@ -76,7 +76,7 @@ const LoadingRoutes = () => {
               path="/auth/reset-password/:token"
               element={<ResetPassword />}
             />
-            {/* <Route path="/login" element={<Login />} /> */}
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<HomePage />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/about" element={<AboutUs />} />

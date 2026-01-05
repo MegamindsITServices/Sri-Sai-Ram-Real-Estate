@@ -10,6 +10,7 @@ import {
   FaCheck,
   FaTimes,
   FaSearch,
+  FaSpinner,
 } from "react-icons/fa";
 import Loader from "../../component/Loader";
 
@@ -29,6 +30,11 @@ const AdminProjects = () => {
   // Search
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [loadingList, setLoadingList] = useState(true); // table/card load
+  const [actionLoading, setActionLoading] = useState(null); // per-row action
+  const [searchLoading, setSearchLoading] = useState(false);
+
+
   useEffect(() => {
   fetchProjects(currentPage);
 }, [currentPage, searchTerm]);
@@ -46,7 +52,7 @@ const AdminProjects = () => {
 
   const fetchProjects = async (page = 1) => {
     try {
-      setLoading(true);
+      setLoadingList(true);
 
       const res = await API.get("/projects/paginated", {
         params: {
@@ -64,7 +70,8 @@ const AdminProjects = () => {
     } catch (err) {
       toast.error("Failed to load projects");
     } finally {
-      setLoading(false);
+      setLoadingList(false);
+      setSearchLoading(false);
     }
   };
 
@@ -79,18 +86,28 @@ const AdminProjects = () => {
     )
       return;
 
+    const toastId = toast.loading(
+      currentLive ? "Unpublishing project..." : "Publishing project..."
+    );
+
     try {
+      setActionLoading(id);
       const res = await API.post("/projects/update", {
         _id: id,
         formFields: JSON.stringify({ live: !currentLive }),
       });
 
       if (res.data.status) {
-        toast.success(`Project ${!currentLive ? "published" : "unpublished"}!`);
+        toast.success(
+          currentLive ? "Project unpublished" : "Project published",
+          { id: toastId }
+        );
         fetchProjects(currentPage); // Refresh list
       }
     } catch (err) {
-      toast.error("Failed to update status");
+      toast.error("Failed to update status", { id: toastId });
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -98,13 +115,13 @@ const AdminProjects = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this project?"))
       return;
-
+    const toastId = toast.loading("Deleting project...");
     try {
       await API.post("/projects/delete", { _id: id });
-      toast.success("Project deleted successfully");
+      toast.success("Project deleted", { id: toastId });
       fetchProjects(currentPage);
     } catch (err) {
-      toast.error("Failed to delete project");
+      toast.error("Failed to delete project", { id: toastId });
     }
   };
 
@@ -134,10 +151,17 @@ const AdminProjects = () => {
               type="text"
               placeholder="Search by title, category, location..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setSearchLoading(true);
+              }}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#F5BE86] focus:border-[#F5BE86]"
             />
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            {searchLoading ? (
+              <FaSpinner className="absolute left-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400" />
+            ) : (
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+            )}
           </div>
 
           {/* Add New Button */}
@@ -152,8 +176,8 @@ const AdminProjects = () => {
 
       {/* Desktop Table */}
 
-      <div className="hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
-        {loading && (
+      <div className="relative hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
+        {loadingList && (
           <div className="absolute inset-0 flex items-center justify-center z-20">
             <Loader text="Loading projects..." />
           </div>
@@ -237,6 +261,7 @@ const AdminProjects = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                     <div className="flex justify-center gap-3">
                       <button
+                        disabled={actionLoading === project._id}
                         onClick={() =>
                           navigate(`/admin/projects/edit/${project._id}`)
                         }
@@ -247,6 +272,7 @@ const AdminProjects = () => {
                       </button>
 
                       <button
+                        disabled={actionLoading === project._id}
                         onClick={() =>
                           handleToggleLive(project._id, project.live)
                         }
@@ -265,6 +291,7 @@ const AdminProjects = () => {
                       </button>
 
                       <button
+                        disabled={actionLoading === project._id}
                         onClick={() => handleDelete(project._id)}
                         className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50 transition"
                         title="Delete"
@@ -282,7 +309,7 @@ const AdminProjects = () => {
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-6">
-        {loading && (
+        {loadingList && (
           <div className="absolute inset-0 flex items-center justify-center z-20">
             <Loader text="Loading projects..." />
           </div>
@@ -331,6 +358,7 @@ const AdminProjects = () => {
 
                 <div className="flex flex-wrap gap-3">
                   <button
+                    disabled={actionLoading === project._id}
                     onClick={() =>
                       navigate(`/admin/projects/edit/${project._id}`)
                     }
@@ -340,6 +368,7 @@ const AdminProjects = () => {
                   </button>
 
                   <button
+                    disabled={actionLoading === project._id}
                     onClick={() => handleToggleLive(project._id, project.live)}
                     className={`flex-1 py-2 rounded-lg text-white transition flex items-center justify-center gap-2 ${
                       project.live
@@ -352,6 +381,7 @@ const AdminProjects = () => {
                   </button>
 
                   <button
+                    disabled={actionLoading === project._id}
                     onClick={() => handleDelete(project._id)}
                     className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-2"
                   >

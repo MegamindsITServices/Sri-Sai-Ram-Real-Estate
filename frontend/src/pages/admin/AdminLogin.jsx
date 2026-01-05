@@ -51,45 +51,50 @@ const AdminLogin = () => {
         <Toast />
         <div className="absolute bg-black opacity-70 h-full w-full"></div>
 
-        <div className="relative z-10 w-full max-w-md p-8 bg-gray-900 bg-opacity-80 backdrop-blur-md rounded-xl shadow-2xl border border-red-500/30">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold fira-sans text-white uppercase tracking-wider">
+        <div className="relative z-10 w-full max-w-md p-6 sm:p-8 bg-opacity-70 backdrop-blur-md rounded-lg shadow-xl border border-gray-700">
+          {/* Heading */}
+          <div className="text-center mb-6">
+            <h2 className="text-2xl sm:text-4xl font-bold fira-sans text-white">
               Admin Portal
             </h2>
-            <p className="text-lg text-[#F4BE85] fira-sans">
+            <p className="text-lg text-[#F4BE85] fira-sans mt-2">
               Sri Sai Ram Real Estate & Construction
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-gray-300 text-sm font-medium mb-1 mont">
+            {/* Email Field */}
+            <div className="space-y-1 animate-fade-in font-[Montserrat]">
+              <label className="block text-gray-200 font-medium">
                 Admin Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition"
-                placeholder="example@gmail.com"
+                placeholder="Enter admin email"
+                className="w-full px-4 py-2 border border-gray-300 border-opacity-50 bg-gray-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-gray-300 text-sm font-medium mb-1 mont">
+            {/* Password Field with Toggle */}
+            <div className="space-y-1 animate-fade-in delay-200">
+              <label className="block text-gray-200 font-medium">
                 Password
               </label>
+
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"} // Dynamic type switching
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-red-500 outline-none transition pr-12"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-2 pr-12 border border-gray-300 border-opacity-50 bg-gray-800 text-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   required
                 />
-                {/* Toggle Button */}
+
+                {/* Show / Hide Toggle */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -104,10 +109,11 @@ const AdminLogin = () => {
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest"
+              className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow-lg hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all"
             >
               {loading ? "Verifying..." : "Login to Dashboard"}
             </button>
