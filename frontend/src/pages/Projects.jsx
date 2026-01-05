@@ -92,6 +92,14 @@ const Projects = () => {
     fetchProjects(1);
   }, []);
 
+  useEffect(() => {
+  fetchProjects(1, filters);
+}, [sort]);
+
+  const handleSortChange = (value) => {
+  setSort(value);
+};
+
   // Apply filters with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -138,7 +146,7 @@ const Projects = () => {
     const pages = [];
     const maxVisiblePages = 5;
 
-    if (pagination.totalPages <= 1) return null;
+    if (pagination.totalPages <= 1) return null;     
 
     // Calculate start and end pages
     let startPage = Math.max(
@@ -299,7 +307,7 @@ const Projects = () => {
                   name="search"
                   value={filters.search}
                   onChange={handleFilterChange}
-                  placeholder="Project name or keyword"
+                  placeholder="Project name"
                   className="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 />
               </div>

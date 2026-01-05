@@ -39,7 +39,7 @@ const HomePage = () => {
       />
 
       <Layout title="Home - SRI SAI ESTATE">
-        <div className="bg-[#E9E9FB] p-0 m-0 md:h-[1250px] lg:h-[1200px] overflow-hidden ">
+        <div className="bg-[#E9E9FB] p-0 m-0 ">
           <BigImage />
           <Overview />
           <section id="about" className="!mb-0 !pb-0">

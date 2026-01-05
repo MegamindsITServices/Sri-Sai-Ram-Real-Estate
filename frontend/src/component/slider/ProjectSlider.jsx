@@ -60,15 +60,16 @@ const ProjectSlider = () => {
   const currentProject = projects[currentIndex];
 
   return (
-    <div className="relative mt-[37vh] md:mt-0 w-full p-8 bg-[#EEEEFC]">
+    <div className="relative  md:mt-0 w-full p-8 bg-[#EEEEFC]">
       <h2 className="text-2xl md:text-4xl mb-6 fira-sans md:pl-12">
         Our Top Projects
       </h2>
+
       <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-6 justify-around">
         {/* Left Arrow */}
         <button
           onClick={prevSlide}
-          className="text-3xl rounded-lg font-bold hover:bg-gray-200 hover:scale-125 text-black py-5 px-2 self-center md:self-auto transition-transform"
+          className="text-3xl hidden md:block rounded-lg font-bold hover:bg-gray-200 hover:scale-125 text-black py-5 px-2 self-center md:self-auto transition-transform"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -122,7 +123,7 @@ const ProjectSlider = () => {
         {/* Right Arrow */}
         <button
           onClick={nextSlide}
-          className="text-3xl px-2 p-1 rounded-lg hover:bg-gray-200 hover:scale-125 text-black py-5 self-center md:self-auto font-bold transition-transform"
+          className="text-3xl hidden md:block px-2 p-1 rounded-lg hover:bg-gray-200 hover:scale-125 text-black py-5 self-center md:self-auto font-bold transition-transform"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -141,6 +142,23 @@ const ProjectSlider = () => {
           </svg>
         </button>
       </div>
+
+       {/* MOBILE ARROWS ONLY */}
+     <div className="flex mt-2 md:hidden justify-center gap-14 mb-6">
+  <button
+    onClick={prevSlide}
+    className="text-5xl rounded-lg hover:bg-gray-200 hover:scale-125 transition-transform"
+  >
+    ‹
+  </button>
+
+  <button
+    onClick={nextSlide}
+    className="text-5xl rounded-lg hover:bg-gray-200 hover:scale-125  transition-transform"
+  >
+    ›
+  </button>
+   </div>
     </div>
   );
 };

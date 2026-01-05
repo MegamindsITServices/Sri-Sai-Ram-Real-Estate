@@ -168,10 +168,10 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
           <img
             src={thumbnailUrl}
             alt={product.title}
-            className={`object-cover rounded-md ${
+            className={`object-cover aspect-[16/8] rounded-md ${
               viewMode === "list"
-                ? "w-full h-52 mb-4 mt-3 md:mt-0"
-                : "w-full h-48 mb-3"
+                ? "w-full  mb-4 mt-3 md:mt-0"
+                : "w-full mb-3"
             }`}
           />
         ) : (

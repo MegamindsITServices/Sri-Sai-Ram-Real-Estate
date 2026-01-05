@@ -66,7 +66,7 @@ const AboutUs = () => {
         </div>
 
         <div className="px-8 md:px-12 min-h-72 pt-10 relative">
-          <div className="flex flex-col md:flex-row items-center rounded-lg overflow-hidden   space-y-6 md:space-y-0 md:space-x-10">
+          <div className="flex flex-col md:flex-row items-center rounded-lg space-y-6 md:space-y-0 md:space-x-10">
             <div className="flex flex-col justify-center space-y-4 w-full md:w-2/3 ">
               <h1 className="top-4 relative text-[40px] md:text-4xl text-gray-800 mb-2 uppercase tracking-wide fira-sans text-center md:text-left">
                 K SURESH BABU Garu
@@ -117,7 +117,7 @@ const AboutUs = () => {
           </p>
         </div>
 
-        <div className="p-6 sm:p-8 md:p-12 min-h-72 pt-10 relative bg-[#F0F1F2]">
+        <div className="p-6 sm:p-8 md:p-12  pt-10 relative bg-[#F0F1F2]">
           <div className="flex flex-col md:flex-row items-center rounded-lg overflow-hidden p-4 sm:p-6 md:p-8 space-y-6 md:space-y-0 md:space-x-10">
             <div className="flex flex-col justify-center space-y-6 w-full md:w-2/3">
               <div className="flex flex-col">
@@ -143,49 +143,45 @@ const AboutUs = () => {
           </div>
         </div>
 
-        <div className="w-full relative z-10 md:z-10 -top-40 sm:-top-60 md:-top-72 flex justify-center">
+        <div className="relative  py-0 md:py-10 bg-[#FFF9EB]">
           <img
             src={cloud}
-            className="w-[95%] sm:w-[90%] md:w-[85%] items-center -z-20"
+            className="absolute -translate-y-[80px]  sm:-translate-y-[180px]  lg:-translate-y-[350px] left-1/2 -translate-x-1/2 w-[90%] pointer-events-none"
           />
         </div>
 
-        <div className="p-12 min-h-72 pt-10 bg-[#FFF9EB] relative -top-[25vh] md:-top-[62vh] mb-[-62vh]">
-          <div className="flex flex-col md:flex-row items-center rounded-lg overflow-hidden p-8 space-y-8 md:space-y-0 md:space-x-10">
-            <div className="flex flex-col justify-center space-y-8 w-full md:w-2/3">
-              <div className="flex flex-col">
-                <h1 className="text-4xl md:text-4xl fira-sans leading-snug text-gray-800">
-                  Our History
-                </h1>
-                <div className="mt-4 text-sm md:text-lg font-[Montserrat] text-gray-600 leading-relaxed">
-                  Founded in 1980, our story is one of growth and adaptation. We
-                  started our journey with a singular focus: to provide our
-                  customers with the perfect piece of land to build their dreams
-                  upon. Our dedication and commitment to this vision allowed us
-                  to thrive in the competitive real estate market.
-                </div>
-              </div>
-            </div>
-            <div className="relative w-[680px] h-[560px]">
-              <div className="relative h-[561px] -top-px">
-                <img
-                  className="absolute w-[576px] h-[435px] top-[126px] left-0 object-cover"
-                  alt="Rectangle"
-                  src={estate}
-                />
-                <div
-                  className="absolute top-7 left-[40%] lg:left-48 font-bold 
-          text-[50px] sm:text-[70px] md:text-[100px] lg:text-[150px] 
-          tracking-[6px] leading-[150px] sm:leading-[200px] whitespace-nowrap 
-          z-20 text-gray-800 bg-gradient-to-b from-black via-gray-700 to-black 
-          bg-clip-text text-transparent"
-                >
-                  1980
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="bg-[#FFF9EB] py-24 px-6 md:px-12">
+  <div className="flex flex-col sm:flex-row items-center gap-10">
+    
+    <div className="w-full  space-y-6">
+      <h1 className="text-4xl fira-sans text-gray-800">
+        Our History
+      </h1>
+      <p className="text-sm md:text-lg font-[Montserrat] text-gray-600 leading-relaxed">
+        Founded in 1980, our story is one of growth and adaptation. We started
+        our journey with a singular focus: to provide our customers with the
+        perfect piece of land to build their dreams upon. Our dedication and
+        commitment to this vision allowed us to thrive in the competitive real
+        estate market.
+      </p>
+    </div>
+
+    <div className="relative w-full flex mt-5  justify-end mr-3">
+      <div className="relative">
+        <img
+          src={estate}
+          alt="Estate"
+          className="w-[320px] md:w-[500px] rounded-lg shadow-md"
+        />
+        <div className="absolute -top-16 md:-top-24 right-0 text-[80px] md:text-[120px] font-bold bg-clip-text text-transparent bg-gradient-to-b from-black via-gray-700 to-black">
+          1980
         </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 
         <ProjectSlider />
 
