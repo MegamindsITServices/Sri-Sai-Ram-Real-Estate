@@ -193,7 +193,7 @@ const ProjectDetail = () => {
               <img
                 src={project.floorImage}
                 alt="Floor Plan"
-                className="max-w-full max-h-full object-contain"
+                className="max-w-full max-h-[90vh] object-contain"
               />
             </div>
           </div>
@@ -233,7 +233,7 @@ const ProjectDetail = () => {
         </div>
 
         {project ? (
-          <div className="bg-white w-full md:w-[95%] mx-auto rounded-lg overflow-hidden  p-5 md:p-8 mt-5">
+          <div className="bg-white w-full md:w-[90%] mx-auto rounded-lg overflow-hidden  p-5 md:p-8 mt-5">
             {/* Header Section */}
             <div className="mb-4 flex justify-between items-center ">
               <h1 className="text-lg md:text-xl font-bold font-[Montserrat]">
@@ -362,7 +362,7 @@ const ProjectDetail = () => {
           )
         )}
 
-        <div className="w-[95%] px-5 mdx:-8 mx-auto ">
+        <div className="w-[90%] px-5 mdx:-8 mx-auto ">
           <button
             onClick={() => openContact(!contact)}
             className="bg-[#2B2BD9] text-white py-2 my-3 hover:bg-blue-600 transition-colors duration-200 w-[240px] md:w-[466px]"
@@ -452,20 +452,20 @@ const ProjectDetail = () => {
                     <img
                       src={listingPhoto[currentIndex]?.url}
                       alt={`Image ${currentIndex + 1}`}
-                      className="min-h-full object-center"
+                      className="w-full h-full object-contain"
                     />
                   )}
                   {/* Left Button */}
                   <button
                     onClick={handlePrev}
-                    className="absolute top-1/2 -left-10 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
+                    className="absolute top-1/2 -left-5 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
                   >
                     &#x276E;
                   </button>
                   {/* Right Button */}
                   <button
                     onClick={handleNext}
-                    className="absolute top-1/2 -right-10 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
+                    className="absolute top-1/2 -right-5 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
                   >
                     &#x276F;
                   </button>
@@ -473,7 +473,10 @@ const ProjectDetail = () => {
               </div>
 
               {/* Thumbnails */}
-              <div className="flex justify-center mt-6 gap-2">
+              <div
+                className="flex justify-start md:justify-center 
+                mt-6 gap-2 overflow-x-auto px-2 scrollbar-hide"
+              >
                 {listingPhoto.map((src, index) => (
                   <div
                     key={index}

@@ -146,42 +146,37 @@ const AboutUs = () => {
         <div className="relative  py-0 md:py-10 bg-[#FFF9EB]">
           <img
             src={cloud}
-            className="absolute -translate-y-[80px]  sm:-translate-y-[180px]  lg:-translate-y-[350px] left-1/2 -translate-x-1/2 w-[90%] pointer-events-none"
+            className="absolute -translate-y-[90px]  sm:-translate-y-[160px]  lg:-translate-y-[295px] xl:-translate-y-[350px] left-1/2 -translate-x-1/2 w-[90%] pointer-events-none"
           />
         </div>
 
         <div className="bg-[#FFF9EB] py-24 px-6 md:px-12">
-  <div className="flex flex-col sm:flex-row items-center gap-10">
-    
-    <div className="w-full  space-y-6">
-      <h1 className="text-4xl fira-sans text-gray-800">
-        Our History
-      </h1>
-      <p className="text-sm md:text-lg font-[Montserrat] text-gray-600 leading-relaxed">
-        Founded in 1980, our story is one of growth and adaptation. We started
-        our journey with a singular focus: to provide our customers with the
-        perfect piece of land to build their dreams upon. Our dedication and
-        commitment to this vision allowed us to thrive in the competitive real
-        estate market.
-      </p>
-    </div>
+          <div className="flex flex-col sm:flex-row items-center gap-10">
+            <div className="w-full  space-y-6">
+              <h1 className="text-4xl fira-sans text-gray-800">Our History</h1>
+              <p className="text-sm md:text-lg font-[Montserrat] text-gray-600 leading-relaxed">
+                Founded in 1980, our story is one of growth and adaptation. We
+                started our journey with a singular focus: to provide our
+                customers with the perfect piece of land to build their dreams
+                upon. Our dedication and commitment to this vision allowed us to
+                thrive in the competitive real estate market.
+              </p>
+            </div>
 
-    <div className="relative w-full flex mt-5  justify-end mr-3">
-      <div className="relative">
-        <img
-          src={estate}
-          alt="Estate"
-          className="w-[320px] md:w-[500px] rounded-lg shadow-md"
-        />
-        <div className="absolute -top-16 md:-top-24 right-0 text-[80px] md:text-[120px] font-bold bg-clip-text text-transparent bg-gradient-to-b from-black via-gray-700 to-black">
-          1980
+            <div className="relative w-full flex mt-5  justify-end mr-3">
+              <div className="relative">
+                <img
+                  src={estate}
+                  alt="Estate"
+                  className="w-[320px] md:w-[500px] rounded-lg shadow-md"
+                />
+                <div className="absolute -top-16 md:-top-24 right-0 text-[80px] md:text-[120px] font-bold bg-clip-text text-transparent bg-gradient-to-b from-black via-gray-700 to-black">
+                  1980
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
 
         <ProjectSlider />
 

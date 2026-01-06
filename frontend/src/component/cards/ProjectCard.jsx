@@ -116,7 +116,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
     <div
       className={`border rounded-lg shadow-lg p-4 bg-white relative hover:cursor-pointer ${
         viewMode === "list"
-          ? "flex flex-col md:flex-row md:gap-4 gap-2"
+          ? "flex flex-col md:flex-row md:gap-4 gap-2 items-stretch"
           : "flex flex-col h-full"
       }`}
     >
@@ -159,32 +159,30 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
       <div
         className={
           viewMode === "list"
-            ? "w-full md:max-w-[30%] md:min-w-[30%]"
+            ? "w-full md:max-w-[30%] md:min-w-[30%] flex"
             : "w-full"
         }
         onClick={handleCardClick}
       >
-        {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={product.title}
-            className={`object-cover aspect-[16/8] rounded-md ${
-              viewMode === "list"
-                ? "w-full  mb-4 mt-3 md:mt-0"
-                : "w-full mb-3"
-            }`}
-          />
-        ) : (
-          <div
-            className={`bg-gray-200 rounded-md flex items-center justify-center ${
-              viewMode === "list"
-                ? "w-full h-52 mb-4 mt-3 md:mt-0"
-                : "w-full h-48 mb-3"
-            }`}
-          >
-            <FaHome className="text-gray-400 text-4xl" />
-          </div>
-        )}
+        <div
+          className={
+            viewMode === "list"
+              ? "w-full h-full bg-gray-100 rounded-md overflow-hidden"
+              : "w-full aspect-[16/8] bg-gray-100 rounded-md overflow-hidden"
+          }
+        >
+          {thumbnailUrl ? (
+            <img
+              src={thumbnailUrl}
+              alt={product.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <FaHome className="text-gray-400 text-4xl" />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content */}
@@ -207,7 +205,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
               : `${totalArea} ${unit}`}
           </p>
         )}
-        {category === "house" && bhk && (
+        {(category === "villa" || category === "apartment") && bhk && (
           <p className="flex items-center gap-2 font-[Montserrat]">
             <BiBed className="font-semibold" />
             {`${bhk} BHK`}

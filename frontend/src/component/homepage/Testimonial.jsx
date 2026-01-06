@@ -162,7 +162,7 @@ const Testimonial = () => {
 
             // DYNAMIC STYLE CALCULATIONS
             const baseClasses =
-              "absolute transition-all duration-700 ease-in-out bg-white p-8 rounded-2xl flex flex-col items-center text-center select-none";
+              "absolute transition-all duration-700 ease-in-out bg-white p-8 text-center select-none";
             let dynamicStyles = {
               opacity: 0,
               transform: "translateX(0) scale(0.7)",
@@ -182,19 +182,19 @@ const Testimonial = () => {
               };
             } else if (position === "prevCard") {
               dynamicStyles = {
-                transform: "translateX(-100%) scale(0.8)", // Reduced translate to prevent overlaps
+                transform: "translateX(-110%) scale(0.8)", // Reduced translate to prevent overlaps
                 opacity: 0.6,
                 zIndex: 20, // Lower than active
                 visibility: "visible",
-                width: "min(80%, 400px)",
+                width: "min(70%, 350px)",
               };
             } else if (position === "nextCard") {
               dynamicStyles = {
-                transform: "translateX(100%) scale(0.8)",
+                transform: "translateX(110%) scale(0.8)",
                 opacity: 0.6,
                 zIndex: 20, // Lower than active
                 visibility: "visible",
-                width: "min(80%, 400px)",
+                width: "min(70%, 350px)",
               };
             }
 
@@ -207,38 +207,73 @@ const Testimonial = () => {
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
               >
-                <img
-                  src={testimonial.profileImage}
-                  alt={testimonial.name}
-                  className="w-20 h-20 rounded-full object-cover mb-4 border-4 border-[#E9E9FB]"
-                />
-                <h3 className="font-bold text-lg text-gray-800">
-                  {testimonial.name}
-                </h3>
-                <p className="text-sm text-blue-600 mb-2">{testimonial.job}</p>
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span
-                      key={i}
-                      className={
-                        i < testimonial.star
-                          ? "text-yellow-400"
-                          : "text-gray-300"
-                      }
-                    >
-                      ★
-                    </span>
-                  ))}
-                </div>
-                <p
-                  className={`text-gray-600 italic transition-opacity duration-500 ${
+                <div
+                  className={`${
                     position === "activeCard"
-                      ? "opacity-100"
-                      : "opacity-0 line-clamp-4"
+                      ? "flex items-center mb-2"
+                      : "flex-col items-center justify-center"
                   }`}
                 >
-                  "{testimonial.feedback}"
-                </p>
+                  <div
+                    className={`overflow-hidden flex-shrink-0 transition-all duration-500 ${
+                      position === "activeCard"
+                        ? "w-24 h-24" 
+                        : "w-40 h-40 mb-3 mx-auto" 
+                    }`}
+                  >
+                    <img
+                      src={testimonial.profileImage}
+                      alt={testimonial.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div
+                    className={`items-center ${
+                      position === "activeCard"
+                        ? "text-left ml-4"
+                        : "text-center"
+                    }`}
+                  >
+                    <h3 className="font-semibold text-lg text-gray-800">
+                      {testimonial.name}
+                    </h3>
+                    <p className="text-sm font-normal text-gray-600">
+                      {testimonial.job}
+                    </p>
+                    <div
+                      className={`${
+                        position === "activeCard"
+                          ? ""
+                          : "flex justify-center"
+                      }`}
+                    >
+                      {[...Array(5)].map((_, i) => (
+                        <span
+                          key={i}
+                          className={
+                            i < testimonial.star
+                              ? "bg-gradient-to-b from-[#faf8e9] via-[#F5BE86] to-[#8f6f4e] text-transparent bg-clip-text text-2xl"
+                              : "text-gray-300 text-2xl"
+                          }
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                {position === "activeCard" && (
+                  <p
+                    className={`text-gray-600 italic transition-opacity duration-500 ${
+                      position === "activeCard"
+                        ? "opacity-100"
+                        : "opacity-0 line-clamp-4"
+                    }`}
+                  >
+                    "{testimonial.feedback}"
+                  </p>
+                )}
               </div>
             );
           })}

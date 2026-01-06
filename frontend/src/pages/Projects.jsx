@@ -93,8 +93,8 @@ const Projects = () => {
   }, []);
 
   useEffect(() => {
-  fetchProjects(1, filters);
-}, [sort]);
+    fetchProjects(1, filters);
+  }, [sort, filters]);
 
   const handleSortChange = (value) => {
   setSort(value);
@@ -327,9 +327,11 @@ const Projects = () => {
                   className="p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 >
                   <option value="">All Categories</option>
-                  <option value="residential">Residential</option>
-                  <option value="commercial">Commercial</option>
-                  <option value="house">Houses</option>
+                  <option value="residential">Residential Plots</option>
+                  <option value="commercial">Commercial Plots</option>
+                  <option value="apartment">Apartment</option>
+                  <option value="villa">House/Villa</option>
+                  <option value="layout">Layout</option>
                 </select>
               </div>
 
