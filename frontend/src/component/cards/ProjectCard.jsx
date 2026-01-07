@@ -231,7 +231,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
         {/* Status indicator */}
         <div className="mt-auto">
           <span
-            className={`px-2 py-1 text-xs font-semibold rounded-full ${
+            className={`px-2 py-1 text-xs font-semibold ${
               status === "available"
                 ? "bg-green-100 text-green-800"
                 : "bg-red-100 text-red-800"
@@ -239,12 +239,6 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
           >
             {status === "available" ? "Available" : "Sold Out"}
           </span>
-
-          {product.live === false && (
-            <span className="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-              Draft
-            </span>
-          )}
         </div>
       </div>
 
