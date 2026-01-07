@@ -41,13 +41,6 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
     }
   }, [user, product._id]); // Fixed: added dependencies
 
-  const incrementProjectView = async (id) => {
-    await API.post("/projects/incrementProjectView", {
-      userId: user?._id,
-      projectId: id,
-    });
-  };
-
   const handleWishlistToggle = async () => {
     if (!user?._id) {
       toast.error("Please login to add to wishlist");
@@ -70,7 +63,6 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
   };
 
   const handleCardClick = () => {
-    incrementProjectView(product._id);
     navigate(
       `/projectDetail/${encodeURIComponent(product.title)}/${product._id}`,
       {
@@ -156,7 +148,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
       )}
 
       {/* Thumbnail with conditional styling based on view mode */}
-      {/* Thumbnail with 16:8 Aspect Ratio */}
+      {/* Thumbnail with conditional styling based on view mode */}
       <div
         className={
           viewMode === "list"
@@ -166,16 +158,26 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
         onClick={handleCardClick}
       >
         <div
-          className={`w-full aspect-[16/8] bg-gray-100 overflow-hidden ${
-            viewMode === "grid" ? "mb-2" : ""
-          }`}
+          className={`
+      w-full bg-gray-100 overflow-hidden relative
+      ${viewMode === "grid" ? "mb-2" : ""}
+      ${viewMode === "list" ? "h-full" : "aspect-[4/3]"}
+    `}
         >
           {thumbnailUrl ? (
-            <img
-              src={thumbnailUrl}
-              alt={product.title}
-              className="w-full h-full object-cover"
-            />
+            <div className="w-full h-full flex items-center justify-center">
+              <img
+                src={thumbnailUrl}
+                alt={product.title}
+                className="max-w-full max-h-full object-contain"
+                style={{
+                  width: "auto",
+                  height: "auto",
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                }}
+              />
+            </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <FaHome className="text-gray-400 text-4xl" />
@@ -185,8 +187,11 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
       </div>
 
       {/* Content */}
-      <div className="flex flex-col gap-2 flex-grow" onClick={handleCardClick}>
-        <h2 className="text-xl font-bold flex items-center gap-2 font-[firaSans]">
+      <div
+        className="flex flex-col gap-1 flex-grow min-h-0"
+        onClick={handleCardClick}
+      >
+        <h2 className="text-xl font-bold flex items-center gap-2 font-[Montserrat]">
           <FaHome /> {product.title || "Untitled Property"}
         </h2>
         <p className="flex items-center gap-2 font-[Montserrat]">
@@ -215,18 +220,16 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
         <p className="font-[Montserrat] font-semibold">₹ {price}</p>
 
         {/* Conditionally truncate description based on view mode */}
-        <p className="font-[Montserrat] text-gray-600">
-          {viewMode === "list"
-            ? description.length > 142
-              ? `${description.substring(0, 142)}...`
-              : description
-            : description.length > 80
-            ? `${description.substring(0, 80)}...`
-            : description}
+        <p
+          className={`font-[Montserrat] text-gray-600 overflow-hidden
+    ${viewMode === "list" ? "line-clamp-3 md:line-clamp-3" : "line-clamp-3"}
+  `}
+        >
+          {description}
         </p>
 
         {/* Status indicator */}
-        <div className="mt-2">
+        <div className="mt-auto">
           <span
             className={`px-2 py-1 text-xs font-semibold rounded-full ${
               status === "available"
@@ -237,7 +240,6 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
             {status === "available" ? "Available" : "Sold Out"}
           </span>
 
-          {/* Live status indicator for admin */}
           {product.live === false && (
             <span className="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
               Draft

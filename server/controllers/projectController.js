@@ -344,15 +344,15 @@ const deleteProject = async (req, res) => {
 // Controller to handle project views
 const incrementProjectView = async (req, res) => {
   try {
-    const { userId, projectId } = req.body;
-    if (!userId || !projectId)
+    const { projectId } = req.body;
+    if (!projectId)
       return res
         .status(400)
-        .json({ message: "userId and projectId are required." });
+        .json({ message: "projectId are required." });
 
-    const existingView = await View.findOne({ userID: userId, projectId });
-    if (existingView)
-      return res.status(200).json({ message: "Already viewed." });
+    // const existingView = await View.findOne({ userID: userId, projectId });
+    // if (existingView)
+    //   return res.status(200).json({ message: "Already viewed." });
 
     // Use findByIdAndUpdate with $inc for atomic operations
     const project = await Listing.findByIdAndUpdate(
@@ -364,7 +364,7 @@ const incrementProjectView = async (req, res) => {
     if (!project)
       return res.status(404).json({ message: "Project not found." });
 
-    await View.create({ userID: userId, projectId });
+    // await View.create({ userID: userId, projectId });
 
     res.status(200).json({ message: "View count updated.", project });
   } catch (error) {

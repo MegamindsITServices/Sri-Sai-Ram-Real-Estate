@@ -52,13 +52,15 @@ const ProjectDetail = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const isHome = project?.category === "villa" || project?.category === "apartment";
-  
+  const isHome =
+    project?.category === "villa" || project?.category === "apartment";
+
   const isLayout =
     project?.category === "commercial_layout" ||
     project?.category === "residential_layout";
 
-  const isPlot = project?.category === "residential" || project?.category === "commercial";
+  const isPlot =
+    project?.category === "residential" || project?.category === "commercial";
 
   const handlePrev = () => {
     setCurrentIndex((prev) =>
@@ -77,6 +79,16 @@ const ProjectDetail = () => {
   };
 
   useEffect(() => {
+    const incrementProjectView = async () => {
+      try {
+        await API.post("/projects/incrementProjectView", {
+          projectId: id,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
     const call = async () => {
       setProject(null);
       setListingPhot([]);
@@ -97,22 +109,23 @@ const ProjectDetail = () => {
           ];
 
           setListingPhot(photos);
-
         } else {
           console.log(data.data.message);
         }
       } catch (err) {
         console.log(err.message);
-      }finally {
+      } finally {
         setLoading(false);
       }
     };
     if (location) {
       call();
+      incrementProjectView();
     }
-  }, [id,location]);
+  }, [id, location]);
 
   useEffect(() => {
+    if (!user?._id) return;
     const fetchWishlistStatus = async () => {
       try {
         const response = await API.get(`/wishlist/getWishlist`, {
@@ -193,7 +206,7 @@ const ProjectDetail = () => {
 
               {/* Full-screen image */}
               <img
-                src={project.floorImage}
+                src={project.floorImage?.url || project.floorImage}
                 alt="Floor Plan"
                 className="max-w-full max-h-[90vh] object-contain"
               />
@@ -203,7 +216,7 @@ const ProjectDetail = () => {
         {shareModel && (
           <Share
             setShareModel={setShareModel}
-            image={project.thumbnail.url || project.thumbnail}
+            image={project.thumbnail?.url || project.thumbnail}
             title={project.title}
             url={`https://srisairam.co.in/projectDetail/${project.title}/${project._id}`}
           />
@@ -262,9 +275,9 @@ const ProjectDetail = () => {
               {/* Left Section */}
               <div className="w-full md:w-[50%] ">
                 <img
-                  src={project.thumbnail.url || project.thumbnail}
+                  src={project.thumbnail?.url || project.thumbnail}
                   alt={project.title}
-                  className="w-full h-60 md:h-80 inset-0 object-center"
+                  className="w-full object-contain"
                 />
                 <div className="mt-4  text-start ">
                   <h3 className="  mb-3 flex gap-2 text-2xl font-semibold items-center ">
@@ -344,13 +357,14 @@ const ProjectDetail = () => {
 
               {/* Right Section */}
 
-              <div className="w-full md:w-[50%] flex justify-center items-top">
+              <div className="w-full md:w-1/2 flex justify-center items-start">
                 {project?.floorImage && (
                   <img
-                    src={project.floorImage.url || project.floorImage}
+                    src={project.floorImage?.url || project.floorImage}
                     alt="Floor Plan"
-                    className="w-full max-h-[450px] object-contain border border-gray-300 p-1"
                     onClick={openModal}
+                    className="w-full max-h-[70vh] md:max-h-[450px]
+                 object-contain border border-gray-300 p-1 cursor-zoom-in"
                   />
                 )}
               </div>
@@ -448,7 +462,7 @@ const ProjectDetail = () => {
                       contact@srisairam.co.in
                     </a>
                   </div>
-                </div>  
+                </div>
               </div>
             </div>
           </div>
@@ -504,10 +518,10 @@ const ProjectDetail = () => {
                           : "border-transparent"
                       }`}
                     />
-                    {index === project.listingPhotoPaths.length - 1 &&
-                      project.listingPhotoPaths.length > 6 && (
+                    {index === project.listingPhotoPaths?.length - 1 &&
+                      project.listingPhotoPaths?.length > 6 && (
                         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-lg font-bold rounded-lg">
-                          +{project.listingPhotoPaths.length - 6}
+                          +{project.listingPhotoPaths?.length - 6}
                         </div>
                       )}
                   </div>
