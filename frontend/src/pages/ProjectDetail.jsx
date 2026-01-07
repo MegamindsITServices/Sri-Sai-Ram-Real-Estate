@@ -426,19 +426,29 @@ const ProjectDetail = () => {
                   {/* Phone */}
                   <div className="flex flex-col items-center md:items-start">
                     <strong className="text-[#2B2BD9]">Mobile Number:</strong>
-                    <span className="text-gray-900 flex items-center gap-2 font-medium text-sm md:text-base font-[Montserrat]">
-                      <FaPhoneAlt className="text-black" /> {"+91 9962999658"}
-                    </span>
+
+                    <a
+                      href="tel:+919962999658"
+                      className="text-gray-900 flex items-center gap-2 font-medium text-sm md:text-base font-[Montserrat] hover:text-[#2B2BD9] transition"
+                    >
+                      <FaPhoneAlt className="text-black" />
+                      +91 99629 99658
+                    </a>
                   </div>
+
                   {/* Email */}
                   <div className="flex flex-col items-center md:items-start">
                     <strong className="text-[#2B2BD9]">Email:</strong>
-                    <span className="text-gray-900 font-medium flex items-center gap-2 text-sm md:text-base font-[Montserrat]">
-                      <FaEnvelope className="text-black" />{" "}
-                      {"contact@srisairam.co.in"}
-                    </span>
+
+                    <a
+                      href="mailto:contact@srisairam.co.in"
+                      className="text-gray-900 font-medium flex items-center gap-2 text-sm md:text-base font-[Montserrat] hover:text-[#2B2BD9] transition"
+                    >
+                      <FaEnvelope className="text-black" />
+                      contact@srisairam.co.in
+                    </a>
                   </div>
-                </div>
+                </div>  
               </div>
             </div>
           </div>
