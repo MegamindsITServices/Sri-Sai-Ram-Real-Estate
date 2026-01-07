@@ -53,8 +53,10 @@ const ProjectDetail = () => {
   const closeModal = () => setIsModalOpen(false);
 
   const isHome = project?.category === "villa" || project?.category === "apartment";
-
-  const isLayout = project?.category === "layout";
+  
+  const isLayout =
+    project?.category === "commercial_layout" ||
+    project?.category === "residential_layout";
 
   const isPlot = project?.category === "residential" || project?.category === "commercial";
 

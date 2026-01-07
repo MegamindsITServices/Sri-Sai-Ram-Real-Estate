@@ -331,7 +331,8 @@ const Projects = () => {
                   <option value="commercial">Commercial Plots</option>
                   <option value="apartment">Apartment</option>
                   <option value="villa">House/Villa</option>
-                  <option value="layout">Layout</option>
+                  <option value="commercial_layout">Commercial Layout</option>
+                  <option value="residential_layout">Residential Layout</option>
                 </select>
               </div>
 

@@ -34,21 +34,17 @@ const AdminProjects = () => {
   const [actionLoading, setActionLoading] = useState(null); // per-row action
   const [searchLoading, setSearchLoading] = useState(false);
 
+  useEffect(() => {
+    fetchProjects(currentPage);
+  }, [currentPage, searchTerm]);
 
   useEffect(() => {
-  fetchProjects(currentPage);
-}, [currentPage, searchTerm]);
+    const delay = setTimeout(() => {
+      setCurrentPage(1);
+    }, 400);
 
-
-  useEffect(() => {
-  const delay = setTimeout(() => {
-    setCurrentPage(1);
-  }, 400);
-
-  return () => clearTimeout(delay);
-}, [searchTerm]);
-
-
+    return () => clearTimeout(delay);
+  }, [searchTerm]);
 
   const fetchProjects = async (page = 1) => {
     try {
@@ -131,8 +127,6 @@ const AdminProjects = () => {
     }
   };
 
-  
-
   if (error)
     return <div className="text-center text-red-600 py-10">{error}</div>;
 
@@ -177,11 +171,6 @@ const AdminProjects = () => {
       {/* Desktop Table */}
 
       <div className="relative hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
-        {loadingList && (
-          <div className="absolute inset-0 flex items-center justify-center z-20">
-            <Loader text="Loading projects..." />
-          </div>
-        )}
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -205,8 +194,16 @@ const AdminProjects = () => {
               </th>
             </tr>
           </thead>
+
           <tbody className="bg-white divide-y divide-gray-200">
-            {projects.length === 0 ? (
+            {loadingList && (
+              <tr>
+                <td colSpan={6}>
+                  <Loader text="Loading projects..." />
+                </td>
+              </tr>
+            )}
+            {projects.length === 0 && !loadingList ? (
               <tr>
                 <td
                   colSpan={6}
@@ -241,11 +238,13 @@ const AdminProjects = () => {
                         <span className="text-gray-500">Draft</span>
                       )}
                       {" • "}
-                      {/* {project.approved === "approved" ? (
-                        <span className="text-green-600">Approved</span>
+                      {project.approvalType === "CMDA" ? (
+                        <span className="text-orange-600">CMDA</span>
+                      ) : project.approvalType === "DTCP" ? (
+                        <span className="text-orange-600">DTCP</span>
                       ) : (
-                        <span className="text-orange-600">Pending</span>
-                      )} */}
+                        <span className="text-gray-600">Not Applicable</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
@@ -258,45 +257,54 @@ const AdminProjects = () => {
                   <td className="px-6 py-4 text-sm text-gray-700 text-center">
                     {project.view || 0}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                    <div className="flex justify-center gap-3">
+                  <td className="px-1.5 py-1 whitespace-nowrap text-center text-sm font-medium">
+                    <div className="flex justify-center gap-1.5 flex-wrap">
+                      {/* Edit */}
                       <button
                         disabled={actionLoading === project._id}
                         onClick={() =>
                           navigate(`/admin/projects/edit/${project._id}`)
                         }
-                        className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50 transition"
-                        title="Edit"
+                        className="inline-flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg
+                 text-blue-700 bg-blue-50 hover:bg-blue-100 transition
+                 disabled:opacity-50"
                       >
-                        <FaEdit size={18} />
+                        <FaEdit size={14} />
+                        <span>Edit</span>
                       </button>
 
+                      {/* Publish / Unpublish */}
                       <button
                         disabled={actionLoading === project._id}
                         onClick={() =>
                           handleToggleLive(project._id, project.live)
                         }
-                        className={`p-2 rounded transition ${
-                          project.live
-                            ? "text-red-600 hover:bg-red-50"
-                            : "text-green-600 hover:bg-green-50"
-                        }`}
-                        title={project.live ? "Unpublish" : "Publish"}
+                        className={`inline-flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg transition
+                          disabled:opacity-50
+                          ${
+                            project.live
+                              ? "text-red-700 bg-red-50 hover:bg-red-100"
+                              : "text-green-700 bg-green-50 hover:bg-green-100"
+                          }`}
                       >
                         {project.live ? (
-                          <FaTimes size={18} />
+                          <FaTimes size={14} />
                         ) : (
-                          <FaCheck size={18} />
+                          <FaCheck size={14} />
                         )}
+                        <span>{project.live ? "Unpublish" : "Publish"}</span>
                       </button>
 
+                      {/* Delete */}
                       <button
                         disabled={actionLoading === project._id}
                         onClick={() => handleDelete(project._id)}
-                        className="text-red-600 hover:text-red-800 p-2 rounded hover:bg-red-50 transition"
-                        title="Delete"
+                        className="inline-flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg
+                          text-red-700 bg-red-50 hover:bg-red-100 transition
+                          disabled:opacity-50"
                       >
-                        <FaTrash size={18} />
+                        <FaTrash size={14} />
+                        <span>Delete</span>
                       </button>
                     </div>
                   </td>
@@ -314,7 +322,7 @@ const AdminProjects = () => {
             <Loader text="Loading projects..." />
           </div>
         )}
-        {projects.length === 0 ? (
+        {projects.length === 0 && !loadingList ? (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center text-gray-500">
             No projects found
           </div>
@@ -322,7 +330,7 @@ const AdminProjects = () => {
           projects.map((project) => (
             <div
               key={project._id}
-              className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200"
+              className="bg-white rounded shadow-sm overflow-hidden border border-gray-200"
             >
               <img
                 src={project.thumbnail?.url || project.thumbnail}
@@ -362,7 +370,7 @@ const AdminProjects = () => {
                     onClick={() =>
                       navigate(`/admin/projects/edit/${project._id}`)
                     }
-                    className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                    className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition flex items-center justify-center gap-2"
                   >
                     <FaEdit /> Edit
                   </button>
@@ -370,7 +378,7 @@ const AdminProjects = () => {
                   <button
                     disabled={actionLoading === project._id}
                     onClick={() => handleToggleLive(project._id, project.live)}
-                    className={`flex-1 py-2 rounded-lg text-white transition flex items-center justify-center gap-2 ${
+                    className={`flex-1 py-2 px-1 rounded-md text-white transition flex items-center justify-center gap-2 ${
                       project.live
                         ? "bg-red-600 hover:bg-red-700"
                         : "bg-green-600 hover:bg-green-700"
@@ -383,7 +391,7 @@ const AdminProjects = () => {
                   <button
                     disabled={actionLoading === project._id}
                     onClick={() => handleDelete(project._id)}
-                    className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-2"
+                    className="flex-1 bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition flex items-center justify-center gap-2"
                   >
                     <FaTrash /> Delete
                   </button>

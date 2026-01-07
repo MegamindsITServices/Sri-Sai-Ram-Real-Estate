@@ -65,7 +65,7 @@ const listingSchema = new mongoose.Schema(
     },
     approvalType: {
       type: String,
-      enum: ["CMDA", "DCTP", "Not Applicable"],
+      enum: ["CMDA", "DTCP", "Not Applicable"],
       default: "Not Applicable",
     },
     live: {

@@ -129,7 +129,7 @@ const AdminMessages = () => {
                     <div className="text-sm text-gray-500">{msg.email}</div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-500 line-clamp-2">
+                    <div className="text-sm text-gray-500 line-clamp-3">
                       {msg.message}
                     </div>
                   </td>
@@ -138,33 +138,49 @@ const AdminMessages = () => {
                       {new Date(msg.createdAt).toLocaleDateString()}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <button
-                      onClick={() => setSelectedMessage(msg)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                      title="View Full Message"
-                    >
-                      <FaEye />
-                    </button>
-                    <button
-                      onClick={() => handleReply(msg.email, msg.name)}
-                      className="text-green-600 hover:text-green-900 mr-3"
-                      title="Reply Email"
-                    >
-                      <FaReply />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(msg._id)}
-                      disabled={deleteLoadingId === msg._id}
-                      className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                      title="Delete"
-                    >
-                      {deleteLoadingId === msg._id ? (
-                        <Loader size="sm" text={null} />
-                      ) : (
-                        <FaTrash />
-                      )}
-                    </button>
+                  <td className="px-6 py-4 text-center">
+                    {/* 1. Removed whitespace-nowrap from td above to allow wrapping */}
+
+                    <div className="flex flex-row flex-wrap items-center justify-center gap-2 min-w-[200px]">
+                      {/* 2. Added min-width to ensure the container has space to behave as a row */}
+
+                      {/* View Button */}
+                      <button
+                        onClick={() => setSelectedMessage(msg)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition whitespace-nowrap"
+                      >
+                        <FaEye size={14} />
+                        <span>View</span>
+                      </button>
+
+                      {/* Reply Button */}
+                      <button
+                        onClick={() => handleReply(msg.email, msg.name)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-green-700 bg-green-50 hover:bg-green-100 transition whitespace-nowrap"
+                      >
+                        <FaReply size={14} />
+                        <span>Reply</span>
+                      </button>
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => handleDelete(msg._id)}
+                        disabled={deleteLoadingId === msg._id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-red-700 bg-red-50 hover:bg-red-100 transition disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {deleteLoadingId === msg._id ? (
+                          <>
+                            <Loader size="sm" text={null} />
+                            <span>Deleting</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaTrash size={14} />
+                            <span>Delete</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

@@ -39,7 +39,7 @@ const ProjectForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEditMode);
-  const isLayout = formData.category === "layout";
+  const isLayout = formData.category === "commercial_layout" || formData.category === "residential_layout";
 
   useEffect(() => {
     if (isEditMode) {
@@ -93,7 +93,7 @@ const ProjectForm = () => {
       const updated = { ...prev, [name]: val };
 
       // If user switches TO layout, clear residential-only fields manually
-      if (name === "category" && val === "layout") {
+      if (name === "category" && (val === "residential_layout" || val === "commercial_layout")) {
         updated.bhk = "";
         updated.balcony = false;
         updated.terrace = false;
@@ -236,7 +236,8 @@ const ProjectForm = () => {
                 <option value="commercial">Commercial Plots</option>
                 <option value="apartment">Apartment</option>
                 <option value="villa">House/Villa</option>
-                <option value="layout">Layout</option>
+                <option value="commercial_layout">Commercial Layout</option>
+                <option value="residential_layout">Residential Layout</option>
               </select>
             </div>
             <div>
@@ -575,7 +576,7 @@ const ProjectForm = () => {
                 className="px-2 py-1 border border-gray-300 rounded"
               >
                 <option value="CMDA">CMDA</option>
-                <option value="DCTP">DCTP</option>
+                <option value="DTCP">DTCP</option>
                 <option value="Not Applicable">Not Applicable</option>
               </select>
             </div>
@@ -600,7 +601,7 @@ const ProjectForm = () => {
                 onChange={handleInputChange}
                 className="h-5 w-5"
               />
-              <span className="text-sm font-bold text-gray-700">Make Live</span>
+              <span className="text-sm font-bold text-gray-700">Publish</span>
             </label>
             <div className="text-sm font-medium">
               {/* Approval Status:{" "}
