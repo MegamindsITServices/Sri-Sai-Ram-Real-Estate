@@ -458,14 +458,14 @@ const ProjectDetail = () => {
                   {/* Left Button */}
                   <button
                     onClick={handlePrev}
-                    className="absolute top-1/2 -left-5 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
+                    className="absolute top-1/2 -left-10 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
                   >
                     &#x276E;
                   </button>
                   {/* Right Button */}
                   <button
                     onClick={handleNext}
-                    className="absolute top-1/2 -right-5 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
+                    className="absolute top-1/2 -right-10 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
                   >
                     &#x276F;
                   </button>

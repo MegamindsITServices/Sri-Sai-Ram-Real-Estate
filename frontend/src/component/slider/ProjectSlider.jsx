@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import API from "../../utils/API";
-import Loading from "../../component/Loading"; // Assuming you have a loading spinner
+import Loading from "../../component/Loading";
 
 const ProjectSlider = () => {
   const [projects, setProjects] = useState([]);
@@ -12,7 +12,6 @@ const ProjectSlider = () => {
     const fetchTopProjects = async () => {
       try {
         setLoading(true);
-        // sort: "price-asc" to show lowest price first, or "price-desc" for highest
         const response = await API.get("/projects/paginated", {
           params: {
             limit: 5,
@@ -60,24 +59,18 @@ const ProjectSlider = () => {
   const currentProject = projects[currentIndex];
 
   return (
-    <div className="relative  md:mt-0 w-full p-8 bg-[#EEEEFC]">
+    <div className="relative w-full p-8 bg-[#EEEEFC]">
       <h2 className="text-2xl md:text-4xl mb-6 fira-sans md:pl-12">
         Our Top Projects
       </h2>
 
-      <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-6 justify-around">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10">
         {/* Left Arrow */}
         <button
           onClick={prevSlide}
-          className="text-3xl hidden md:block rounded-lg font-bold hover:bg-gray-200 hover:scale-125 text-black py-5 px-2 self-center md:self-auto transition-transform"
+          className="hidden md:block rounded-lg hover:bg-gray-200 hover:scale-110 text-black py-5 px-2 transition-all flex-shrink-0"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="35"
-            height="96"
-            viewBox="0 0 35 96"
-            fill="none"
-          >
+          <svg width="35" height="96" viewBox="0 0 35 96" fill="none">
             <g opacity="0.1">
               <rect
                 x="35"
@@ -95,24 +88,26 @@ const ProjectSlider = () => {
           </svg>
         </button>
 
-        {/* Thumbnail */}
-        <div className="relative flex items-center">
-          <img
-            src={currentProject.thumbnail?.url || currentProject.thumbnail}
-            alt={currentProject.title}
-            className="w-80 h-60 md:w-120 md:h-80 object-cover rounded-lg shadow-lg"
-          />
+        {/* Thumbnail - Aspect Ratio 16/8 Implemented */}
+        <div className="w-full md:w-[45%] max-w-[600px] flex-shrink-0">
+          <div className="aspect-[16/8] w-full overflow-hidden rounded-lg shadow-lg">
+            <img
+              src={currentProject.thumbnail?.url || currentProject.thumbnail}
+              alt={currentProject.title}
+              className="w-full h-full object-cover transition-opacity duration-500"
+            />
+          </div>
         </div>
 
         {/* Content */}
-        <div className="text-center md:text-left max-w-lg">
+        <div className="text-center md:text-left w-full md:w-[45%] max-w-lg flex-shrink">
           <h3 className="text-xl md:text-3xl fira-sans animate-text-shine">
             {currentProject.title}
           </h3>
-          <p className="text-sm md:text-lg font-semibold font-[Montserrat]">
+          <p className="text-sm md:text-lg font-semibold font-[Montserrat] text-gray-800">
             Location: {currentProject.locationTitle}
           </p>
-          <p className="text-sm md:text-lg font-semibold font-[Montserrat]">
+          <p className="text-sm md:text-lg font-semibold font-[Montserrat] text-gray-800">
             Project Size: {currentProject.totalArea} {currentProject.unit}
           </p>
           <p className="text-gray-700 mt-4 text-sm md:text-base font-[Montserrat] line-clamp-3">
@@ -123,15 +118,9 @@ const ProjectSlider = () => {
         {/* Right Arrow */}
         <button
           onClick={nextSlide}
-          className="text-3xl hidden md:block px-2 p-1 rounded-lg hover:bg-gray-200 hover:scale-125 text-black py-5 self-center md:self-auto font-bold transition-transform"
+          className="hidden md:block rounded-lg hover:bg-gray-200 hover:scale-110 text-black py-5 px-2 transition-all flex-shrink-0"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="35"
-            height="96"
-            viewBox="0 0 35 96"
-            fill="none"
-          >
+          <svg width="35" height="96" viewBox="0 0 35 96" fill="none">
             <g opacity="0.1">
               <rect width="35" height="96" fill="#D9D9D9" />
             </g>
@@ -143,22 +132,21 @@ const ProjectSlider = () => {
         </button>
       </div>
 
-       {/* MOBILE ARROWS ONLY */}
-     <div className="flex mt-2 md:hidden justify-center gap-14 mb-6">
-  <button
-    onClick={prevSlide}
-    className="text-5xl rounded-lg hover:bg-gray-200 hover:scale-125 transition-transform"
-  >
-    ‹
-  </button>
-
-  <button
-    onClick={nextSlide}
-    className="text-5xl rounded-lg hover:bg-gray-200 hover:scale-125  transition-transform"
-  >
-    ›
-  </button>
-   </div>
+      {/* MOBILE ARROWS */}
+      <div className="flex mt-6 md:hidden justify-center gap-10">
+        <button
+          onClick={prevSlide}
+          className="text-5xl text-gray-800 active:scale-90 transition-transform"
+        >
+          ‹
+        </button>
+        <button
+          onClick={nextSlide}
+          className="text-5xl text-gray-800 active:scale-90 transition-transform"
+        >
+          ›
+        </button>
+      </div>
     </div>
   );
 };

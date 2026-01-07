@@ -114,7 +114,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
 
   return (
     <div
-      className={`border rounded-lg shadow-lg p-4 bg-white relative hover:cursor-pointer ${
+      className={`border shadow-lg p-4 bg-white relative hover:cursor-pointer ${
         viewMode === "list"
           ? "flex flex-col md:flex-row md:gap-4 gap-2 items-stretch"
           : "flex flex-col h-full"
@@ -156,6 +156,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
       )}
 
       {/* Thumbnail with conditional styling based on view mode */}
+      {/* Thumbnail with 16:8 Aspect Ratio */}
       <div
         className={
           viewMode === "list"
@@ -165,11 +166,9 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
         onClick={handleCardClick}
       >
         <div
-          className={
-            viewMode === "list"
-              ? "w-full h-full bg-gray-100 rounded-md overflow-hidden"
-              : "w-full aspect-[16/8] bg-gray-100 rounded-md overflow-hidden"
-          }
+          className={`w-full aspect-[16/8] bg-gray-100 overflow-hidden ${
+            viewMode === "grid" ? "mb-2" : ""
+          }`}
         >
           {thumbnailUrl ? (
             <img
