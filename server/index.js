@@ -24,6 +24,7 @@ app.use(
       "https://srisairam.co.in",
       "https://www.srisairam.co.in",
       "http://localhost:5173",
+      "https://srisairam.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
