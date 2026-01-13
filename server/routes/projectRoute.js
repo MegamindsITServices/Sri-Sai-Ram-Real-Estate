@@ -11,11 +11,13 @@ const {
   getShowcase,
   adminAllProjects,
   getAlsoLikeProjects,
+  topProjects,
 } = require("../controllers/projectController");
 
 
 router.post('/create',create);
 router.get('/getAll',allProjects);
+router.get('/top-projects',topProjects);
 router.get('/getAll/admin',adminAllProjects);
 router.post('/update',update);
 router.post("/delete",deleteProject)

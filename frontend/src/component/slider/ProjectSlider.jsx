@@ -12,14 +12,7 @@ const ProjectSlider = () => {
     const fetchTopProjects = async () => {
       try {
         setLoading(true);
-        const response = await API.get("/projects/paginated", {
-          params: {
-            limit: 5,
-            sort: "price-asc",
-            live: "true",
-          },
-        });
-
+        const response = await API.get("/projects/top-projects");
         if (response.data.status) {
           setProjects(response.data.projects);
         }
@@ -88,13 +81,12 @@ const ProjectSlider = () => {
           </svg>
         </button>
 
-        {/* Thumbnail - Aspect Ratio 16/8 Implemented */}
-        <div className="w-full md:w-[45%] max-w-[600px] flex-shrink-0">
-          <div className="aspect-[16/8] w-full overflow-hidden rounded-lg shadow-lg">
+        <div className="w-full md:max-w-[40%]  flex-shrink-0">
+          <div className="w-full aspect-[16/9] flex items-center justify-center">
             <img
               src={currentProject.thumbnail?.url || currentProject.thumbnail}
               alt={currentProject.title}
-              className="w-full h-full object-cover transition-opacity duration-500"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-lg transition-opacity duration-500"
             />
           </div>
         </div>

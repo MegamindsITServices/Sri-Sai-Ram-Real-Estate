@@ -24,6 +24,8 @@ const ProjectForm = () => {
     balcony: false,
     terrace: false,
     live: false,
+    startingPlotSize : "",
+    topProject : false,
     approvalType: "Not Applicable", // new field
   });
 
@@ -63,6 +65,8 @@ const ProjectForm = () => {
               balcony: project.balcony || false,
               terrace: project.terrace || false,
               live: project.live || false,
+              startingPlotSize: project.startingPlotSize || "",
+              topProject: project.topProject || false,
               approvalType: project.approvalType || "Not Applicable",
             });
 
@@ -269,12 +273,28 @@ const ProjectForm = () => {
                 />
               </div>
             )}
+
+            {isLayout && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Starting Plot Size
+                </label>
+                <input
+                  type="number"
+                  name="startingPlotSize"
+                  value={formData.startingPlotSize}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 2, 3"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                />
+              </div>
+            )}
           </div>
           {isLayout && (
             <div className="mt-8 pt-6 border-t grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Starting Plot Size
+                  Total Area
                 </label>
                 <input
                   type="number"
@@ -602,6 +622,18 @@ const ProjectForm = () => {
                 className="h-5 w-5"
               />
               <span className="text-sm font-bold text-gray-700">Publish</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                name="topProject"
+                checked={formData.topProject}
+                onChange={handleInputChange}
+                className="h-5 w-5"
+              />
+              <span className="text-sm font-bold text-gray-700">
+                Add to Top Projects
+              </span>
             </label>
             <div className="text-sm font-medium">
               {/* Approval Status:{" "}

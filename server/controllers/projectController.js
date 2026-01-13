@@ -289,6 +289,20 @@ const allProjects = async (req, res) => {
   }
 };
 
+const topProjects = async (req, res) => {
+  try {
+    const projects = await Listing.find({ live: true, topProject: true });
+
+    if (!projects || projects.length == 0) {
+      return res.json({ status: false, message: "No Top Projects Found" });
+    }
+    return res.status(200).json({"status":true, "projects": projects });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const adminAllProjects = async (req, res) => {
   try {
     const projects = await Listing.find({});
@@ -426,6 +440,7 @@ const getShowcase = async (req, res) => {
 module.exports = {
   create,
   allProjects,
+  topProjects,
   update,
   deleteProject,
   incrementProjectView,

@@ -72,7 +72,14 @@ const listingSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    topProject: {
+      type: Boolean,
+      default: false,
+    },
     totalArea: {
+      type: Number,
+    },
+    startingPlotSize: {
       type: Number,
     },
   },

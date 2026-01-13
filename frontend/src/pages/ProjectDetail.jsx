@@ -8,59 +8,48 @@ import {
   FaShareAlt,
   FaHome,
   FaArrowRight,
-  FaLandmark,
-  FaLocationArrow,
-  FaPoundSign,
-  FaRupeeSign,
-  FaMagento,
-  FaMap,
-  FaMapPin,
-  FaMapSigns,
   FaThLarge,
-  FaLayerGroup,
-  FaChartBar,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaHeart,
+  FaWhatsapp,
+  FaChevronLeft,
+  FaChevronRight,
+  FaExpand,
+  FaTimes,
+  FaCheckCircle,
 } from "react-icons/fa";
-import { BiBed } from "react-icons/bi";
-import { MdOutlineAttachMoney } from "react-icons/md";
-import { FaPhoneAlt, FaEnvelope, FaUserCircle, FaHeart } from "react-icons/fa";
+import { BiBed, BiArea } from "react-icons/bi";
 import Footer from "../component/homepage/Footer";
 import { useSelector } from "react-redux";
 import API from "../utils/API";
 import { useNavigate } from "react-router-dom";
 import Share from "../component/models/Share";
-import founder from "../assets/founder.png";
 import toast from "react-hot-toast";
 import Loading from "../component/Loading";
 import Alsolike from "../component/Alsolike";
 import Layout from "../component/layout/Layout";
-import Loader from "../component/Loader";
+import SEO from "../component/SEO";
+
 const ProjectDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
   const user = useSelector((state) => state.user.user);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState("Images");
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [project, setProject] = useState(null);
   const [shareModel, setShareModel] = useState(false);
-  const [listingPhoto, setListingPhot] = useState([]);
+  const [listingPhoto, setListingPhotos] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [loading, setLoading] = useState(false);
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
+  const openGalleryModal = () => setIsGalleryModalOpen(true);
+  const closeGalleryModal = () => setIsGalleryModalOpen(false);
 
-  const isHome =
-    project?.category === "villa" || project?.category === "apartment";
-
-  const isLayout =
-    project?.category === "commercial_layout" ||
-    project?.category === "residential_layout";
-
-  const isPlot =
-    project?.category === "residential" || project?.category === "commercial";
+  const contactRef = React.useRef(null);
 
   const handlePrev = () => {
     setCurrentIndex((prev) =>
@@ -79,55 +68,61 @@ const ProjectDetail = () => {
   };
 
   useEffect(() => {
-    const incrementProjectView = async () => {
-      try {
-        await API.post("/projects/incrementProjectView", {
-          projectId: id,
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    const call = async () => {
-      setProject(null);
-      setListingPhot([]);
-      setLoading(true);
+    const fetchProject = async () => {
       try {
         const data = await API.post("/projects/getProject", {
           _id: id,
         });
         if (data.data.status) {
-          setProject(data.data.project);
+          const projectData = data.data.project;
+          setProject(projectData);
 
-          const project = data.data.project;
+          let photos = [];
+          const thumbnailUrl =
+            projectData.thumbnail?.url || projectData.thumbnail;
+          if (thumbnailUrl) {
+            photos.push(thumbnailUrl);
+          }
 
-          const photos = [
-            ...(project.listingPhotoPaths || []),
-            project.thumbnail,
-            ...(project.floorImage ? [project.floorImage] : []),
-          ];
+          if (
+            projectData.listingPhotoPaths &&
+            Array.isArray(projectData.listingPhotoPaths)
+          ) {
+            projectData.listingPhotoPaths.forEach((photo) => {
+              const photoUrl = photo?.url || photo;
+              if (photoUrl) {
+                photos.push(photoUrl);
+              }
+            });
+          }
 
-          setListingPhot(photos);
+          const floorImageUrl =
+            projectData.floorImage?.url || projectData.floorImage;
+          if (floorImageUrl) {
+            photos.push(floorImageUrl);
+          }
+
+          setListingPhotos(photos);
         } else {
           console.log(data.data.message);
+          toast.error("Failed to load project details");
         }
       } catch (err) {
-        console.log(err.message);
-      } finally {
-        setLoading(false);
+        console.error(err.message);
+        toast.error("Error loading project");
       }
     };
-    if (location) {
-      call();
-      incrementProjectView();
+
+    if (id) {
+      fetchProject();
     }
-  }, [id, location]);
+  }, [id]);
 
   useEffect(() => {
-    if (!user?._id) return;
     const fetchWishlistStatus = async () => {
       try {
+        if (!user?._id || !id) return;
+
         const response = await API.get(`/wishlist/getWishlist`, {
           params: { userId: user._id, listingId: id },
         });
@@ -138,400 +133,614 @@ const ProjectDetail = () => {
     };
 
     fetchWishlistStatus();
-  }, [id]);
+  }, [user, id]);
+
   const handleWishlistToggle = async () => {
     try {
+      if (!user?._id) {
+        toast.error("Please login to update wishlist");
+        navigate("/login");
+        return;
+      }
+
       const response = await API.post(`/wishlist/postWishlist`, {
         userId: user._id,
         listingId: id,
       });
-      navigate("/projects");
+
       if (response.data.success) {
         setIsInWishlist(!isInWishlist);
-        toast.success("Updated the wishlist wishlist");
+        toast.success(
+          isInWishlist ? "Removed from wishlist" : "Added to wishlist"
+        );
       }
     } catch (error) {
       console.error("Failed to update wishlist", error);
+      toast.error("Failed to update wishlist");
     }
   };
+
+  const handleWhatsAppContact = () => {
+    const message = `Hi, I'm interested in ${project?.title} property. Please share more details.`;
+    const phone = "+919962999658";
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  };
+
+  const isHome =
+    project?.category === "villa" ||
+    project?.category === "apartment" ||
+    project?.category === "house";
+
+  const isLayout =
+    project?.category === "commercial_layout" ||
+    project?.category === "residential_layout";
+
+  const isPlot =
+    project?.category === "residential" || project?.category === "commercial";
+
   const [contact, openContact] = useState(false);
+
+  const getThumbnailUrl = () => {
+    if (!project?.thumbnail) return "";
+    return project.thumbnail.url || project.thumbnail;
+  };
+
+  const getFloorImageUrl = () => {
+    if (!project?.floorImage) return "";
+    return project.floorImage.url || project.floorImage;
+  };
+
+  const getPriceFormatted = () => {
+    if (!project?.price) return "Price not available";
+    return Number(project.price).toLocaleString("en-IN");
+  };
+
+  const getDescription = () => {
+    return project?.description || "No description available";
+  };
+
+  const getLocationTitle = () => {
+    return project?.locationTitle || "Location not specified";
+  };
+
+  const getLocationLink = () => {
+    return project?.locationLink || "#";
+  };
+
+  const getPlotNumber = () => {
+    return project?.plotNumber || "N/A";
+  };
+
+  const getStartingPlotSize = () => {
+    return project?.startingPlotSize || "N/A";
+  };
+
+  const getStartingPlotSizeFormatted = () => {
+    if (!getStartingPlotSize() || !getUnit()) return "N/A";
+    const unitMap = {
+      sqft: "Sq. Ft",
+      Acre: "Acres",
+      Cents: "Cents",
+    };
+    return `${getStartingPlotSize()} ${unitMap[getUnit()] || getUnit()}`;
+  };
+
+  const getTotalArea = () => {
+    return project?.totalArea || 0;
+  };
+
+  const getUnit = () => {
+    return project?.unit || "";
+  };
+
+  const getBHK = () => {
+    return project?.bhk || "";
+  };
+
+  const getCategory = () => {
+    return project?.category || "";
+  };
+
+  const getStatus = () => {
+    return project?.status || "available";
+  };
+
+  const getAreaFormatted = () => {
+    if (!getTotalArea() || !getUnit()) return "N/A";
+    const unitMap = {
+      sqft: "Sq. Ft",
+      Acre: "Acres",
+      Cents: "Cents",
+    };
+    return `${getTotalArea()} ${unitMap[getUnit()] || getUnit()}`;
+  };
 
   return (
     <>
       <Navbar />
+
+      <SEO
+        title={`${project?.title || "Project"} | Sri Sai Ram Real Estate`}
+        description={`Explore ${
+          project?.title || "Property"
+        } located in ${getLocationTitle()}. ${getAreaFormatted()} ${getCategory()} available at ₹${getPriceFormatted()}.`}
+        keywords={`${
+          project?.title || "Property"
+        }, plots in ${getLocationTitle()}, buy ${getCategory()}, real estate investment`}
+        image={getThumbnailUrl()}
+        url={window.location.href}
+        type="article"
+      />
+
       <Layout
-        title={`${project ? project.title : "Project"} - SRI SAI ESTATE`}
-        description={`Explore ${project?.title} – ${
-          project?.unit === "sqft"
-            ? `${project?.totalArea} Sq.ft `
-            : project?.unit === "Acre"
-            ? `${project?.totalArea} Acre`
-            : `${project?.totalArea} Cents`
-        } located in ${
-          project?.locationTitle
-        }. Get complete details including price, floor plans, amenities, and more.`}
-        keywords={`${project?.title}, real estate in ${
-          project?.locationTitle
-        }, ${
-          project?.unit === "sqft"
-            ? `${project?.totalArea} Sq.ft `
-            : project?.unit === "Acre"
-            ? `${project?.totalArea} Acre`
-            : `${project?.totalArea} Cents`
-        }], project floor plans, project brochure, real estate investment`}
+        title={`${project?.title || "Project"} - SRI SAI ESTATE`}
+        description={`Explore ${
+          project?.title || "Property"
+        } – ${getAreaFormatted()} located in ${getLocationTitle()}. Get complete details including price, floor plans, amenities, and more.`}
+        keywords={`${
+          project?.title || "Property"
+        }, real estate in ${getLocationTitle()}, ${getAreaFormatted()}, project floor plans, real estate investment`}
       >
+        {/* Image Modals */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-            <div className="relative w-full h-full flex items-center justify-center p-4">
-              {/* Close button */}
+          <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4">
+            <div className="relative w-full max-w-5xl">
               <button
-                className="absolute top-4 right-4 bg-white rounded-full p-2 text-black hover:bg-gray-200"
+                className="absolute -top-12 right-0 text-white text-3xl hover:text-gray-300 transition-colors"
                 onClick={closeModal}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <FaTimes />
               </button>
-
-              {/* Full-screen image */}
               <img
-                src={project.floorImage?.url || project.floorImage}
+                src={getFloorImageUrl()}
                 alt="Floor Plan"
-                className="max-w-full max-h-[90vh] object-contain"
+                className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
               />
             </div>
           </div>
         )}
-        {shareModel && (
+
+        {isGalleryModalOpen && (
+          <div className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 p-4">
+            <div className="relative w-full max-w-6xl">
+              <button
+                className="absolute -top-12 right-0 text-white text-3xl hover:text-gray-300 transition-colors"
+                onClick={closeGalleryModal}
+              >
+                <FaTimes />
+              </button>
+
+              <div className="relative">
+                <img
+                  src={listingPhoto[currentIndex]}
+                  alt={`Gallery ${currentIndex + 1}`}
+                  className="w-full h-auto max-h-[70vh] object-contain rounded-lg"
+                />
+
+                {listingPhoto.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrev}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg hover:bg-white transition-all"
+                    >
+                      <FaChevronLeft />
+                    </button>
+                    <button
+                      onClick={handleNext}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg hover:bg-white transition-all"
+                    >
+                      <FaChevronRight />
+                    </button>
+                  </>
+                )}
+
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-sm">
+                  {currentIndex + 1} / {listingPhoto.length}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {shareModel && project && (
           <Share
             setShareModel={setShareModel}
-            image={project.thumbnail?.url || project.thumbnail}
+            image={getThumbnailUrl()}
             title={project.title}
-            url={`https://srisairam.co.in/projectDetail/${project.title}/${project._id}`}
+            url={window.location.href}
           />
         )}
-        {/* Background Section */}
-        <div
-          className="w-full min-h-72 max-h-72 inset-0  bg-center"
-          style={{ backgroundImage: `url(${background})` }}
-        >
-          <div className="flex flex-col justify-end gap-3 h-72 pb-8 pl-4 md:pl-14 text-white">
-            <h1 className="text-4xl fira-sans">Projects</h1>
-            <p className="text-xl font-[Montserrat]">
-              <span
-                onClick={() => navigate("/")}
-                className="border-b-2 cursor-pointer"
-              >
-                Home
-              </span>{" "}
-              {">"}{" "}
-              <span
-                className="border-b-2 hover:cursor-pointer "
-                onClick={() => navigate("/projects")}
-              >
+
+        {/* Hero Banner */}
+        <div className="relative">
+          <div
+            className="w-full h-80 bg-cover bg-center"
+            style={{ backgroundImage: `url(${background})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/30"></div>
+          </div>
+          <div className="absolute inset-0 flex flex-col justify-end">
+            <div className="container mx-auto px-6 pb-10">
+              <nav className="text-white mb-4">
+                <ol className="flex items-center space-x-2 text-sm md:text-base">
+                  <li>
+                    <button
+                      onClick={() => navigate("/")}
+                      className="hover:text-gray-300 transition-colors"
+                    >
+                      Home
+                    </button>
+                  </li>
+                  <li className="text-gray-300">/</li>
+                  <li>
+                    <button
+                      onClick={() => navigate("/projects")}
+                      className="hover:text-gray-300 transition-colors"
+                    >
+                      Projects
+                    </button>
+                  </li>
+                  <li className="text-gray-300">/</li>
+                  <li className="font-semibold text-white">Project Detail</li>
+                </ol>
+              </nav>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
                 Projects
-              </span>{" "}
-              {`>`} <span>Project Detail</span>
-            </p>
+              </h1>
+              <p className="text-gray-200">Detailed view of the property</p>
+            </div>
           </div>
         </div>
 
         {project ? (
-          <div className="bg-white w-full md:w-[90%] mx-auto rounded-lg overflow-hidden  p-5 md:p-8 mt-5">
-            {/* Header Section */}
-            <div className="mb-4 flex justify-between items-center ">
-              <h1 className="text-lg md:text-xl font-bold font-[Montserrat]">
-                {project?.title}
-              </h1>
-              <div className="flex gap-4 items-center">
-                <FaShareAlt
-                  onClick={() => setShareModel(true)}
-                  className="hover:cursor-pointer text-gray-600 hover:text-blue-500 transition-colors duration-200"
-                />
-                {/* <FaHeart
-                  onClick={() => {
-                    user !== null ? handleWishlistToggle() : navigate("/login");
-                  }}
-                  className={`cursor-pointer text-xl ${
-                    isInWishlist ? "text-red-500" : "text-gray-400"
-                  } hover:scale-110 transition-transform duration-200`}
-                /> */}
+          <div className="container mx-auto px-4 md:px-6 py-8">
+            {/* Property Header with Actions */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+                  {project.title || "Untitled Property"}
+                </h1>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <FaMapMarkerAlt className="text-[#2B2BD9]" />
+                    <span>{getLocationTitle()}</span>
+                  </div>
+                  <div
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      getStatus() === "available"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {getStatus() === "available" ? "Available" : "Sold Out"}
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Main Content Section */}
-            <div className="flex flex-col md:flex-row gap-6">
-              {/* Left Section */}
-              <div className="w-full md:w-[50%] ">
-                <img
-                  src={project.thumbnail?.url || project.thumbnail}
-                  alt={project.title}
-                  className="w-full object-contain"
-                />
-                <div className="mt-4  text-start ">
-                  <h3 className="  mb-3 flex gap-2 text-2xl font-semibold items-center ">
-                    <FaHome />
-                    {project.title}
-                  </h3>
-                  <p className=" flex gap-2 items-center mt-2  font-thin ">
-                    <FaMapMarkerAlt className="text-xl" />{" "}
-                    <a
-                      href={project.locationLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-black flex gap-1"
-                    >
-                      Location :{" "}
-                      <p className="underline hover:underline">
-                        {project.locationTitle}
-                      </p>
-                    </a>
-                  </p>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="text-2xl md:text-3xl font-bold text-[#2B2BD9]">
+                    {isLayout ? "Starting Price" : ""} ₹{getPriceFormatted()}
+                  </div>
+                  <div className="text-gray-600 text-sm">
+                    {getAreaFormatted()}
+                  </div>
+                </div>
 
-                  <p className=" mt-2 flex gap-2 items-center font-thin  pl-[0.5px] ">
-                    <FaMapMarked className="text-xl" />
-                    {isLayout ? "Starting Plot Size : " : "Total Area : "}
-                    {project.unit === "sqft"
-                      ? `${project.totalArea} Sq.ft `
-                      : project.unit === "Acre"
-                      ? `${project.totalArea} Acre`
-                      : `${project.totalArea} Cents`}
-                  </p>
-
-                  {(isPlot || isLayout) && project.plotNumber && (
-                    <p className="flex gap-2 items-center mt-2 font-thin">
-                      <FaThLarge className="text-xl" />
-                      Number of Plots : {project.plotNumber}
-                    </p>
-                  )}
-
-                  {isHome && project.bhk && (
-                    <p className="mt-2 mb-2 flex gap-2 items-center font-thin relative -left-[0.9px]">
-                      <BiBed className="text-2xl" />
-                      {project.bhk} BHK
-                      {project.balcony && " • Balcony"}
-                      {project.terrace && " • Terrace"}
-                    </p>
-                  )}
-
-                  <p className="flex gap-3 items-center pl-1 ">
-                    <span className="text-2xl">₹</span>
-                    <span className="font-thin">
-                      {Number(project.price).toLocaleString("en-IN")}
-                      {isLayout && (
-                        <span className="text-sm ml-1">(Starting Price)</span>
-                      )}
-                    </span>
-                  </p>
-
+                <div className="flex gap-2">
                   <button
-                    className="mont mt-5 border-2 flex items-center rounded-sm border-blue-500 px-5 py-2 font-medium text-blue-600 "
-                    onClick={() => {
-                      const gallerySection = document.getElementById("gallery");
-                      gallerySection.scrollIntoView({ behavior: "smooth" });
-                    }}
+                    onClick={() => setShareModel(true)}
+                    className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    title="Share"
                   >
-                    View Site Gallery <FaArrowRight className="ml-3" />
+                    <FaShareAlt className="text-green-600" />
                   </button>
-                  <div className="max-w-[90%] mt-4">
-                    <h4 className="text-gray-800 font-medium mb-2">
-                      Description
-                    </h4>
-                    <p className="text-gray-700 text-sm md:text-base font-[Montserrat] leading-relaxed whitespace-pre-line">
-                      {project.description || "No description available"}
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column - Main Image & Gallery */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* Main Image with Gallery */}
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                  <div className="relative">
+                    <img
+                      src={listingPhoto[currentIndex] || getThumbnailUrl()}
+                      alt={`Gallery ${currentIndex + 1}`}
+                      className="w-full h-80 md:h-96 object-cover"
+                    />
+
+                    {/* Image Count */}
+                    <div className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+                      {currentIndex + 1} / {listingPhoto.length}
+                    </div>
+
+                    {/* Navigation Arrows */}
+                    {listingPhoto.length > 1 && (
+                      <>
+                        <button
+                          onClick={handlePrev}
+                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg hover:bg-white transition-all"
+                        >
+                          <FaChevronLeft />
+                        </button>
+                        <button
+                          onClick={handleNext}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg hover:bg-white transition-all"
+                        >
+                          <FaChevronRight />
+                        </button>
+                      </>
+                    )}
+
+                    {/* Fullscreen Button */}
+                    <button
+                      onClick={openGalleryModal}
+                      className="absolute bottom-4 right-4 bg-white/90 text-gray-800 p-2 rounded-full shadow-lg hover:bg-white transition-all"
+                      title="View Fullscreen"
+                    >
+                      <FaExpand />
+                    </button>
+                  </div>
+
+                  {/* Thumbnails */}
+                  {listingPhoto.length > 1 && (
+                    <div className="p-4 bg-gray-50">
+                      <div className="flex gap-2 overflow-x-auto pb-2">
+                        {listingPhoto.map((src, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleThumbnailClick(index)}
+                            className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                              index === currentIndex
+                                ? "border-[#2B2BD9]"
+                                : "border-transparent hover:border-gray-300"
+                            }`}
+                          >
+                            <img
+                              src={src}
+                              alt={`Thumbnail ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Property Description */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <FaHome className="text-[#2B2BD9]" />
+                    Property Description
+                  </h2>
+                  <div className="prose max-w-none">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {getDescription()}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Right Section */}
+              {/* Right Column - Details & Actions */}
+              <div className="space-y-6">
+                {/* Quick Details Card */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h3 className="text-lg font-bold text-gray-800 mb-4">
+                    Property Details
+                  </h3>
 
-              <div className="w-full md:w-1/2 flex justify-center items-start">
-                {project?.floorImage && (
-                  <img
-                    src={project.floorImage?.url || project.floorImage}
-                    alt="Floor Plan"
-                    onClick={openModal}
-                    className="w-full max-h-[70vh] md:max-h-[450px]
-                 object-contain border border-gray-300 p-1 cursor-zoom-in"
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          loading && (
-            <div className="min-h-[50vh] flex items-center justify-center">
-              <Loading className="" />
-            </div>
-          )
-        )}
+                  <div className="space-y-4">
+                    {/* 1. Area - Always Visible */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <BiArea className="text-[#2B2BD9] text-xl" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Total Area</p>
+                        <p className="font-semibold">{getAreaFormatted()}</p>
+                      </div>
+                    </div>
 
-        <div className="w-[90%] px-5 mdx:-8 mx-auto ">
-          <button
-            onClick={() => openContact(!contact)}
-            className="bg-[#2B2BD9] text-white py-2 my-3 hover:bg-blue-600 transition-colors duration-200 w-[240px] md:w-[466px]"
-          >
-            Enquiry to Buy Property
-          </button>
-        </div>
+                    {/* 2. Location - Always Visible */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                        <FaMapMarked className="text-[#2B2BD9] text-xl" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Location</p>
+                        <a
+                          href={getLocationLink()}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-[#2B2BD9] hover:underline"
+                        >
+                          {getLocationTitle()}
+                        </a>
+                      </div>
+                    </div>
 
-        {contact && (
-          <div className="w-full flex justify-center px-4 md:px-8 lg:px-16 mb-5">
-            <div className="w-full max-w-5xl bg-[#E9E9FB] border-2 border-gray-400  shadow-md">
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b-2 border-gray-400">
-                <div className="flex items-center space-x-2">
-                  {/* <FaUserCircle className="text-xl md:text-3xl" /> */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <g id="mdi:support">
-                      <path
-                        id="Vector"
-                        d="M18.72 14.7607C19.07 13.9107 19.26 13.0007 19.26 12.0007C19.26 11.2807 19.15 10.5907 18.96 9.95068C18.31 10.1007 17.63 10.1807 16.92 10.1807C15.466 10.1822 14.0329 9.8342 12.7415 9.1659C11.4502 8.4976 10.3384 7.52863 9.5 6.34068C8.60396 8.51142 6.91172 10.2573 4.77 11.2207C4.73 11.4707 4.73 11.7407 4.73 12.0007C4.73 12.9554 4.91804 13.9008 5.2834 14.7828C5.64875 15.6648 6.18425 16.4663 6.85933 17.1413C8.22272 18.5047 10.0719 19.2707 12 19.2707C13.05 19.2707 14.06 19.0407 14.97 18.6307C15.54 19.7207 15.8 20.2607 15.78 20.2607C14.14 20.8107 12.87 21.0807 12 21.0807C9.58 21.0807 7.27 20.1307 5.57 18.4207C4.53505 17.3906 3.76627 16.1242 3.33 14.7307H2V10.1807H3.09C3.42024 8.57319 4.17949 7.08509 5.28719 5.87427C6.39489 4.66345 7.80971 3.77509 9.38153 3.30344C10.9534 2.83179 12.6235 2.79445 14.2149 3.19539C15.8062 3.59632 17.2593 4.42057 18.42 5.58068C19.6798 6.83626 20.5393 8.43696 20.89 10.1807H22V14.7307H21.94L18.38 18.0007L13.08 17.4007V15.7307H17.91L18.72 14.7607ZM9.27 11.7707C9.57 11.7707 9.86 11.8907 10.07 12.1107C10.281 12.3234 10.3995 12.611 10.3995 12.9107C10.3995 13.2104 10.281 13.4979 10.07 13.7107C9.86 13.9207 9.57 14.0407 9.27 14.0407C8.64 14.0407 8.13 13.5407 8.13 12.9107C8.13 12.2807 8.64 11.7707 9.27 11.7707ZM14.72 11.7707C15.35 11.7707 15.85 12.2807 15.85 12.9107C15.85 13.5407 15.35 14.0407 14.72 14.0407C14.09 14.0407 13.58 13.5407 13.58 12.9107C13.58 12.6083 13.7001 12.3184 13.9139 12.1046C14.1277 11.8908 14.4177 11.7707 14.72 11.7707Z"
-                        fill="black"
-                      />
-                    </g>
-                  </svg>
-                  <span className="font-semibold text-lg md:text-2xl mont">
-                    Contact
-                  </span>
-                </div>
-              </div>
+                    {isLayout && project?.startingPlotSize && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                          <FaThLarge className="text-[#2B2BD9] text-xl" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">
+                            Starting Plot Size
+                          </p>
+                          <p className="font-semibold">
+                            {getStartingPlotSizeFormatted()}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
-              {/* Content */}
-              <div className="flex flex-col md:flex-row items-center px-6 md:px-12 py-8 gap-y-6 md:gap-x-12">
-                {/* Image Placeholder */}
-                {/* <div className="w-24 h-24  bg-gray-300 overflow-hidden">
-                  <img
-                    src={founder}
-                    alt="Founder"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                    {/* 3. Conditional Plots - Only for Layouts/Plots */}
+                    {(isPlot || isLayout) && project?.plotNumber && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                          <FaThLarge className="text-[#2B2BD9] text-xl" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">
+                            Number of Plots
+                          </p>
+                          <p className="font-semibold">{getPlotNumber()}</p>
+                        </div>
+                      </div>
+                    )}
 
-                <div className="text-center md:text-left flex-1">
-                  <p className="text-lg md:text-xl font-semibold text-gray-800 fira-sans">
-                    {name || "K SURESH BABU"}
-                  </p>
-                  <p className="text-sm text-gray-600 font-[Montserrat]">
-                    Property Seller
-                  </p>
-                </div> */}
-
-                {/* Contact Info */}
-                <div className="flex flex-col md:flex-row gap-y-4 md:gap-x-12 w-full md:w-auto">
-                  {/* Phone */}
-                  <div className="flex flex-col items-center md:items-start">
-                    <strong className="text-[#2B2BD9]">Mobile Number:</strong>
-
-                    <a
-                      href="tel:+919962999658"
-                      className="text-gray-900 flex items-center gap-2 font-medium text-sm md:text-base font-[Montserrat] hover:text-[#2B2BD9] transition"
-                    >
-                      <FaPhoneAlt className="text-black" />
-                      +91 99629 99658
-                    </a>
+                    {/* 4. Conditional BHK - Only for Houses/Villas/Apartments */}
+                    {isHome && project?.bhk && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                          <BiBed className="text-[#2B2BD9] text-xl" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Configuration</p>
+                          <p className="font-semibold">
+                            {getBHK()} BHK
+                            {project.balcony && " • Balcony"}
+                            {project.terrace && " • Terrace"}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  {/* Email */}
-                  <div className="flex flex-col items-center md:items-start">
-                    <strong className="text-[#2B2BD9]">Email:</strong>
+                {/* Floor Plan Card */}
+                {getFloorImageUrl() && (
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-lg font-bold text-gray-800 mb-4">
+                      Floor Plan
+                    </h3>
+                    <div
+                      className="relative rounded-lg overflow-hidden cursor-pointer group mb-4"
+                      onClick={openModal}
+                    >
+                      <img
+                        src={getFloorImageUrl()}
+                        alt="Floor Plan"
+                        className="w-full h-48 object-contain group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                        <div className="bg-white/90 p-3 rounded-full">
+                          <FaExpand className="text-gray-800" />
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={openModal}
+                      className="w-full text-center text-[#2B2BD9] font-semibold hover:text-blue-700 transition-colors"
+                    >
+                      View Full Floor Plan →
+                    </button>
+                  </div>
+                )}
 
+                {/* Contact Card */}
+                <div className="bg-gradient-to-br from-[#2B2BD9] to-blue-600 rounded-xl shadow-lg p-6">
+                  <h3 className="text-lg font-bold text-white mb-4">
+                    Interested in this Property?
+                  </h3>
+
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => {
+                        openContact(true);
+                        setTimeout(() => {
+                          contactRef.current?.scrollIntoView({
+                            behavior: "smooth",
+                          });
+                        }, 100);
+                      }}
+                      className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors flex items-center justify-center"
+                    >
+                      <FaPhoneAlt className="mr-2 text-xl" />
+                      Contact Us for Inquiry
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Section */}
+            {contact && (
+              <div
+                ref={contactRef}
+                className="mt-10 bg-gradient-to-r from-[#E9E9FB] to-blue-50 rounded-2xl p-8 shadow-lg"
+              >
+                <div className="max-w-4xl mx-auto">
+                  {/* Heading */}
+                  <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">
+                    Contact Us
+                  </h2>
+                  <p className="text-center text-gray-600 mb-10">
+                    Get in touch with us for site visit, pricing & full details
+                  </p>
+
+                  {/* Info Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Call */}
+                    <a
+                      className="bg-white rounded-xl p-6 shadow-md flex items-center gap-4 hover:scale-105 transition-transform duration-200"
+                      href="tel:+919962999658"
+                    >
+                      <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
+                        <FaPhoneAlt className="text-[#2B2BD9] text-2xl" />
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-sm">Phone</p>
+                        <p className="text-lg font-bold text-gray-800 hover:text-[#2B2BD9]">
+                          +91 99629 99658
+                        </p>
+                      </div>
+                    </a>
+
+                    {/* Email */}
                     <a
                       href="mailto:contact@srisairam.co.in"
-                      className="text-gray-900 font-medium flex items-center gap-2 text-sm md:text-base font-[Montserrat] hover:text-[#2B2BD9] transition"
+                      className="bg-white rounded-xl p-6 shadow-md flex items-center gap-4 hover:scale-105 transition-transform duration-200"
                     >
-                      <FaEnvelope className="text-black" />
-                      contact@srisairam.co.in
+                      <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
+                        <FaEnvelope className="text-[#2B2BD9] text-2xl" />
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-sm">Email</p>
+                        <p className="text-lg font-bold text-gray-800 hover:text-[#2B2BD9]">
+                          contact@srisairam.co.in
+                        </p>
+                      </div>
                     </a>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Similar Properties */}
+            {project && (
+              <div className="mt-12">
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                  Similar Properties
+                </h2>
+                <Alsolike id={project._id} />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="min-h-[50vh] flex flex-col items-center justify-center">
+            <div className="w-16 h-16 border-4 border-[#2B2BD9] border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600 text-lg">Loading property details...</p>
           </div>
         )}
-
-        <div className="w-full max-w-5xl mx-auto p-6">
-          {/* Main Image Slider */}
-          {project && (
-            <div id="gallery">
-              <div className="w-full flex justify-center">
-                <div className="relative w-[90%] md:w-[80%] aspect-video flex items-center justify-center overflow-visible">
-                  {listingPhoto.length > 0 && (
-                    <img
-                      src={listingPhoto[currentIndex]?.url}
-                      alt={`Image ${currentIndex + 1}`}
-                      className="w-full h-full object-contain"
-                    />
-                  )}
-                  {/* Left Button */}
-                  <button
-                    onClick={handlePrev}
-                    className="absolute top-1/2 -left-10 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
-                  >
-                    &#x276E;
-                  </button>
-                  {/* Right Button */}
-                  <button
-                    onClick={handleNext}
-                    className="absolute top-1/2 -right-10 transform -translate-y-1/2 bg-blue-600 text-white px-3 py-2 shadow-lg hover:bg-blue-700 focus:outline-none"
-                  >
-                    &#x276F;
-                  </button>
-                </div>
-              </div>
-
-              {/* Thumbnails */}
-              <div
-                className="flex justify-start md:justify-center 
-                mt-6 gap-2 overflow-x-auto px-2 scrollbar-hide"
-              >
-                {listingPhoto.map((src, index) => (
-                  <div
-                    key={index}
-                    className="relative cursor-pointer"
-                    onClick={() => handleThumbnailClick(index)}
-                  >
-                    <img
-                      src={src.url}
-                      alt={`Thumbnail ${index + 1}`}
-                      className={`h-20 w-28 object-cover border-2 ${
-                        index === currentIndex
-                          ? "border-blue-600"
-                          : "border-transparent"
-                      }`}
-                    />
-                    {index === project.listingPhotoPaths?.length - 1 &&
-                      project.listingPhotoPaths?.length > 6 && (
-                        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-lg font-bold rounded-lg">
-                          +{project.listingPhotoPaths?.length - 6}
-                        </div>
-                      )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {project && <Alsolike id={project._id} />}
       </Layout>
 
       <Footer />
