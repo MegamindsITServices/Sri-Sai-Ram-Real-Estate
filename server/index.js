@@ -75,7 +75,7 @@ app.use("/api/v1/wishlist", WishlistRoute);
 app.use("/api/v1/msg", MessageRoute);
 app.use("/api/v1/testimonial", upload.single("profileImage"), TestimonalRoute);
 //Routes End
-const port = 5431;
+const port = process.env.PORT || 5435;
 const connectDb = async () => {
   try {
     await mongoose.connect(`${process.env.MONGO_URI}`);
