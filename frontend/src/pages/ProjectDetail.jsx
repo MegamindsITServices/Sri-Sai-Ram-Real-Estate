@@ -452,7 +452,8 @@ const ProjectDetail = () => {
                     <img
                       src={listingPhoto[currentIndex] || getThumbnailUrl()}
                       alt={`Gallery ${currentIndex + 1}`}
-                      className="w-full h-80 md:h-96 object-cover"
+                      className="w-full h-80 md:h-96 object-cover cursor-pointer"
+                      onClick={openGalleryModal}
                     />
 
                     {/* Image Count */}
