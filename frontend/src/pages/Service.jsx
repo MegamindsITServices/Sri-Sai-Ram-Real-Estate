@@ -1,61 +1,21 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { FaPhoneAlt, FaEnvelope } from "react-icons/fa";
 import service2 from "../assets/service2.jpg";
 import home from "../assets/h1.webp";
 import working from "../assets/working.jpg";
 import Footer from "../component/homepage/Footer";
 import Navbar from "../component/homepage/Navbar";
 import background from "../assets/project.jpeg";
-import m1 from "../assets/m1 (1).png";
-import m2 from "../assets/m1 (3).png";
-import m3 from "../assets/m1 (3).png";
-import m4 from "../assets/m1 (4).png";
-import m5 from "../assets/m1 (5).png";
-import m6 from "../assets/m1 (6).png";
-import { Helmet } from "react-helmet";
 import SEO from "../component/SEO";
-const teamMembers = [
-  {
-    name: "Team member",
-    role: "Team member Role",
-    phone: "+91 999 666 1234",
-    image: m1,
-  },
-  {
-    name: "Team member",
-    role: "Team member Role",
-    phone: "+91 999 666 1234",
-    image: m2,
-  },
-  {
-    name: "Team member",
-    role: "Team member Role",
-    phone: "+91 999 666 1234",
-    image: m3,
-  },
-  {
-    name: "Team member",
-    role: "Team member Role",
-    phone: "+91 999 666 1234",
-    image: m4,
-  },
-  {
-    name: "Team member",
-    role: "Team member Role",
-    phone: "+91 999 666 1234",
-    image: m5,
-  },
-  {
-    name: "Team member",
-    role: "Team member Role",
-    phone: "+91 999 666 1234",
-    image: m6,
-  },
-];
+
 const services = [
   {
     title: "Discover Your Plot",
     description:
       "Explore the perfect piece of land tailored to your needs with ease.",
     icon: home,
+    link: "/projects", // Identifier for navigation
   },
   {
     title: "Make the Most of Your Land",
@@ -72,17 +32,18 @@ const services = [
 ];
 
 const Service = () => {
+  const navigate = useNavigate();
+
   return (
     <>
       <Navbar />
       <SEO
         title="Real Estate & Construction Services | Sri Sai Ram Estate"
         description="Explore expert real estate and construction services by Sri Sai Ram Estate including plot selection, land development, and complete construction solutions."
-        keywords="real estate services, construction services, plot selection, land development, home construction, property consulting, Sri Sai Ram Estate"
-        image="https://srisairam.co.in/og-services.jpg"
         url="https://srisairam.co.in/service"
       />
 
+      {/* Header Section - Spacing Unchanged */}
       <div
         className="w-full min-h-72 max-h-72 inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${background})` }}
@@ -96,14 +57,13 @@ const Service = () => {
             >
               Home
             </span>{" "}
-            {">"}
-            <span>Services</span>
+            {">"} <span>Services</span>
           </p>
         </div>
       </div>
 
       <section className="py-8 px-5 md:px-[65px] flex items-center justify-center">
-        <div className="max-w-6xl  px-4 sm:px-6 lg:px-8  bg-white">
+        <div className="max-w-6xl px-4 sm:px-6 lg:px-8 bg-white">
           <h2 className="text-3xl pl-3 sm:text-4xl fira-sans font-bold text-start text-gray-800 mb-2">
             Our Services
           </h2>
@@ -112,9 +72,13 @@ const Service = () => {
               {services.map((service, index) => (
                 <div
                   key={index}
-                  className={`flex flex-col md:flex-row items-center  ${
-                    index % 2 !== 0 ? "md:flex-row-reverse" : ""
-                  }`}
+                  /* Logic: Navigate only if link exists */
+                  onClick={() => service.link && navigate(service.link)}
+                  className={`flex flex-col md:flex-row items-center transition-all ${
+                    service.link
+                      ? "cursor-pointer hover:scale-[1.01] duration-200"
+                      : ""
+                  } ${index % 2 !== 0 ? "md:flex-row-reverse" : ""}`}
                 >
                   <img
                     src={service.icon}
@@ -126,6 +90,45 @@ const Service = () => {
                     <p className="text-gray-600 font-[Montserrat]">
                       {service.description}
                     </p>
+
+                    {/* Logic: Display contact info only for requested cards */}
+                    {(service.title === "Make the Most of Your Land" ||
+                      service.title === "Crafting Your Vision") && (
+                      <div className="flex flex-wrap gap-4 pt-1">
+                        <a
+                          href="tel:+919962999658"
+                          className="bg-white rounded-lg p-3 shadow-sm flex items-center gap-3 hover:bg-blue-50 transition-colors"
+                        >
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <FaPhoneAlt className="text-[#2B2BD9] text-sm" />
+                          </div>
+                          <div>
+                            <p className="text-gray-500 text-[10px] uppercase">
+                              Phone
+                            </p>
+                            <p className="text-sm font-bold text-gray-800 tracking-tighter">
+                              +91 99629 99658
+                            </p>
+                          </div>
+                        </a>
+                        <a
+                          href="mailto:contact@srisairam.co.in"
+                          className="bg-white rounded-lg p-3 shadow-sm flex items-center gap-3 hover:bg-blue-50 transition-colors"
+                        >
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <FaEnvelope className="text-[#2B2BD9] text-sm" />
+                          </div>
+                          <div>
+                            <p className="text-gray-500 text-[10px] uppercase">
+                              Email
+                            </p>
+                            <p className="text-sm font-bold text-gray-800 tracking-tighter">
+                              contact@srisairam.co.in
+                            </p>
+                          </div>
+                        </a>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -134,23 +137,6 @@ const Service = () => {
         </div>
       </section>
 
-      {/* <div className="max-w-5xl mx-auto py-10">
-        <h2 className="text-4xl font-bold mb-6 fira-sans">Our Team</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-[Montserrat]">
-          {teamMembers.map((member, index) => (
-            <div key={index} className="flex items-center bg-purple-100 p-10 rounded-sm shadow-md">
-              <img src={member.image} alt={member.name} className="w-20 h-20  object-cover" />
-              <div className="ml-4">
-                <h3 className="font-bold text-lg">{member.name}</h3>
-                <p className="text-gray-600">{member.role}</p>
-                <p className="text-gray-700 flex items-center">
-                  📞 <span className="ml-1">{member.phone}</span>
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div> */}
       <Footer />
     </>
   );

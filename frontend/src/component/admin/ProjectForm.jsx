@@ -25,8 +25,9 @@ const ProjectForm = () => {
     terrace: false,
     live: false,
     startingPlotSize : "",
+    startingPlotUnit: "sqft",
     topProject : false,
-    approvalType: "Not Applicable", // new field
+    approvalType: "",
   });
 
   const [thumbnail, setThumbnail] = useState(null);
@@ -42,6 +43,7 @@ const ProjectForm = () => {
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(isEditMode);
   const isLayout = formData.category === "commercial_layout" || formData.category === "residential_layout";
+  const isPlot = formData.category === "residential" || formData.category === "commercial";
 
   useEffect(() => {
     if (isEditMode) {
@@ -66,8 +68,9 @@ const ProjectForm = () => {
               terrace: project.terrace || false,
               live: project.live || false,
               startingPlotSize: project.startingPlotSize || "",
+              startingPlotUnit: project.startingPlotUnit || "sqft",
               topProject: project.topProject || false,
-              approvalType: project.approvalType || "Not Applicable",
+              approvalType: project.approvalType || "",
             });
 
             setListingPhotos(project.listingPhotoPaths || []);
@@ -101,6 +104,7 @@ const ProjectForm = () => {
         updated.bhk = "";
         updated.balcony = false;
         updated.terrace = false;
+        updated.startingPlotUnit = "sqft"; 
       }
       return updated;
     });
@@ -124,6 +128,30 @@ const ProjectForm = () => {
       }));
     }
   };
+
+  const removeThumbnail = () => {
+    if (
+      previewImages.thumbnail &&
+      typeof previewImages.thumbnail === "string"
+    ) {
+      setDeletedImages((prev) => [...prev, "THUMBNAIL"]);
+    }
+    setThumbnail(null);
+    setPreviewImages((prev) => ({ ...prev, thumbnail: null }));
+  };
+
+  const removeFloorImage = () => {
+    if (
+      previewImages.floorImage &&
+      typeof previewImages.floorImage === "string"
+    ) {
+      setDeletedImages((prev) => [...prev, "FLOOR"]);
+    }
+    setFloorImage(null);
+    setPreviewImages((prev) => ({ ...prev, floorImage: null }));
+  };
+
+
 
   const handleMultiplePhotos = (e) => {
     const files = Array.from(e.target.files);
@@ -150,8 +178,14 @@ const ProjectForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+    console.log(previewImages)
+    if (!previewImages.thumbnail) {
+      toast.error("Thumbnail is required");
+      setLoading(false);
+      return;
+    }
     try {
+
       const payload = new FormData();
       payload.append("formFields", JSON.stringify(formData));
 
@@ -279,14 +313,28 @@ const ProjectForm = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Starting Plot Size
                 </label>
-                <input
-                  type="number"
-                  name="startingPlotSize"
-                  value={formData.startingPlotSize}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 2, 3"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                />
+
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    name="startingPlotSize"
+                    value={formData.startingPlotSize}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 600"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  />
+
+                  <select
+                    name="startingPlotUnit"
+                    value={formData.startingPlotUnit}
+                    onChange={handleInputChange}
+                    className="px-3 py-2 border border-gray-300 rounded-md bg-white"
+                  >
+                    <option value="sqft">Sq.ft</option>
+                    <option value="Acre">Acre</option>
+                    <option value="Cents">Cents</option>
+                  </select>
+                </div>
               </div>
             )}
           </div>
@@ -372,7 +420,7 @@ const ProjectForm = () => {
               {!["villa", "apartment"].includes(formData.category) && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Number of Plots
+                    {isPlot ? "Plot Number" : "Number of Plots"}
                   </label>
                   <input
                     type="number"
@@ -442,8 +490,9 @@ const ProjectForm = () => {
                   onChange={(e) => handleFileChange(e, "thumbnail")}
                   className="hidden"
                   id="thumbnail"
-                  required={!isEditMode}
+                  required={!previewImages.thumbnail}
                 />
+
                 <label
                   htmlFor="thumbnail"
                   className="cursor-pointer text-[#2B2BD9] hover:underline"
@@ -451,11 +500,23 @@ const ProjectForm = () => {
                   Click to upload main image
                 </label>
                 {previewImages.thumbnail && (
-                  <img
-                    src={previewImages.thumbnail}
-                    alt="Preview"
-                    className="mt-4 h-40 w-full object-cover rounded shadow-md"
-                  />
+                  <div className="relative mt-4 rounded-xl overflow-hidden shadow-sm border border-gray-100 group">
+                    <img
+                      src={previewImages.thumbnail}
+                      alt="Thumbnail"
+                      className="w-full h-40 object-cover"
+                    />
+
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={removeThumbnail}
+                        className="bg-red-500 text-white p-2 rounded-full hover:scale-110 transition"
+                      >
+                        <FaTrash size={12} />
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -463,7 +524,7 @@ const ProjectForm = () => {
             {/* Floor Image */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Floor Plan
+                {isLayout ? "Master Plan" : "Floor Plan"}
               </label>
               <div className="border-2 border-dashed border-gray-300 p-4 rounded-md text-center">
                 <input
@@ -479,11 +540,23 @@ const ProjectForm = () => {
                   Click to upload floor plan
                 </label>
                 {previewImages.floorImage && (
-                  <img
-                    src={previewImages.floorImage}
-                    alt="Floor preview"
-                    className="mt-4 h-40 w-full object-contain rounded shadow-md"
-                  />
+                  <div className="relative mt-4 rounded-xl overflow-hidden shadow-sm border border-gray-100 group">
+                    <img
+                      src={previewImages.floorImage}
+                      alt="Floor"
+                      className="w-full h-40 object-contain bg-white"
+                    />
+
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={removeFloorImage}
+                        className="bg-red-500 text-white p-2 rounded-full hover:scale-110 transition"
+                      >
+                        <FaTrash size={12} />
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -595,9 +668,10 @@ const ProjectForm = () => {
                 onChange={handleInputChange}
                 className="px-2 py-1 border border-gray-300 rounded"
               >
+                <option value="">Select Approval Type</option>
                 <option value="CMDA">CMDA</option>
                 <option value="DTCP">DTCP</option>
-                <option value="Not Applicable">Not Applicable</option>
+                <option value="Panchayat">Panchayat</option>
               </select>
             </div>
 
@@ -668,8 +742,8 @@ const ProjectForm = () => {
             {loading
               ? "Saving..."
               : isEditMode
-              ? "Update Listing"
-              : "Create Listing"}
+                ? "Update Listing"
+                : "Create Listing"}
           </button>
         </div>
       </form>

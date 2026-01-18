@@ -218,14 +218,19 @@ const ProjectDetail = () => {
     return project?.startingPlotSize || "N/A";
   };
 
+  const getStartingUnit = () =>{
+    return project?.startingPlotUnit || "N/A";
+  }
+  console.log(getStartingUnit());
+
   const getStartingPlotSizeFormatted = () => {
-    if (!getStartingPlotSize() || !getUnit()) return "N/A";
+    if (!getStartingPlotSize() || (!getUnit() && !getStartingUnit())) return "N/A";
     const unitMap = {
       sqft: "Sq. Ft",
       Acre: "Acres",
       Cents: "Cents",
     };
-    return `${getStartingPlotSize()} ${unitMap[getUnit()] || getUnit()}`;
+    return `${getStartingPlotSize()} ${unitMap[getStartingUnit()] || getUnit()}`;
   };
 
   const getTotalArea = () => {
@@ -591,7 +596,7 @@ const ProjectDetail = () => {
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">
-                            Number of Plots
+                            {isPlot ? "Plot Number" : "Number of Plots"}
                           </p>
                           <p className="font-semibold">{getPlotNumber()}</p>
                         </div>
@@ -614,6 +619,18 @@ const ProjectDetail = () => {
                         </div>
                       </div>
                     )}
+
+                    {project.approvalType && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                          <FaCheckCircle className="text-[#2B2BD9] text-xl" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500">Approval Type</p>
+                          <p className="font-semibold">{project.approvalType}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -621,7 +638,7 @@ const ProjectDetail = () => {
                 {getFloorImageUrl() && (
                   <div className="bg-white rounded-xl shadow-lg p-6">
                     <h3 className="text-lg font-bold text-gray-800 mb-4">
-                      Floor Plan
+                      {isLayout ? "Master Plan" : "Floor Plan"}
                     </h3>
                     <div
                       className="relative rounded-lg overflow-hidden cursor-pointer group mb-4"
@@ -642,7 +659,7 @@ const ProjectDetail = () => {
                       onClick={openModal}
                       className="w-full text-center text-[#2B2BD9] font-semibold hover:text-blue-700 transition-colors"
                     >
-                      View Full Floor Plan →
+                      {isLayout ? "View Full Master Plan →" : "View Full Floor Plan →"}
                     </button>
                   </div>
                 )}

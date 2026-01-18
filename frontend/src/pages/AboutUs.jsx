@@ -76,19 +76,21 @@ const AboutUs = () => {
               </p>
               <p className="text-gray-600 leading-relaxed text-sm md:text-base lg:text-lg font-[Montserrat]">
                 Our esteemed founder, K. Suresh Babu Garu, was a visionary
-                leader whose passion for service and dedication to excellence
-                left an indelible mark on the Sri Sai Ram Group and Sasvat
-                Charitable Trust. With a rich legacy of compassionate
-                leadership, he spearheaded initiatives that transformed
-                countless lives and uplifted communities.
+                business leader who established the Sri Sai Ram Group as a
+                trusted and respected name in the real estate and construction
+                sector. With over three decades of industry experience, his
+                strategic insight, operational excellence, and commitment to
+                quality laid a strong foundation for sustainable growth and
+                long-term value creation. His disciplined leadership and
+                forward-looking approach continue to guide the organization’s
+                expansion and success.
               </p>
               <p className="text-gray-600 leading-relaxed text-sm md:text-base lg:text-lg font-[Montserrat]">
-                Driven by his unwavering commitment to philanthropy and social
-                responsibility, Mr. Suresh Babu Garu played a pivotal role in
-                shaping the Sri Sai Ram Group's success in the real estate and
-                construction industry. His visionary leadership and
-                forward-thinking approach laid the foundation for the
-                organization's growth and expansion over 3 decades.
+                Under his leadership, the Sri Sai Ram Group built a reputation
+                for integrity, reliability, and customer-centric development.
+                His ability to align innovation with market needs enabled the
+                organization to consistently deliver high-quality projects while
+                maintaining strong ethical and professional standards.
               </p>
             </div>
             <div className="w-full md:w-1/3 h-full">
@@ -102,18 +104,20 @@ const AboutUs = () => {
         </div>
 
         <div className="px-5 min-h-72 relative mt-3">
+          <p className="text-gray-600 leading-relaxed text-sm md:text-base pb-2 pl-3 md:pl-7 lg:text-lg font-[Montserrat]">
+            Beyond commercial success, Mr. Suresh Babu Garu strongly believed
+            that responsible businesses must contribute meaningfully to society.
+            Through Sasvat Charitable Trust, he championed initiatives focused
+            on social development, community welfare, and inclusive growth,
+            ensuring that the organization’s progress positively impacted
+            society at large.
+          </p>
           <p className="text-gray-600 leading-relaxed text-sm md:text-base pl-3 md:pl-7 lg:text-lg font-[Montserrat]">
-            My belief has always been that success is not measured solely by
-            financial achievements but by the positive change we bring to the
-            world. Through Sasvat Charitable Trust, I have strived to address
-            pressing social issues, provide essential resources, and give back
-            to society in a meaningful way.
-            <br />
-            As I reflect on this journey, I take immense pride in the values of
-            compassion, integrity, and excellence that have shaped our mission.
-            My hope is that this legacy continues to inspire future generations
-            to carry forward this vision and make a lasting difference in the
-            lives of others.
+            His enduring legacy is defined by the core values of
+            professionalism, integrity, and excellence. The principles he
+            established continue to inspire the organization’s leadership and
+            teams, reinforcing a long-term vision that balances business
+            performance with social responsibility.
           </p>
         </div>
 

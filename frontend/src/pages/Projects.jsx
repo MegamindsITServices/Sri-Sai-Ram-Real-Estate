@@ -36,7 +36,7 @@ const Projects = () => {
     area: "",
     category: "",
   });
-  const [viewMode, setViewMode] = useState("list"); // 'list' or 'grid'
+  const [viewMode, setViewMode] = useState("grid"); // 'list' or 'grid'
 
   // Toggle view mode between list and grid
   const toggleViewMode = (mode) => {
@@ -293,7 +293,7 @@ const Projects = () => {
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           {/* Filter Section */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-2">
               <div className="flex flex-col">
                 <label
                   htmlFor="search"
@@ -327,12 +327,10 @@ const Projects = () => {
                   className="p-3 border border-gray-300 rounded-md bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 >
                   <option value="">All Categories</option>
-                  <option value="residential">Residential Plots</option>
-                  <option value="commercial">Commercial Plots</option>
+                  <option value="residential_group">Residential Plots</option>
+                  <option value="commercial_group">Commercial Plots</option>
                   <option value="apartment">Apartment</option>
                   <option value="villa">House/Villa</option>
-                  <option value="commercial_layout">Commercial Layout</option>
-                  <option value="residential_layout">Residential Layout</option>
                 </select>
               </div>
 

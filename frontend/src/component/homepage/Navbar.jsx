@@ -75,7 +75,7 @@ const Navbar = ({ setModel }) => {
   };
   return (
     <div
-      className={`flex justify-between items-center p-4  z-40 md:pl-20 sticky top-0 transition-all duration-300 ${
+      className={`flex justify-between items-center p-4  z-40 lg:pl-20 sticky top-0 transition-all duration-300 ${
         isScrolled
           ? "bg-white/30 backdrop-blur-3xl shadow-md" // Glass effect on scroll
           : "bg-white"

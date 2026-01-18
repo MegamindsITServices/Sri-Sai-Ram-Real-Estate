@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import API from "../../utils/API";
 import Loading from "../../component/Loading";
+import { Link } from "react-router-dom";
 
 const ProjectSlider = () => {
   const [projects, setProjects] = useState([]);
@@ -105,6 +106,12 @@ const ProjectSlider = () => {
           <p className="text-gray-700 mt-4 text-sm md:text-base font-[Montserrat] line-clamp-3">
             {currentProject.description}
           </p>
+          <Link
+            to={`/projectDetail/${encodeURIComponent(currentProject.title)}/${currentProject._id}`}
+            className="mt-4 inline-block bg-[#e57f14]/80 text-white px-6 py-2 rounded-md hover:bg-[#e17f34] transition-colors"
+          >
+            Know More
+          </Link>
         </div>
 
         {/* Right Arrow */}

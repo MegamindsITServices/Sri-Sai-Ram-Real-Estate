@@ -243,7 +243,11 @@ const AdminProjects = () => {
                       ) : project.approvalType === "DTCP" ? (
                         <span className="text-orange-600">DTCP</span>
                       ) : (
-                        <span className="text-gray-600">Not Applicable</span>
+                        project.approvalType === "Panchayat" ? (
+                          <span className="text-orange-600">Panchayat</span>
+                        ) : (
+                        <span className="text-gray-600">{project.approvalType}</span>
+                        )
                       )}
                     </div>
                   </td>

@@ -14,23 +14,28 @@ import {Helmet} from "react-helmet"
 import Search from '../component/models/Search';
 import Layout from '../component/layout/Layout';
 import SEO from '../component/SEO';
+import { useRef } from 'react';
 const HomePage = () => {
   const location = useLocation();
+  const contactRef = useRef(null);
+
   useEffect(() => {
-    if (location.hash) {
-      const targetElement = document.querySelector(location.hash);
-      if (targetElement) {
-        targetElement.scrollIntoView({ behavior: "smooth" });
-      }
+    if (location.hash === "#contact") {
+      const timeout = setTimeout(() => {
+        contactRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 700);
+
+      return () => clearTimeout(timeout);
     }
   }, [location]);
+
   const togle=()=>{
     toast.success("hello")
   }
   return (
     <>
       <Navbar />
-      
+
       <SEO
         title="Sri Sai Ram Real Estate & Construction | Trusted Builders Since 1980"
         description="Sri Sai Ram Real Estate & Construction is a trusted real estate and construction company delivering premium residential and commercial projects since 1980."
@@ -54,7 +59,7 @@ const HomePage = () => {
         </section>
 
         <Testimonial />
-        <section id="contact">
+        <section id="contact" ref={contactRef} className="scroll-mt-28">
           <ContactUs />
         </section>
       </Layout>

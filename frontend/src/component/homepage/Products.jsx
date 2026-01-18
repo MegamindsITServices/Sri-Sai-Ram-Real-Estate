@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { BiBed } from "react-icons/bi";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import API from "../../utils/API";
 import { useSelector } from "react-redux";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -27,7 +26,6 @@ const Products = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch paginated but we use a larger limit for the slider
         const response = await API.get("/projects/paginated", {
           params: { limit: 12 },
         });
@@ -43,7 +41,7 @@ const Products = () => {
     fetchData();
   }, []);
 
-  // Fetch Showcase Setting (determines if we show featured, latest, etc)
+  // Fetch Showcase
   useEffect(() => {
     const fetchShowcase = async () => {
       try {
@@ -70,22 +68,15 @@ const Products = () => {
     }
   };
 
-  // Logic to filter/sort based on showcase preference
   const getDisplayedProducts = () => {
     if (!products) return [];
     let list = [...products];
 
-    if (showcase === "featured") {
-      // Example: If you had a 'featured' boolean in schema
-      // list = list.filter(p => p.isFeatured);
-    }
-
-    // Sort by views if showcase is 'popular'
     if (showcase === "popular") {
       list = list.sort((a, b) => (b.view || 0) - (a.view || 0));
     }
 
-    return list.slice(0, 10); // Show top 10 in slider
+    return list.slice(0, 10);
   };
 
   const displayedList = getDisplayedProducts();
@@ -95,7 +86,8 @@ const Products = () => {
       <h2 className="text-4xl font-bold text-center mb-6 fira-sans">
         Properties
       </h2>
-      <p className="text-xl font-[Montserrat] text-center mb-6">
+
+      <p className="text-xl font-[Montserrat] text-center mb-10">
         Transforming Visions into Reality, Shaping Tomorrow's Landscape.
         <br />
         Innovative Construction for a Brighter Future.
@@ -106,16 +98,17 @@ const Products = () => {
       ) : (
         <>
           <div className="relative w-[85%] md:w-[70%] lg:w-[65%] mx-auto">
-            {/* Custom Navigation Buttons */}
+            {/* Custom Arrows */}
             <button
               ref={prevRef}
-              className="absolute left-[-50px] md:left-[-60px] top-1/2 transform -translate-y-1/2 z-10 p-3 text-gray-400 hover:text-gray-800 transition-colors"
+              className="absolute left-[-50px] md:left-[-60px] top-1/2 -translate-y-1/2 z-10 p-3 text-gray-400 hover:text-gray-800"
             >
               <span className="text-3xl">❮</span>
             </button>
+
             <button
               ref={nextRef}
-              className="absolute right-[-50px] md:right-[-60px] top-1/2 transform -translate-y-1/2 z-10 p-3 text-gray-400 hover:text-gray-800 transition-colors"
+              className="absolute right-[-50px] md:right-[-60px] top-1/2 -translate-y-1/2 z-10 p-3 text-gray-400 hover:text-gray-800"
             >
               <span className="text-3xl">❯</span>
             </button>
@@ -146,39 +139,33 @@ const Products = () => {
                     onClick={() => {
                       incrementProjectView(product._id);
                       navigate(
-                        `/projectDetail/${encodeURIComponent(product.title)}/${
-                          product._id
-                        }`,
-                        {
-                          state: product,
-                        }
+                        `/projectDetail/${encodeURIComponent(
+                          product.title,
+                        )}/${product._id}`,
+                        { state: product },
                       );
                     }}
-                    className="relative bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100 group h-96 w-full cursor-pointer transition-transform hover:scale-[1.02]"
+                    className="bg-white shadow-lg rounded-md overflow-hidden border border-gray-100 group cursor-pointer transition-transform hover:scale-[1.02]"
                   >
-                    {/* Background Image Container */}
-                    <div
-                      className="absolute inset-0 transition-transform duration-700 group-hover:scale-110"
-                      style={{
-                        backgroundImage: `url(${product.thumbnail?.url})`,
-                        backgroundSize: "cover",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "center",
-                      }}
-                    >
-                      {/* Gradient Overlay for Title Visibility */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 group-hover:opacity-0 transition-opacity duration-500 flex flex-col justify-end p-6">
+                    {/* Aspect Ratio Thumbnail */}
+                    <div className="relative w-full aspect-[49/75] overflow-hidden">
+                      <img
+                        src={product.thumbnail?.url}
+                        alt={product.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+
+                      {/* Bottom gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
                         <h3 className="text-white text-lg font-bold fira-sans">
                           {product.title}
                         </h3>
                       </div>
-                    </div>
 
-                    {/* Hover Content Overlay */}
-                    <div className="absolute inset-0 p-6 opacity-0 group-hover:opacity-100 bg-black/75 text-white transition-all duration-500 flex flex-col justify-center translate-y-4 group-hover:translate-y-0">
-                      <div className="mb-3">
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 p-6 opacity-0 group-hover:opacity-100 bg-black/75 text-white transition-all duration-500 flex flex-col justify-center translate-y-4 group-hover:translate-y-0">
                         {product.category === "house" && (
-                          <div className="flex items-center gap-2 font-[Montserrat] text-sm mb-2">
+                          <div className="flex items-center gap-2 text-sm mb-3 font-[Montserrat]">
                             <BiBed className="text-[#F5BE86] text-xl" />
                             <span>{product.bhk} BHK</span>
                             {product.balcony && (
@@ -188,25 +175,24 @@ const Products = () => {
                             )}
                           </div>
                         )}
-                      </div>
 
-                      <p className="text-xs text-gray-300 mb-4 line-clamp-3 font-[Montserrat]">
-                        {product.description}
-                      </p>
+                        <p className="text-xs text-gray-300 mb-4 line-clamp-3 font-[Montserrat]">
+                          {product.description}
+                        </p>
 
-                      <div className="space-y-2 border-t border-white/20 pt-4">
-                        <div className="flex items-center font-bold text-lg text-[#F5BE86]">
-                          <span className="mr-1">₹</span>
-                          {Number(product.price).toLocaleString("en-IN")}
-                        </div>
+                        <div className="space-y-2 border-t border-white/20 pt-4">
+                          <div className="flex items-center font-bold text-lg text-[#F5BE86]">
+                            ₹{Number(product.price).toLocaleString("en-IN")}
+                          </div>
 
-                        <div className="flex items-center text-xs text-gray-200">
-                          <FaMapMarkerAlt className="text-red-400 mr-2" />
-                          {product.locationTitle}
-                        </div>
+                          <div className="flex items-center text-xs text-gray-200">
+                            <FaMapMarkerAlt className="text-red-400 mr-2" />
+                            {product.locationTitle}
+                          </div>
 
-                        <div className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
-                          Area: {product.totalArea} {product.unit}
+                          <div className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">
+                            Area: {product.totalArea} {product.unit}
+                          </div>
                         </div>
                       </div>
                     </div>

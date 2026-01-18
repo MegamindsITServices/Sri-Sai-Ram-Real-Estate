@@ -43,7 +43,6 @@ const SEO = ({
       <meta name="author" content="Sri Sai Ram Real Estate & Construction" />
       <meta name="publisher" content="Sri Sai Ram Real Estate & Construction" />
 
-      <link rel="icon" href="/logo.png" />
       <meta name="theme-color" content="#F5BE86" />
 
       {/* Basic Schema (Organization) */}
