@@ -65,7 +65,7 @@ app.use(
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
     { name: "floorImage", maxCount: 1 },
-    { name: "listingPhotos", maxCount: 10 }, // max 10 additional photos
+    { name: "listingPhotos", maxCount: 20 }, // max 10 additional photos
   ]),
   projectRoute
 );

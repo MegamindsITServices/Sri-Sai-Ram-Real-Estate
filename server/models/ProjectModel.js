@@ -65,8 +65,8 @@ const listingSchema = new mongoose.Schema(
     },
     approvalType: {
       type: String,
-      enum: ["CMDA", "DTCP", "Not Applicable"],
-      default: "Not Applicable",
+      enum: ["CMDA", "DTCP", "Panchayat", ""],
+      default: "",
     },
     live: {
       type: Boolean,
@@ -82,8 +82,13 @@ const listingSchema = new mongoose.Schema(
     startingPlotSize: {
       type: Number,
     },
+    startingPlotUnit: {
+      type: String,
+      enum: ["sqft", "Acre", "Cents"],
+      default: "sqft",
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Listing = mongoose.model("Listing", listingSchema);

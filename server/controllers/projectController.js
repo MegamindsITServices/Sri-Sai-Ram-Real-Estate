@@ -85,16 +85,32 @@ const update = async (req, res) => {
     // --- 1. HANDLE DELETION OF SPECIFIC GALLERY IMAGES ---
     let currentGallery = existing.listingPhotoPaths || [];
 
+    // --- HANDLE THUMBNAIL DELETE ---
+    if (deletedImages.includes("THUMBNAIL")) {
+      if (existing.thumbnail?.public_id) {
+        await deleteFromCloudinary(existing.thumbnail.public_id);
+      }
+      updateData.thumbnail = null;
+    }
+
+    // --- HANDLE FLOOR DELETE ---
+    if (deletedImages.includes("FLOOR")) {
+      if (existing.floorImage?.public_id) {
+        await deleteFromCloudinary(existing.floorImage.public_id);
+      }
+      updateData.floorImage = null;
+    }
+
     if (deletedImages.length > 0) {
       // Delete from Cloudinary
       const deletePromises = deletedImages.map((id) =>
-        deleteFromCloudinary(id)
+        deleteFromCloudinary(id),
       );
       await Promise.all(deletePromises);
 
       // Filter them out of the database array
       currentGallery = currentGallery.filter(
-        (img) => !deletedImages.includes(img.public_id)
+        (img) => !deletedImages.includes(img.public_id),
       );
     }
 
@@ -134,7 +150,7 @@ const update = async (req, res) => {
     const updatedListing = await Listing.findByIdAndUpdate(
       _id,
       { $set: updateData },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     res.json({
@@ -191,7 +207,13 @@ const getPaginatedProjects = async (req, res) => {
 
     // 🏠 Category filter
     if (category) {
-      filter.category = category;
+      if (category === "commercial_group") {
+        filter.category = { $in: ["commercial", "commercial_layout"] };
+      } else if (category === "residential_group") {
+        filter.category = { $in: ["residential", "residential_layout"] };
+      } else {
+        filter.category = category;
+      }
     }
 
     // 💰 Price range filter

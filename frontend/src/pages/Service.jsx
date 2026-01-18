@@ -85,7 +85,7 @@ const Service = () => {
                     alt={service.title}
                     className="w-full md:w-1/3 h-56 object-cover rounded-sm shadow-lg"
                   />
-                  <div className="bg-amber-50 p-6 py-10 rounded-sm shadow-md">
+                  <div className={`bg-amber-50 p-6 ${service.link ? "py-10" : "py-4"} rounded-sm shadow-md`}>
                     <h3 className="text-xl fira-sans">{service.title}</h3>
                     <p className="text-gray-600 font-[Montserrat]">
                       {service.description}
