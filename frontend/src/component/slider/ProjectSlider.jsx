@@ -4,10 +4,19 @@ import API from "../../utils/API";
 import Loading from "../../component/Loading";
 import { Link } from "react-router-dom";
 
+// Swiper imports
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+
 const ProjectSlider = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // For custom navigation buttons
+  const [prevEl, setPrevEl] = useState(null);
+  const [nextEl, setNextEl] = useState(null);
 
   useEffect(() => {
     const fetchTopProjects = async () => {
@@ -15,7 +24,7 @@ const ProjectSlider = () => {
         setLoading(true);
         const response = await API.get("/projects/top-projects");
         if (response.data.status) {
-          setProjects(response.data.projects);
+          setProjects(response.data.projects || []);
         }
       } catch (error) {
         console.error("Slider fetch error:", error);
@@ -28,18 +37,6 @@ const ProjectSlider = () => {
     fetchTopProjects();
   }, []);
 
-  const nextSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === projects.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? projects.length - 1 : prevIndex - 1
-    );
-  };
-
   if (loading) {
     return (
       <div className="min-h-[400px] flex items-center justify-center bg-[#EEEEFC]">
@@ -50,19 +47,17 @@ const ProjectSlider = () => {
 
   if (projects.length === 0) return null;
 
-  const currentProject = projects[currentIndex];
-
   return (
     <div className="relative w-full p-8 bg-[#EEEEFC]">
       <h2 className="text-2xl md:text-4xl mb-6 fira-sans md:pl-12">
         Our Top Projects
       </h2>
 
-      <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10">
-        {/* Left Arrow */}
+      <div className="relative">
+        {/* Left Arrow - same positioning & style as original */}
         <button
-          onClick={prevSlide}
-          className="hidden md:block rounded-lg hover:bg-gray-200 hover:scale-110 text-black py-5 px-2 transition-all flex-shrink-0"
+          ref={(node) => setPrevEl(node)}
+          className="hidden md:block absolute -left-4  top-1/2 -translate-y-1/2 z-10 rounded-lg hover:bg-gray-200 hover:scale-110 text-black py-5 px-2 transition-all flex-shrink-0"
         >
           <svg width="35" height="96" viewBox="0 0 35 96" fill="none">
             <g opacity="0.1">
@@ -82,42 +77,10 @@ const ProjectSlider = () => {
           </svg>
         </button>
 
-        <div className="w-full md:max-w-[40%]  flex-shrink-0">
-          <div className="w-full aspect-[16/9] flex items-center justify-center">
-            <img
-              src={currentProject.thumbnail?.url || currentProject.thumbnail}
-              alt={currentProject.title}
-              className="max-w-full max-h-full object-contain rounded-lg shadow-lg transition-opacity duration-500"
-            />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="text-center md:text-left w-full md:w-[45%] max-w-lg flex-shrink">
-          <h3 className="text-xl md:text-3xl fira-sans animate-text-shine">
-            {currentProject.title}
-          </h3>
-          <p className="text-sm md:text-lg font-semibold font-[Montserrat] text-gray-800">
-            Location: {currentProject.locationTitle}
-          </p>
-          <p className="text-sm md:text-lg font-semibold font-[Montserrat] text-gray-800">
-            Project Size: {currentProject.totalArea} {currentProject.unit}
-          </p>
-          <p className="text-gray-700 mt-4 text-sm md:text-base font-[Montserrat] line-clamp-3">
-            {currentProject.description}
-          </p>
-          <Link
-            to={`/projectDetail/${encodeURIComponent(currentProject.title)}/${currentProject._id}`}
-            className="mt-4 inline-block bg-[#e57f14]/80 text-white px-6 py-2 rounded-md hover:bg-[#e17f34] transition-colors"
-          >
-            Know More
-          </Link>
-        </div>
-
         {/* Right Arrow */}
         <button
-          onClick={nextSlide}
-          className="hidden md:block rounded-lg hover:bg-gray-200 hover:scale-110 text-black py-5 px-2 transition-all flex-shrink-0"
+          ref={(node) => setNextEl(node)}
+          className="hidden md:block absolute -right-4  top-1/2 -translate-y-1/2 z-10 rounded-lg hover:bg-gray-200 hover:scale-110 text-black py-5 px-2 transition-all flex-shrink-0"
         >
           <svg width="35" height="96" viewBox="0 0 35 96" fill="none">
             <g opacity="0.1">
@@ -129,22 +92,80 @@ const ProjectSlider = () => {
             />
           </svg>
         </button>
-      </div>
 
-      {/* MOBILE ARROWS */}
-      <div className="flex mt-6 md:hidden justify-center gap-10">
-        <button
-          onClick={prevSlide}
-          className="text-5xl text-gray-800 active:scale-90 transition-transform"
+        {/* Swiper - minimal padding, same layout sizes as original */}
+        <Swiper
+          modules={[Navigation, Autoplay]}
+          navigation={{
+            prevEl,
+            nextEl,
+          }}
+          autoplay={{
+            delay: 5000,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+          }}
+          loop={projects.length > 1}
+          speed={800}
+          slidesPerView={1}
+          spaceBetween={0} // ← important: no extra gap between slides
+          className="overflow-hidden w-full"
         >
-          ‹
-        </button>
-        <button
-          onClick={nextSlide}
-          className="text-5xl text-gray-800 active:scale-90 transition-transform"
-        >
-          ›
-        </button>
+          {projects.map((project) => (
+            <SwiperSlide key={project._id}>
+              <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10">
+                {/* Image container - exact same classes as original */}
+                <div className="w-full md:max-w-[40%] flex-shrink-0">
+                  <div className="w-full aspect-[16/9] flex items-center justify-center">
+                    <img
+                      src={project.thumbnail?.url || project.thumbnail}
+                      alt={project.title}
+                      className="max-w-full max-h-full object-contain rounded-sm shadow-lg"
+                    />
+                  </div>
+                </div>
+
+                {/* Content - exact same classes */}
+                <div className="text-center md:text-left w-full md:w-[45%] max-w-lg flex-shrink">
+                  <h3 className="text-xl md:text-3xl fira-sans animate-text-shine">
+                    {project.title}
+                  </h3>
+                  <p className="text-sm md:text-lg font-semibold font-[Montserrat] text-gray-800">
+                    Location: {project.locationTitle}
+                  </p>
+                  <p className="text-sm md:text-lg font-semibold font-[Montserrat] text-gray-800">
+                    Project Size: {project.totalArea} {project.unit}
+                  </p>
+                  <p className="text-gray-700 mt-4 text-sm md:text-base font-[Montserrat] line-clamp-3">
+                    {project.description}
+                  </p>
+                  <Link
+                    to={`/projectDetail/${encodeURIComponent(project.title)}/${project._id}`}
+                    className="mt-4 inline-block bg-[#e57f14]/80 text-white px-6 py-2 rounded-md hover:bg-[#e17f34] transition-colors"
+                  >
+                    Know More
+                  </Link>
+                </div>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+
+        {/* Mobile arrows - same as original */}
+        <div className="flex mt-6 md:hidden justify-center gap-10">
+          <button
+            onClick={() => prevEl?.click()}
+            className="text-5xl text-gray-800 active:scale-90 transition-transform"
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => nextEl?.click()}
+            className="text-5xl text-gray-800 active:scale-90 transition-transform"
+          >
+            ›
+          </button>
+        </div>
       </div>
     </div>
   );

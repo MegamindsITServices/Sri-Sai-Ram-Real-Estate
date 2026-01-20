@@ -64,9 +64,9 @@ const listingSchema = new mongoose.Schema(
       type: Number,
     },
     approvalType: {
-      type: String,
-      enum: ["CMDA", "DTCP", "Panchayat", ""],
-      default: "",
+      type: [String],
+      enum: ["CMDA", "DTCP", "Panchayat"],
+      default: [],
     },
     live: {
       type: Boolean,

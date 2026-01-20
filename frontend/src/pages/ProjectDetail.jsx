@@ -30,6 +30,14 @@ import Loading from "../component/Loading";
 import Alsolike from "../component/Alsolike";
 import Layout from "../component/layout/Layout";
 import SEO from "../component/SEO";
+import { useRef } from "react";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/autoplay";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
 
 const ProjectDetail = () => {
   const navigate = useNavigate();
@@ -50,6 +58,8 @@ const ProjectDetail = () => {
   const closeGalleryModal = () => setIsGalleryModalOpen(false);
 
   const contactRef = React.useRef(null);
+  const swiperRef = useRef(null);
+
 
   const handlePrev = () => {
     setCurrentIndex((prev) =>
@@ -158,15 +168,6 @@ const ProjectDetail = () => {
       console.error("Failed to update wishlist", error);
       toast.error("Failed to update wishlist");
     }
-  };
-
-  const handleWhatsAppContact = () => {
-    const message = `Hi, I'm interested in ${project?.title} property. Please share more details.`;
-    const phone = "+919962999658";
-    window.open(
-      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
   };
 
   const isHome =
@@ -431,7 +432,7 @@ const ProjectDetail = () => {
                     {isLayout ? "Starting Price" : ""} ₹{getPriceFormatted()}
                   </div>
                   <div className="text-gray-600 text-sm">
-                    {getAreaFormatted()}
+                    {isLayout && project.startingPlotSize ? "Starting Plot Size: " + getStartingPlotSizeFormatted() : "Total Project Area: " + getAreaFormatted()}
                   </div>
                 </div>
 
@@ -451,57 +452,76 @@ const ProjectDetail = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Left Column - Main Image & Gallery */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Main Image with Gallery */}
+                {/* Main Image with Gallery Swiper */}
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <div className="relative">
-                    <img
-                      src={listingPhoto[currentIndex] || getThumbnailUrl()}
-                      alt={`Gallery ${currentIndex + 1}`}
-                      className="w-full h-80 md:h-96 object-cover cursor-pointer"
-                      onClick={openGalleryModal}
-                    />
-
-                    {/* Image Count */}
-                    <div className="absolute top-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
-                      {currentIndex + 1} / {listingPhoto.length}
-                    </div>
-
-                    {/* Navigation Arrows */}
-                    {listingPhoto.length > 1 && (
-                      <>
-                        <button
-                          onClick={handlePrev}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg hover:bg-white transition-all"
-                        >
-                          <FaChevronLeft />
-                        </button>
-                        <button
-                          onClick={handleNext}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg hover:bg-white transition-all"
-                        >
-                          <FaChevronRight />
-                        </button>
-                      </>
-                    )}
-
-                    {/* Fullscreen Button */}
-                    <button
-                      onClick={openGalleryModal}
-                      className="absolute bottom-4 right-4 bg-white/90 text-gray-800 p-2 rounded-full shadow-lg hover:bg-white transition-all"
-                      title="View Fullscreen"
+                  <div className="relative group">
+                    <Swiper
+                      modules={[Navigation, Pagination, Autoplay]}
+                      spaceBetween={0}
+                      slidesPerView={1}
+                      loop={listingPhoto.length > 1}
+                      autoplay={{
+                        delay: 4000,
+                        disableOnInteraction: false,
+                        pauseOnMouseEnter: true,
+                      }}
+                      navigation={{
+                        prevEl: ".custom-prev",
+                        nextEl: ".custom-next",
+                      }}
+                      pagination={{
+                        type: "fraction", // This replicates your "1 / 5" UI style
+                        el: ".custom-pagination",
+                      }}
+                      onSwiper={(swiper) => {
+                        swiperRef.current = swiper;
+                      }}
+                      onSlideChange={(swiper) => {
+                        setCurrentIndex(swiper.realIndex); // ✅ THIS syncs thumbnails
+                      }}
+                      className="w-full h-80 md:h-96"
                     >
-                      <FaExpand />
-                    </button>
+                      {listingPhoto.map((src, index) => (
+                        <SwiperSlide key={index}>
+                          <img
+                            src={src}
+                            alt={`Gallery ${index + 1}`}
+                            className="w-full h-full object-cover cursor-pointer"
+                            onClick={openGalleryModal}
+                          />
+                        </SwiperSlide>
+                      ))}
+
+                      {listingPhoto.length > 1 && (
+                        <>
+                          <button className="custom-prev absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg transition-all">
+                            <FaChevronLeft />
+                          </button>
+                          <button className="custom-next absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg transition-all">
+                            <FaChevronRight />
+                          </button>
+                        </>
+                      )}
+
+                      <button
+                        onClick={openGalleryModal}
+                        className="absolute bottom-4 right-4 z-10 bg-white/90 text-gray-800 p-2 rounded-full shadow-lg hover:bg-white transition-all"
+                      >
+                        <FaExpand />
+                      </button>
+                    </Swiper>
                   </div>
 
-                  {/* Thumbnails */}
+                  {/* Thumbnails - Kept exactly the same UI */}
                   {listingPhoto.length > 1 && (
                     <div className="p-4 bg-gray-50">
-                      <div className="flex gap-2 overflow-x-auto pb-2">
+                      <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
                         {listingPhoto.map((src, index) => (
                           <button
                             key={index}
-                            onClick={() => handleThumbnailClick(index)}
+                            onClick={() =>
+                              swiperRef.current?.slideToLoop(index)
+                            }
                             className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                               index === currentIndex
                                 ? "border-[#2B2BD9]"
@@ -510,7 +530,7 @@ const ProjectDetail = () => {
                           >
                             <img
                               src={src}
-                              alt={`Thumbnail ${index + 1}`}
+                              alt="Thumbnail"
                               className="w-full h-full object-cover"
                             />
                           </button>
@@ -620,14 +640,16 @@ const ProjectDetail = () => {
                       </div>
                     )}
 
-                    {project.approvalType && (
+                    {project.approvalType?.length !== 0 && (
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
                           <FaCheckCircle className="text-[#2B2BD9] text-xl" />
                         </div>
                         <div>
                           <p className="text-sm text-gray-500">Approval Type</p>
-                          <p className="font-semibold">{project.approvalType}</p>
+                          <p className="font-semibold">
+                            {project.approvalType?.join(" , ")}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -659,7 +681,9 @@ const ProjectDetail = () => {
                       onClick={openModal}
                       className="w-full text-center text-[#2B2BD9] font-semibold hover:text-blue-700 transition-colors"
                     >
-                      {isLayout ? "View Full Master Plan →" : "View Full Floor Plan →"}
+                      {isLayout
+                        ? "View Full Master Plan →"
+                        : "View Full Floor Plan →"}
                     </button>
                   </div>
                 )}

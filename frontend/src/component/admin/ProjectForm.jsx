@@ -27,7 +27,7 @@ const ProjectForm = () => {
     startingPlotSize : "",
     startingPlotUnit: "sqft",
     topProject : false,
-    approvalType: "",
+    approvalType: [],
   });
 
   const [thumbnail, setThumbnail] = useState(null);
@@ -70,7 +70,7 @@ const ProjectForm = () => {
               startingPlotSize: project.startingPlotSize || "",
               startingPlotUnit: project.startingPlotUnit || "sqft",
               topProject: project.topProject || false,
-              approvalType: project.approvalType || "",
+              approvalType: project.approvalType || [],
             });
 
             setListingPhotos(project.listingPhotoPaths || []);
@@ -109,6 +109,20 @@ const ProjectForm = () => {
       return updated;
     });
   };
+
+  const handleApprovalChange = (value) => {
+    setFormData((prev) => {
+      const exists = prev.approvalType.includes(value);
+
+      return {
+        ...prev,
+        approvalType: exists
+          ? prev.approvalType.filter((v) => v !== value) // remove
+          : [...prev.approvalType, value], // add
+      };
+    });
+  };
+
 
   const handleFileChange = (e, field) => {
     const file = e.target.files[0];
@@ -658,21 +672,29 @@ const ProjectForm = () => {
         {/* Admin Controls */}
         <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
           <div className="flex flex-wrap gap-10 items-center">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-bold text-gray-700">
-                Approval Type:
-              </label>
-              <select
-                name="approvalType"
-                value={formData.approvalType}
-                onChange={handleInputChange}
-                className="px-2 py-1 border border-gray-300 rounded"
-              >
-                <option value="">Select Approval Type</option>
-                <option value="CMDA">CMDA</option>
-                <option value="DTCP">DTCP</option>
-                <option value="Panchayat">Panchayat</option>
-              </select>
+            <div className="flex items-center gap-2 border border-gray-300 rounded p-1">
+                <label className="text-sm font-bold text-gray-700 block mb-2">
+                  Approval Type:
+                </label>
+
+                <div className="flex flex-wrap gap-5">
+                  {["CMDA", "DTCP", "Panchayat"].map((type) => (
+                    <label
+                      key={type}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={formData.approvalType.includes(type)}
+                        onChange={() => handleApprovalChange(type)}
+                        className="h-5 w-5 accent-[#2B2BD9]"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        {type}
+                      </span>
+                    </label>
+                  ))}
+                </div>
             </div>
 
             <div className="flex items-center gap-2">
