@@ -60,16 +60,15 @@ const ProjectDetail = () => {
   const contactRef = React.useRef(null);
   const swiperRef = useRef(null);
 
-
   const handlePrev = () => {
     setCurrentIndex((prev) =>
-      prev === 0 ? listingPhoto.length - 1 : prev - 1
+      prev === 0 ? listingPhoto.length - 1 : prev - 1,
     );
   };
 
   const handleNext = () => {
     setCurrentIndex((prev) =>
-      prev === listingPhoto.length - 1 ? 0 : prev + 1
+      prev === listingPhoto.length - 1 ? 0 : prev + 1,
     );
   };
 
@@ -161,7 +160,7 @@ const ProjectDetail = () => {
       if (response.data.success) {
         setIsInWishlist(!isInWishlist);
         toast.success(
-          isInWishlist ? "Removed from wishlist" : "Added to wishlist"
+          isInWishlist ? "Removed from wishlist" : "Added to wishlist",
         );
       }
     } catch (error) {
@@ -219,13 +218,14 @@ const ProjectDetail = () => {
     return project?.startingPlotSize || "N/A";
   };
 
-  const getStartingUnit = () =>{
+  const getStartingUnit = () => {
     return project?.startingPlotUnit || "N/A";
-  }
+  };
   console.log(getStartingUnit());
 
   const getStartingPlotSizeFormatted = () => {
-    if (!getStartingPlotSize() || (!getUnit() && !getStartingUnit())) return "N/A";
+    if (!getStartingPlotSize() || (!getUnit() && !getStartingUnit()))
+      return "N/A";
     const unitMap = {
       sqft: "Sq. Ft",
       Acre: "Acres",
@@ -432,7 +432,9 @@ const ProjectDetail = () => {
                     {isLayout ? "Starting Price" : ""} ₹{getPriceFormatted()}
                   </div>
                   <div className="text-gray-600 text-sm">
-                    {isLayout && project.startingPlotSize ? "Starting Plot Size: " + getStartingPlotSizeFormatted() : "Total Project Area: " + getAreaFormatted()}
+                    {isLayout && project.startingPlotSize
+                      ? "Starting Plot Size: " + getStartingPlotSizeFormatted()
+                      : "Total Project Area: " + getAreaFormatted()}
                   </div>
                 </div>
 
@@ -455,61 +457,75 @@ const ProjectDetail = () => {
                 {/* Main Image with Gallery Swiper */}
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                   <div className="relative group">
-                    <Swiper
-                      modules={[Navigation, Pagination, Autoplay]}
-                      spaceBetween={0}
-                      slidesPerView={1}
-                      loop={listingPhoto.length > 1}
-                      autoplay={{
-                        delay: 4000,
-                        disableOnInteraction: false,
-                        pauseOnMouseEnter: true,
-                      }}
-                      navigation={{
-                        prevEl: ".custom-prev",
-                        nextEl: ".custom-next",
-                      }}
-                      pagination={{
-                        type: "fraction", // This replicates your "1 / 5" UI style
-                        el: ".custom-pagination",
-                      }}
-                      onSwiper={(swiper) => {
-                        swiperRef.current = swiper;
-                      }}
-                      onSlideChange={(swiper) => {
-                        setCurrentIndex(swiper.realIndex); // ✅ THIS syncs thumbnails
-                      }}
-                      className="w-full h-80 md:h-96"
-                    >
-                      {listingPhoto.map((src, index) => (
-                        <SwiperSlide key={index}>
-                          <img
-                            src={src}
-                            alt={`Gallery ${index + 1}`}
-                            className="w-full h-full object-cover cursor-pointer"
-                            onClick={openGalleryModal}
-                          />
-                        </SwiperSlide>
-                      ))}
+                    {listingPhoto.length > 0 && (
+                      <Swiper
+                        key={listingPhoto.length} // ✅ forces rebuild when data loads
+                        modules={[Navigation, Pagination, Autoplay]}
+                        spaceBetween={0}
+                        slidesPerView={1}
+                        loop={listingPhoto.length > 1}
+                        autoplay={
+                          listingPhoto.length > 1
+                            ? {
+                                delay: 4000,
+                                disableOnInteraction: false,
+                                pauseOnMouseEnter: true,
+                              }
+                            : false
+                        }
+                        navigation={{
+                          prevEl: ".custom-prev",
+                          nextEl: ".custom-next",
+                        }}
+                        pagination={{
+                          type: "fraction",
+                          el: ".custom-pagination",
+                        }}
+                        onSwiper={(swiper) => {
+                          swiperRef.current = swiper;
 
-                      {listingPhoto.length > 1 && (
-                        <>
-                          <button className="custom-prev absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg transition-all">
-                            <FaChevronLeft />
-                          </button>
-                          <button className="custom-next absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg transition-all">
-                            <FaChevronRight />
-                          </button>
-                        </>
-                      )}
-
-                      <button
-                        onClick={openGalleryModal}
-                        className="absolute bottom-4 right-4 z-10 bg-white/90 text-gray-800 p-2 rounded-full shadow-lg hover:bg-white transition-all"
+                          // ✅ VERY IMPORTANT
+                          setTimeout(() => {
+                            swiper.navigation.init();
+                            swiper.navigation.update();
+                            swiper.autoplay?.start();
+                          }, 0);
+                        }}
+                        onSlideChange={(swiper) => {
+                          setCurrentIndex(swiper.realIndex);
+                        }}
+                        className="w-full h-80 md:h-96"
                       >
-                        <FaExpand />
-                      </button>
-                    </Swiper>
+                        {listingPhoto.map((src, index) => (
+                          <SwiperSlide key={index}>
+                            <img
+                              src={src}
+                              alt={`Gallery ${index + 1}`}
+                              className="w-full h-full object-cover cursor-pointer"
+                              onClick={openGalleryModal}
+                            />
+                          </SwiperSlide>
+                        ))}
+
+                        {listingPhoto.length > 1 && (
+                          <>
+                            <button className="custom-prev absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg transition-all">
+                              <FaChevronLeft />
+                            </button>
+                            <button className="custom-next absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 text-gray-800 p-3 rounded-full shadow-lg transition-all">
+                              <FaChevronRight />
+                            </button>
+                          </>
+                        )}
+
+                        <button
+                          onClick={openGalleryModal}
+                          className="absolute bottom-4 right-4 z-10 bg-white/90 text-gray-800 p-2 rounded-full shadow-lg hover:bg-white transition-all"
+                        >
+                          <FaExpand />
+                        </button>
+                      </Swiper>
+                    )}
                   </div>
 
                   {/* Thumbnails - Kept exactly the same UI */}
