@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FaMapMarked, FaMapMarkerAlt } from "react-icons/fa";
-
+import logo from "../../../public/logo.png";
 const LikeCard = ({ property }) => {
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ const LikeCard = ({ property }) => {
       <div className="bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all border border-gray-200 h-full flex flex-col">
         <div className="relative h-40 overflow-hidden cursor-pointer">
           <img
-            src={property.thumbnail?.url || property.thumbnail}
+            src={property.thumbnail?.url || property.thumbnail || logo}
             alt={property.title}
             className="w-full h-full object-cover"
           />

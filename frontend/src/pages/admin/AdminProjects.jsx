@@ -217,7 +217,11 @@ const AdminProjects = () => {
                 <tr key={project._id} className="hover:bg-gray-50 transition">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <img
-                      src={project.thumbnail?.url || project.thumbnail}
+                      src={
+                        project.thumbnail?.url ||
+                        project.thumbnail ||
+                        "/logo.png"
+                      }
                       alt={project.title}
                       className="h-16 w-24 object-cover rounded shadow-sm"
                     />
@@ -238,17 +242,12 @@ const AdminProjects = () => {
                         <span className="text-gray-500">Draft</span>
                       )}
                       {" • "}
-                      {project.approvalType === "CMDA" ? (
-                        <span className="text-orange-600">CMDA</span>
-                      ) : project.approvalType === "DTCP" ? (
-                        <span className="text-orange-600">DTCP</span>
-                      ) : (
-                        project.approvalType === "Panchayat" ? (
-                          <span className="text-orange-600">Panchayat</span>
-                        ) : (
-                        <span className="text-gray-600">{project.approvalType}</span>
-                        )
-                      )}
+                      {project.approvalType.map((type, idx) => (
+                        <span key={idx} className="text-gray-600">
+                          {type}
+                          {idx < project.approvalType.length - 1 ? "," : ""}
+                        </span>
+                      ))}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">
@@ -337,7 +336,9 @@ const AdminProjects = () => {
               className="bg-white rounded shadow-sm overflow-hidden border border-gray-200"
             >
               <img
-                src={project.thumbnail?.url || project.thumbnail}
+                src={
+                  project.thumbnail?.url || project.thumbnail || "./logo.png"
+                }
                 alt={project.title}
                 className="w-full h-48 object-cover"
               />

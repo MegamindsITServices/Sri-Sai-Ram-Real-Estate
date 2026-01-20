@@ -118,7 +118,7 @@ const ProjectSlider = () => {
                 <div className="w-full md:max-w-[40%] flex-shrink-0">
                   <div className="w-full aspect-[16/9] flex items-center justify-center">
                     <img
-                      src={project.thumbnail?.url || project.thumbnail}
+                      src={project.thumbnail?.url || project.thumbnail || "/logo.png"}
                       alt={project.title}
                       className="max-w-full max-h-full object-contain rounded-sm shadow-lg"
                     />

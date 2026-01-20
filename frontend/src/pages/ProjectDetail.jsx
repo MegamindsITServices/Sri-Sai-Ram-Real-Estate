@@ -88,7 +88,7 @@ const ProjectDetail = () => {
 
           let photos = [];
           const thumbnailUrl =
-            projectData.thumbnail?.url || projectData.thumbnail;
+            projectData.thumbnail?.url || projectData.thumbnail || "/logo.png";
           if (thumbnailUrl) {
             photos.push(thumbnailUrl);
           }
@@ -184,7 +184,7 @@ const ProjectDetail = () => {
   const [contact, openContact] = useState(false);
 
   const getThumbnailUrl = () => {
-    if (!project?.thumbnail) return "";
+    if (!project?.thumbnail) return "./logo.png";
     return project.thumbnail.url || project.thumbnail;
   };
 

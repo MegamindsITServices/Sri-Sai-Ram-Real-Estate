@@ -154,7 +154,7 @@ const Search = () => {
                 <div className="w-full md:max-w-[30%] md:min-w-[30%] flex">
                   <div className="w-full h-40 md:h-full bg-gray-100 overflow-hidden">
                     <img
-                      src={item.thumbnail?.url || item.thumbnail}
+                      src={item.thumbnail?.url || item.thumbnail || "/logo.png"}
                       alt={item.title}
                       className="w-full h-full object-cover"
                     />

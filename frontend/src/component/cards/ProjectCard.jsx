@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import Share from "../models/Share";
 import stickerImage from "../../assets/Star 6.png";
 import sold from "../../assets/sold.png";
+import logo from "../../../public/logo.png";
 
 const ProjectCard = ({ product, viewMode = "list" }) => {
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -138,7 +139,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
       {/* Share Modal - same for both views */}
       {shareModel && (
         <Share
-          image={thumbnailUrl}
+          image={thumbnailUrl || logo}
           title={product.title}
           url={`https://srisairam.co.in/projectDetail/${encodeURIComponent(
             product.title
@@ -167,7 +168,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
           {thumbnailUrl ? (
             <div className="w-full h-full flex items-center justify-center">
               <img
-                src={thumbnailUrl}
+                src={thumbnailUrl || logo}
                 alt={product.title}
                 className="max-w-full max-h-full object-contain"
                 style={{

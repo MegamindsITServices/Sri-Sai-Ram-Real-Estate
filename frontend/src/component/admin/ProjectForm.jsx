@@ -192,12 +192,7 @@ const ProjectForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log(previewImages)
-    if (!previewImages.thumbnail) {
-      toast.error("Thumbnail is required");
-      setLoading(false);
-      return;
-    }
+    
     try {
 
       const payload = new FormData();
@@ -496,7 +491,7 @@ const ProjectForm = () => {
             {/* Thumbnail */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Main Thumbnail <span className="text-red-500">*</span>
+                Main Thumbnail
               </label>
               <div className="border-2 border-dashed border-gray-300 p-4 rounded-md text-center">
                 <input
@@ -504,7 +499,6 @@ const ProjectForm = () => {
                   onChange={(e) => handleFileChange(e, "thumbnail")}
                   className="hidden"
                   id="thumbnail"
-                  required={!previewImages.thumbnail}
                 />
 
                 <label

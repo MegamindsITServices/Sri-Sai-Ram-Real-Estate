@@ -158,7 +158,7 @@ const Products = () => {
                     {/* Thumbnail with specific 49:75 Aspect Ratio */}
                     <div className="relative w-full aspect-[49/75] overflow-hidden">
                       <img
-                        src={product.thumbnail?.url}
+                        src={product.thumbnail?.url || "/logo.png"}
                         alt={product.title}
                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       />

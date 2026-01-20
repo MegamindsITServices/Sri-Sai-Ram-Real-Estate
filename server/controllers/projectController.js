@@ -13,12 +13,8 @@ const create = async (req, res) => {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
-    if (!files?.thumbnail?.[0]) {
-      return res.status(400).json({ message: "Thumbnail image is required" });
-    }
-
     // Upload Thumbnail - returns {url, public_id}
-    const thumbnailData = await uploadFile(files.thumbnail[0].buffer);
+    const thumbnailData = files?.thumbnail?.[0] ? await uploadFile(files.thumbnail[0].buffer) : undefined;
 
     // Handle floorImage (optional)
     let floorImageData = null;
