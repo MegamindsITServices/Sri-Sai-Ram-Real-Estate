@@ -67,14 +67,15 @@ const Navbar = ({ setModel }) => {
   };
 
   const handleNavigation = (path) => {
-    const currentFullPath = location.pathname + location.hash;
-
-    if (currentFullPath === path) {
-      return; // do nothing (no reload)
+    if (path === "/") {
+      navigate("/", { replace: true });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
     }
 
     navigate(path);
   };
+
 
   const goToContact = () => {
     if (location.pathname === "/") {
@@ -85,6 +86,7 @@ const Navbar = ({ setModel }) => {
       navigate("/#contact");
     }
   };
+
 
 
 
