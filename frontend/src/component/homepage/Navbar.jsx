@@ -67,12 +67,27 @@ const Navbar = ({ setModel }) => {
   };
 
   const handleNavigation = (path) => {
-    if (location.pathname === path) {
-      window.location.reload(); // Reload if already on the same page
+    const currentFullPath = location.pathname + location.hash;
+
+    if (currentFullPath === path) {
+      return; // do nothing (no reload)
+    }
+
+    navigate(path);
+  };
+
+  const goToContact = () => {
+    if (location.pathname === "/") {
+      document
+        .getElementById("contact")
+        ?.scrollIntoView({ behavior: "smooth" });
     } else {
-      navigate(path);
+      navigate("/#contact");
     }
   };
+
+
+
   return (
     <div
       className={`flex justify-between items-center p-4  z-40 lg:pl-20 sticky top-0 transition-all duration-300 ${
@@ -120,10 +135,11 @@ const Navbar = ({ setModel }) => {
             </button>
             <button
               className="hover:cursor-pointer hover:border-b-2"
-              onClick={() => handleNavigation("/#contact")}
+              onClick={goToContact}
             >
               Contact Us
             </button>
+
             {/* {user ? (
               <button
                 className="hover:cursor-pointer hover:border-b-2"
@@ -250,10 +266,11 @@ const Navbar = ({ setModel }) => {
             </button>
             <button
               className="hover:cursor-pointer hover:border-b-2"
-              onClick={() => handleNavigation("/#contact")}
+              onClick={goToContact}
             >
               Contact Us
             </button>
+
             {/* {user ? (
               <button
                 className="hover:cursor-pointer hover:border-b-2"

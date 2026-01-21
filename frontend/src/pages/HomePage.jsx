@@ -23,11 +23,12 @@ const HomePage = () => {
     if (location.hash === "#contact") {
       const timeout = setTimeout(() => {
         contactRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 700);
+      }, 300);
 
       return () => clearTimeout(timeout);
     }
-  }, [location]);
+  }, [location.hash]);
+
 
   const togle=()=>{
     toast.success("hello")
