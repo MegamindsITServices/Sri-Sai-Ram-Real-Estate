@@ -32,11 +32,13 @@ const ProjectForm = () => {
 
   const [thumbnail, setThumbnail] = useState(null);
   const [floorImage, setFloorImage] = useState(null);
+  const [homeThumbnail, setHomeThumbnail] = useState(null);
   const [listingPhotos, setListingPhotos] = useState([]);
   const [deletedImages, setDeletedImages] = useState([]);
   const [previewImages, setPreviewImages] = useState({
     thumbnail: null,
     floorImage: null,
+    homeThumbnail: null,
     listingPhotos: [],
   });
 
@@ -78,6 +80,8 @@ const ProjectForm = () => {
             setPreviewImages({
               thumbnail: project.thumbnail?.url || project.thumbnail,
               floorImage: project.floorImage?.url || project.floorImage || null,
+              homeThumbnail:
+                project.homeThumbnail?.url || project.homeThumbnail || null,
               listingPhotos:
                 project.listingPhotoPaths?.map((img) => img.url) || [],
             });
@@ -134,6 +138,12 @@ const ProjectForm = () => {
         ...prev,
         thumbnail: URL.createObjectURL(file),
       }));
+    } else if (field === "homeThumbnail") {
+      setHomeThumbnail(file);
+      setPreviewImages((prev) => ({
+        ...prev,
+        homeThumbnail: URL.createObjectURL(file),
+      }));
     } else if (field === "floorImage") {
       setFloorImage(file);
       setPreviewImages((prev) => ({
@@ -141,6 +151,17 @@ const ProjectForm = () => {
         floorImage: URL.createObjectURL(file),
       }));
     }
+  };
+
+  const removeHomeThumbnail = () => {
+    if (
+      previewImages.homeThumbnail &&
+      typeof previewImages.homeThumbnail === "string"
+    ) {
+      setDeletedImages((prev) => [...prev, "HOMETHUMB"]);
+    }
+    setHomeThumbnail(null);
+    setPreviewImages((prev) => ({ ...prev, homeThumbnail: null }));
   };
 
   const removeThumbnail = () => {
@@ -201,6 +222,7 @@ const ProjectForm = () => {
       payload.append("deletedImages", JSON.stringify(deletedImages));
 
       if (thumbnail instanceof File) payload.append("thumbnail", thumbnail);
+      if (homeThumbnail instanceof File) payload.append("homeThumbnail", homeThumbnail);
       if (floorImage instanceof File) payload.append("floorImage", floorImage);
 
       listingPhotos.forEach((photo) => {
@@ -217,7 +239,7 @@ const ProjectForm = () => {
         navigate("/admin/projects");
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Operation failed");
+      toast.error(err.response?.data?.error || "Operation failed");
     } finally {
       setLoading(false);
     }
@@ -529,6 +551,49 @@ const ProjectForm = () => {
               </div>
             </div>
 
+            {/* Homepage Thumbnail */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Homepage Thumbnail
+              </label>
+
+              <div className="border-2 border-dashed border-gray-300 p-4 rounded-md text-center">
+                <input
+                  type="file"
+                  onChange={(e) => handleFileChange(e, "homeThumbnail")}
+                  className="hidden"
+                  id="homeThumbnail"
+                />
+
+                <label
+                  htmlFor="homeThumbnail"
+                  className="cursor-pointer text-[#2B2BD9] hover:underline"
+                >
+                  Click to upload homepage thumbnail
+                </label>
+
+                {previewImages.homeThumbnail && (
+                  <div className="relative mt-4 rounded-xl overflow-hidden shadow-sm border border-gray-100 group">
+                    <img
+                      src={previewImages.homeThumbnail}
+                      alt="Home Thumbnail"
+                      className="w-full h-40 object-cover"
+                    />
+
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={removeHomeThumbnail}
+                        className="bg-red-500 text-white p-2 rounded-full hover:scale-110 transition"
+                      >
+                        <FaTrash size={12} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Floor Image */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -667,28 +732,28 @@ const ProjectForm = () => {
         <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
           <div className="flex flex-wrap gap-10 items-center">
             <div className="flex items-center gap-2 border border-gray-300 rounded p-1">
-                <label className="text-sm font-bold text-gray-700 block mb-2">
-                  Approval Type:
-                </label>
+              <label className="text-sm font-bold text-gray-700 block mb-2">
+                Approval Type:
+              </label>
 
-                <div className="flex flex-wrap gap-5">
-                  {["CMDA", "DTCP", "Panchayat"].map((type) => (
-                    <label
-                      key={type}
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.approvalType.includes(type)}
-                        onChange={() => handleApprovalChange(type)}
-                        className="h-5 w-5 accent-[#2B2BD9]"
-                      />
-                      <span className="text-sm font-medium text-gray-700">
-                        {type}
-                      </span>
-                    </label>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-5">
+                {["CMDA", "DTCP", "Panchayat"].map((type) => (
+                  <label
+                    key={type}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.approvalType.includes(type)}
+                      onChange={() => handleApprovalChange(type)}
+                      className="h-5 w-5 accent-[#2B2BD9]"
+                    />
+                    <span className="text-sm font-medium text-gray-700">
+                      {type}
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
 
             <div className="flex items-center gap-2">

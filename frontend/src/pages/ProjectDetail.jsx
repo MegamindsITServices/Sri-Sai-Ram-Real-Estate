@@ -93,6 +93,12 @@ const ProjectDetail = () => {
             photos.push(thumbnailUrl);
           }
 
+          const homeThumbnailUrl =
+            projectData.homeThumbnail?.url || projectData.homeThumbnail;
+          if (homeThumbnailUrl) {
+            photos.push(homeThumbnailUrl);
+          }
+
           if (
             projectData.listingPhotoPaths &&
             Array.isArray(projectData.listingPhotoPaths)
@@ -426,15 +432,16 @@ const ProjectDetail = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="text-right">
+              {/* PRICE + SHARE */}
+              <div className="flex items-center gap-4 w-full md:w-auto justify-end">
+                <div className="text-right md:text-right">
                   <div className="text-2xl md:text-3xl font-bold text-[#2B2BD9]">
                     {isLayout ? "Starting Price" : ""} ₹{getPriceFormatted()}
                   </div>
                   <div className="text-gray-600 text-sm">
                     {isLayout && project.startingPlotSize
-                      ? "Starting Plot Size: " + getStartingPlotSizeFormatted()
-                      : "Total Project Area: " + getAreaFormatted()}
+                      ? getStartingPlotSizeFormatted()
+                      : getAreaFormatted()}
                   </div>
                 </div>
 

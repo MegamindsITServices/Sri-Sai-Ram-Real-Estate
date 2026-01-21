@@ -15,6 +15,10 @@ const create = async (req, res) => {
 
     // Upload Thumbnail - returns {url, public_id}
     const thumbnailData = files?.thumbnail?.[0] ? await uploadFile(files.thumbnail[0].buffer) : undefined;
+    const homeThumbnailData = files?.homeThumbnail?.[0]
+      ? await uploadFile(files.homeThumbnail[0].buffer)
+      : null;
+
 
     // Handle floorImage (optional)
     let floorImageData = null;
@@ -35,6 +39,7 @@ const create = async (req, res) => {
       ...formFields,
       thumbnail: thumbnailData,
       floorImage: floorImageData,
+      homeThumbnail: homeThumbnailData,
       listingPhotoPaths: listingPhotosData,
       price: Number(formFields.price),
       totalArea: Number(formFields.totalArea),
@@ -89,6 +94,14 @@ const update = async (req, res) => {
       updateData.thumbnail = null;
     }
 
+    if (deletedImages.includes("HOMETHUMB")) {
+      if (existing.homeThumbnail?.public_id) {
+        await deleteFromCloudinary(existing.homeThumbnail.public_id);
+      }
+      updateData.homeThumbnail = null;
+    }
+
+
     // --- HANDLE FLOOR DELETE ---
     if (deletedImages.includes("FLOOR")) {
       if (existing.floorImage?.public_id) {
@@ -126,6 +139,16 @@ const update = async (req, res) => {
       updateData.floorImage = await uploadFile(files.floorImage[0].buffer);
     }
 
+    if (files?.homeThumbnail?.[0]) {
+      if (existing.homeThumbnail?.public_id) {
+        await deleteFromCloudinary(existing.homeThumbnail.public_id);
+      }
+      updateData.homeThumbnail = await uploadFile(
+        files.homeThumbnail[0].buffer,
+      );
+    }
+
+
     // --- 4. HANDLE NEW GALLERY UPLOADS ---
     const newPhotos = [];
     if (files?.listingPhotos?.length > 0) {
@@ -156,7 +179,7 @@ const update = async (req, res) => {
     });
   } catch (err) {
     console.error("Update error:", err);
-    res.status(500).json({ message: "Failed to update project" });
+    res.status(500).json({ message: "Failed to update project", error: err.message });
   }
 };
 

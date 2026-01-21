@@ -37,7 +37,7 @@ const storage = multer.memoryStorage(); // Keep files in memory for Cloudinary
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max per file
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB max per file
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png|webp/;
     const extname = filetypes.test(
@@ -64,6 +64,7 @@ app.use(
   "/api/v1/projects",
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
+    { name: "homeThumbnail", maxCount: 1 },
     { name: "floorImage", maxCount: 1 },
     { name: "listingPhotos", maxCount: 20 }, // max 10 additional photos
   ]),

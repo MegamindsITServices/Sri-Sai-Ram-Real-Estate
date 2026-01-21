@@ -11,6 +11,7 @@ const imageSchema = new mongoose.Schema(
 const listingSchema = new mongoose.Schema(
   {
     thumbnail: imageSchema,
+    homeThumbnail: imageSchema,
     title: {
       type: String,
       required: true,
