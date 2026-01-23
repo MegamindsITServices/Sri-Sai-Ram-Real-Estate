@@ -149,7 +149,6 @@ const Search = () => {
                 onClick={() => handleCardClick(item)}
                 className="border shadow-lg p-4 bg-white relative hover:cursor-pointer flex flex-col md:flex-row md:gap-4 gap-2 items-stretch transition-all duration-300 hover:shadow-xl"
               >
-
                 {/* Thumbnail */}
                 <div className="w-full md:max-w-[30%] md:min-w-[30%] flex">
                   <div className="w-full h-40 md:h-full bg-gray-100 overflow-hidden">
@@ -194,13 +193,19 @@ const Search = () => {
 
                   <div className="mt-auto">
                     <span
-                      className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
-                        item.status === "available"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                      className={`px-2 py-1 text-xs font-semibold ${
+                        item.status === "sold-out"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-green-100 text-green-800"
                       }`}
                     >
-                      {item.status === "available" ? "Available" : "Sold Out"}
+                      {item.status === "available"
+                        ? "Available"
+                        : item.status === "upcoming"
+                          ? "Upcoming"
+                          : item.status === "newly-launched"
+                            ? "Newly Launched"
+                            : "Sold Out"}
                     </span>
                   </div>
                 </div>

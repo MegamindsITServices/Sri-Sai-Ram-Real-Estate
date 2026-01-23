@@ -83,9 +83,10 @@ const Navbar = ({ setModel }) => {
         .getElementById("contact")
         ?.scrollIntoView({ behavior: "smooth" });
     } else {
-      navigate("/#contact");
+      navigate("/contact-us");
     }
   };
+
 
 
 

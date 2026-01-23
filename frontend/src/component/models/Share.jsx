@@ -1,8 +1,28 @@
-import React from 'react';
-import toast from 'react-hot-toast';
-import { FaWhatsapp } from 'react-icons/fa';
-import {   FacebookShareButton,   TelegramShareButton,   TwitterShareButton,   WhatsappShareButton, } from 'react-share'; 
+import React from "react";
+import toast from "react-hot-toast";
+import { FaWhatsapp, FaInstagram } from "react-icons/fa";
+import {
+  FacebookShareButton,
+  TelegramShareButton,
+  TwitterShareButton,
+  WhatsappShareButton,
+} from "react-share";
 const Share = ({ setShareModel, image, title, url }) => {
+  const handleInstagramShare = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+
+      toast.success("Link copied. Paste it on Instagram.");
+
+      // ⏳ Delay so toast is visible before opening Instagram
+      setTimeout(() => {
+        window.open("https://www.instagram.com/", "_blank");
+      }, 800); // 0.8s delay
+    } catch (err) {
+      toast.error("Failed to copy link");
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-4 w-full max-w-md">
@@ -53,12 +73,12 @@ const Share = ({ setShareModel, image, title, url }) => {
                 // Split path by "/" and encode each part individually
                 const parts = path.split("/").filter((part) => part !== "");
                 const encodedParts = parts.map((part) =>
-                  encodeURIComponent(part)
+                  encodeURIComponent(part),
                 );
 
                 // Reconstruct the URL with encoded path components
                 const formattedUrl = `${urlObj.origin}/${encodedParts.join(
-                  "/"
+                  "/",
                 )}${urlObj.search}${urlObj.hash}`;
 
                 // Copy to clipboard
@@ -95,6 +115,13 @@ const Share = ({ setShareModel, image, title, url }) => {
               </svg>
             </button>
           </FacebookShareButton>
+
+          <button
+            onClick={handleInstagramShare}
+            className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 rounded-lg p-3"
+          >
+            <FaInstagram className="text-white text-xl" />
+          </button>
 
           <TwitterShareButton url={encodeURI(url)}>
             <button className="bg-black rounded-lg p-3">

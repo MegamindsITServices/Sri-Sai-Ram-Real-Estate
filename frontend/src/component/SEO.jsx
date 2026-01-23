@@ -10,6 +10,7 @@ const SEO = ({
 }) => {
     const siteName = "SRI SAI RAM Real Estate & Construction";
     const siteUrl = "https://srisairam.co.in";
+    console.log(image)
   return (
     <Helmet>
       {/* ===== BASIC SEO ===== */}

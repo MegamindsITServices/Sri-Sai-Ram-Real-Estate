@@ -30,6 +30,7 @@ import Loader from "./component/Loader";
 import Profile from "./pages/admin/Profile";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminAdmins from "./pages/admin/AdminManagement";
+import ContactUsPage from "./pages/ContactUsPage";
 
 function App() {
   return (
@@ -82,6 +83,7 @@ const LoadingRoutes = () => {
             <Route path="/about" element={<AboutUs />} />
             <Route path="/register" element={<Register />} />
             <Route path="/service" element={<Service />} />
+            <Route path="/contact-us" element={<ContactUsPage />} />
             <Route
               path="/projectDetail/:name/:id"
               element={<ProjectDetail />}

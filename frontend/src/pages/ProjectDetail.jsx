@@ -93,12 +93,6 @@ const ProjectDetail = () => {
             photos.push(thumbnailUrl);
           }
 
-          const homeThumbnailUrl =
-            projectData.homeThumbnail?.url || projectData.homeThumbnail;
-          if (homeThumbnailUrl) {
-            photos.push(homeThumbnailUrl);
-          }
-
           if (
             projectData.listingPhotoPaths &&
             Array.isArray(projectData.listingPhotoPaths)
@@ -109,12 +103,6 @@ const ProjectDetail = () => {
                 photos.push(photoUrl);
               }
             });
-          }
-
-          const floorImageUrl =
-            projectData.floorImage?.url || projectData.floorImage;
-          if (floorImageUrl) {
-            photos.push(floorImageUrl);
           }
 
           setListingPhotos(photos);
@@ -420,14 +408,22 @@ const ProjectDetail = () => {
                     <FaMapMarkerAlt className="text-[#2B2BD9]" />
                     <span>{getLocationTitle()}</span>
                   </div>
-                  <div
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      getStatus() === "available"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {getStatus() === "available" ? "Available" : "Sold Out"}
+                  <div className="">
+                    <span
+                      className={`px-2 py-1 text-xs font-semibold ${
+                        project.status === "sold-out"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
+                      {project.status === "available"
+                        ? "Available"
+                        : project.status === "upcoming"
+                          ? "Upcoming"
+                          : project.status === "newly-launched"
+                            ? "Newly Launched"
+                            : "Sold Out"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -604,14 +600,18 @@ const ProjectDetail = () => {
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Location</p>
-                        <a
-                          href={getLocationLink()}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-semibold text-[#2B2BD9] hover:underline"
-                        >
-                          {getLocationTitle()}
-                        </a>
+                        {project?.locationLink ? (
+                          <a
+                            href={getLocationLink()}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-[#2B2BD9] hover:underline"
+                          >
+                            {getLocationTitle()}
+                          </a>
+                        ) : (
+                          <p className="font-semibold ">{getLocationTitle()}</p>
+                        )}
                       </div>
                     </div>
 
@@ -683,7 +683,9 @@ const ProjectDetail = () => {
                 {getFloorImageUrl() && (
                   <div className="bg-white rounded-xl shadow-lg p-6">
                     <h3 className="text-lg font-bold text-gray-800 mb-4">
-                      {isLayout ? "Master Plan" : "Floor Plan"}
+                      {isLayout || project.category == "commercial"
+                        ? "Master Plan"
+                        : "Floor Plan"}
                     </h3>
                     <div
                       className="relative rounded-lg overflow-hidden cursor-pointer group mb-4"

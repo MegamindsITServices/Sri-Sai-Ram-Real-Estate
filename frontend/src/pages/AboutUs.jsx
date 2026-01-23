@@ -60,7 +60,14 @@ const AboutUs = () => {
               About Us
             </h1>
             <p className="text-lg md:text-xl hover:cursor-pointer font-[Montserrat]">
-              <Link to="/">Home</Link> {`>`} <span>About Us</span>
+              <span
+                onClick={() => navigate("/")}
+                className="border-b-2 cursor-pointer"
+              >
+                Home
+              </span>{" "}
+              {">"}
+              <span>About Us</span>
             </p>
           </div>
         </div>
@@ -126,7 +133,7 @@ const AboutUs = () => {
             <div className="flex flex-col justify-center space-y-6 w-full md:w-2/3">
               <div className="flex flex-col">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl leading-snug text-gray-800 fira-sans">
-                  About <br /> SRI SAI RAM ESTATE <br /> & CONSTRUCTION
+                  About <br /> SRI SAI RAM REAL ESTATE <br /> & CONSTRUCTION
                 </h1>
                 <div className="text-sm sm:text-base md:text-lg font-[Montserrat] text-gray-600 leading-relaxed mt-4">
                   Welcome to Sri Sai Ram Real Estate, where we have been serving

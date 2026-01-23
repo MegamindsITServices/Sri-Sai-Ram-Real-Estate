@@ -41,7 +41,7 @@ const listingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["available", "sold-out"],
+      enum: ["available", "sold-out", "upcoming", "newly-launched"],
       default: "available",
     },
     listingPhotoPaths: [imageSchema],
@@ -66,7 +66,7 @@ const listingSchema = new mongoose.Schema(
     },
     approvalType: {
       type: [String],
-      enum: ["CMDA", "DTCP", "Panchayat"],
+      enum: ["CMDA", "DTCP", "RERA", "Panchayat"],
       default: [],
     },
     live: {

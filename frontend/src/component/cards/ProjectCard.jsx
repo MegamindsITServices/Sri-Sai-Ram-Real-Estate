@@ -68,7 +68,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
       `/projectDetail/${encodeURIComponent(product.title)}/${product._id}`,
       {
         state: product,
-      }
+      },
     );
   };
 
@@ -122,8 +122,16 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
             className="w-full h-full absolute top-0 left-0"
           />
           <div className="relative z-20 text-center -rotate-[35deg]">
-            <div className="text-xs font-bold text-black">New</div>
-            <div className="text-xs font-bold text-black">Arrival</div>
+            {status === "upcoming" ? (
+              <div className="text-xs font-bold text-black">Upcoming</div>
+            ) : status === "available" ? (
+              <div className="text-xs font-bold text-black">Available</div>
+            ) : (
+              <div>
+                <div className="text-xs font-bold text-black">New</div>
+                <div className="text-xs font-bold text-black">Arrival</div>
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -142,7 +150,7 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
           image={thumbnailUrl || logo}
           title={product.title}
           url={`https://srisairam.co.in/projectDetail/${encodeURIComponent(
-            product.title
+            product.title,
           )}/${product._id}`}
           setShareModel={setShareModel}
         />
@@ -204,10 +212,10 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
             {unit === "sqft"
               ? `${totalArea} Sq.ft `
               : unit === "Acre"
-              ? `${totalArea} Acre`
-              : unit === "Cents"
-              ? `${totalArea} Cents`
-              : `${totalArea} ${unit}`}
+                ? `${totalArea} Acre`
+                : unit === "Cents"
+                  ? `${totalArea} Cents`
+                  : `${totalArea} ${unit}`}
           </p>
         )}
         {(category === "villa" || category === "apartment") && bhk && (
@@ -233,12 +241,12 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
         <div className="mt-auto">
           <span
             className={`px-2 py-1 text-xs font-semibold ${
-              status === "available"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
+              status === "sold-out"
+              ? "bg-red-100 text-red-800"
+              : "bg-green-100 text-green-800"
             }`}
           >
-            {status === "available" ? "Available" : "Sold Out"}
+            {status === "available" ? "Available" : status === "upcoming" ? "Upcoming" : status === "newly-launched" ? "Newly Launched" : "Sold Out"}
           </span>
         </div>
       </div>

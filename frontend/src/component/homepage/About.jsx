@@ -14,7 +14,7 @@ const About = () => {
     <>
     <div className="p-6 md:p-8  bg-[#E9E9FB]  pt-16 md:pt-32 relative  -top-20 md:-top-24 lg:-top-40 pl-4 md:pl-20 ">
       <h2 className="text-lg md:text-4xl font-bold text-gray-800 mb-6 md:mb-8 uppercase tracking-wide text-start pl-4 fira-sans">
-        About SRI SAI RAM ESTATE
+        About SRI SAI RAM REAL ESTATE
       </h2>
       <div className="flex flex-col md:flex-row items-center md:items-start rounded-lg overflow-hidden p-4 md:p-6 space-y-6 md:space-y-0 md:space-x-8">
         {/* Image Section */}

@@ -597,7 +597,9 @@ const ProjectForm = () => {
             {/* Floor Image */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {isLayout ? "Master Plan" : "Floor Plan"}
+                {isLayout || formData.category == "commercial"
+                  ? "Master Plan"
+                  : "Floor Plan"}
               </label>
               <div className="border-2 border-dashed border-gray-300 p-4 rounded-md text-center">
                 <input
@@ -737,7 +739,7 @@ const ProjectForm = () => {
               </label>
 
               <div className="flex flex-wrap gap-5">
-                {["CMDA", "DTCP", "Panchayat"].map((type) => (
+                {["CMDA", "DTCP", "RERA", "Panchayat"].map((type) => (
                   <label
                     key={type}
                     className="flex items-center gap-2 cursor-pointer"
@@ -766,6 +768,8 @@ const ProjectForm = () => {
               >
                 <option value="available">Available</option>
                 <option value="sold-out">Sold Out</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="newly-launched">Newly Launched</option>
               </select>
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
