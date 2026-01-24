@@ -7,23 +7,24 @@ const add = async (req, res) => {
     const { name, job, feedback, star } = req.body;
     const file = req.file;
 
-    if (!file)
-      return res.status(400).json({ message: "Profile image required" });
-
-    if (!name || !feedback || !job) {
+    if (!name || !feedback) {
       return res
         .status(400)
-        .json({ message: "name, feedback and job/Profession required" });
+        .json({ message: "Name and feedback are required" });
     }
 
-    const imageUrl = await uploadFile(file.buffer, "srisai-testimonials");
+    let imageUrl = null;
+
+    if (file) {
+      imageUrl = await uploadFile(file.buffer, "srisai-testimonials");
+    }
 
     const newTestimonial = new Testimonial({
       name,
-      job,
+      job: job || "", // optional
       feedback,
-      profileImage: imageUrl,
-      star: Number(star),
+      profileImage: imageUrl, // optional
+      star: Number(star) || 5,
     });
 
     await newTestimonial.save();
@@ -40,6 +41,7 @@ const add = async (req, res) => {
       .json({ message: "Failed to add testimonial", error: err.message });
   }
 };
+
 
 // GET ALL
 const allTestimonial = async (req, res) => {

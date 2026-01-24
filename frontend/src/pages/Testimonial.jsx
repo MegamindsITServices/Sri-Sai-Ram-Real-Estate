@@ -118,15 +118,15 @@ const Testimonials = () => {
                     <img
                       className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover"
                       alt="Profile"
-                      src={testimonial.profileImage}
+                      src={testimonial.profileImage || "/default-user.jpg"}
                     />
                     <div>
                       <div className="text-lg sm:text-xl font-bold text-[#1b1c1e]">
                         {testimonial.name}
                       </div>
-                      <div className="text-sm text-[#6b7280]">
+                      {testimonial.job && <div className="text-sm text-[#6b7280]">
                         {testimonial.job}
-                      </div>
+                      </div>}
                       {/* Stars */}
                       <div className="flex gap-1">
                         {Array(5)

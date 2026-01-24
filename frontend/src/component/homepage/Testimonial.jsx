@@ -179,7 +179,7 @@ const Testimonial = () => {
                 >
                   <div className="flex flex-row space-x-4">
                     <img
-                      src={testimonial.profileImage}
+                      src={testimonial.profileImage || "/default-user.jpg"}
                       alt={testimonial.name}
                       className="w-16 h-16 sm:w-32 sm:h-28 object-cover mb-4 sm:mb-0"
                     />
@@ -187,9 +187,11 @@ const Testimonial = () => {
                       <p className="text-base sm:text-lg text-gray-900 font-[Montserrat]">
                         {testimonial.name}
                       </p>
-                      <p className="text-sm text-gray-500 font-[Montserrat]">
-                        {testimonial.job}
-                      </p>
+                      {testimonial.job && (
+                        <p className="text-sm text-gray-500 font-[Montserrat]">
+                          {testimonial.job}
+                        </p>
+                      )}
                       <div className="flex space-x-1 mt-1">
                         {[...Array(testimonial.star)].map((_, i) => (
                           <span
@@ -214,7 +216,7 @@ const Testimonial = () => {
               ) : (
                 <>
                   <img
-                    src={testimonial.profileImage}
+                    src={testimonial.profileImage || "/default-user.jpg"}
                     alt={testimonial.name}
                     className="w-20 h-16 sm:w-48 sm:h-48 object-cover mb-4 "
                   />
@@ -236,9 +238,11 @@ const Testimonial = () => {
                   <p className="text-base sm:text-lg text-gray-900 font-[Montserrat]">
                     {testimonial.name}
                   </p>
-                  <p className="text-sm text-gray-500 font-[Montserrat]">
-                    {testimonial.job}
-                  </p>
+                  {testimonial.job && (
+                    <p className="text-sm text-gray-500 font-[Montserrat]">
+                      {testimonial.job}
+                    </p>
+                  )}
                 </>
               )}
             </div>

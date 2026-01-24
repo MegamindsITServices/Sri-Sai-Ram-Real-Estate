@@ -174,13 +174,13 @@ const AdminTestimonials = () => {
             >
               <div className="p-4 flex items-center gap-4 border-b">
                 <img
-                  src={t.profileImage}
+                  src={t.profileImage || "/default-user.jpg"}
                   alt={t.name}
                   className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
                 />
                 <div>
                   <h3 className="font-semibold">{t.name}</h3>
-                  <p className="text-sm text-gray-600">{t.job}</p>
+                  {t.job && <p className="text-sm text-gray-600">{t.job}</p>}
                   <div className="flex text-[#F5BE86]">
                     {[...Array(t.star)].map((_, i) => (
                       <FaStar key={i} />
@@ -274,13 +274,12 @@ const AdminTestimonials = () => {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Job/Profession <span className="text-red-600">*</span>
+                    Job/Profession (optional)
                   </label>
                   <input
                     type="text"
                     value={form.job}
                     onChange={(e) => setForm({ ...form, job: e.target.value })}
-                    required
                     className="w-full px-4 py-2 border rounded-md"
                   />
                 </div>
@@ -321,7 +320,7 @@ const AdminTestimonials = () => {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Profile Image <span className="text-red-600">*</span>
+                    Profile Image (optional)
                   </label>
                   <input
                     type="file"
@@ -372,8 +371,8 @@ const AdminTestimonials = () => {
                         ? "Updating..."
                         : "Adding..."
                       : editMode
-                      ? "Update"
-                      : "Add"}
+                        ? "Update"
+                        : "Add"}
                   </button>
                 </div>
               </form>
