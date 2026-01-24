@@ -13,7 +13,6 @@ const [condition,setCondition]=useState(false);
       try {
         const response = await API.get(`/wishlist/getAll/${user._id}`);
         setWishlistItems(response.data);
-        console.log(response.data)
       } catch (error) {
         console.error("Error fetching wishlist:", error);
       } finally {

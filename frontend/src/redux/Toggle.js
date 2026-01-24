@@ -9,7 +9,6 @@ const Toggle = createSlice({
   reducers: {
    
     ToggleSearch:(state,action)=>{
-      console.log("here")
       state.search=!state.search
     }
   },

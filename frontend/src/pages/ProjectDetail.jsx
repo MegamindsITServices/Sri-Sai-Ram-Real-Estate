@@ -215,7 +215,6 @@ const ProjectDetail = () => {
   const getStartingUnit = () => {
     return project?.startingPlotUnit || "N/A";
   };
-  console.log(getStartingUnit());
 
   const getStartingPlotSizeFormatted = () => {
     if (!getStartingPlotSize() || (!getUnit() && !getStartingUnit()))

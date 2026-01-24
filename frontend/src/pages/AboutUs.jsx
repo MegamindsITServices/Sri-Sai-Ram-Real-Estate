@@ -27,7 +27,6 @@ const AboutUs = () => {
         i = i - 1;
       }
     }
-    console.log(i);
   };
   zero();
   return (

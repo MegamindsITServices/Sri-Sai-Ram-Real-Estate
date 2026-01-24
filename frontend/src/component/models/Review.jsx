@@ -12,10 +12,6 @@ const Review = ({setReviewModel}) => {
     setRating(value);
   };
 
-  const handleReviewSubmit = () => {
-    console.log({ rating, reviewMessage });
-    // Submit review logic here
-  };
 
   return (
     <>

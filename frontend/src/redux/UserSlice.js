@@ -13,19 +13,15 @@ const UserSlice = createSlice({
     },
     setLogOut: (state, action) => {
       localStorage.removeItem("token");
-      console.log(state.user);
-      console.log(state.user.user);
       state.user = null;
     },
     updateName: (state, action) => {
       state.user.name = action.payload.name;
-      console.log(action.payload.name);
     },
     updateAvatar: (state, action) => {
       state.user.avatar = action.payload.avatar;
     },
     search: (state, action) => {
-      console.log("here");
       state.search = !state.search;
     },
   },

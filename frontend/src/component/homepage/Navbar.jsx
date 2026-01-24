@@ -58,7 +58,6 @@ const Navbar = ({ setModel }) => {
   };
   const s = useSelector((state) => state.toggle.search);
   const toogleModel = () => {
-    console.log(s);
     dispatch(ToggleSearch());
   };
   const logout = () => {
