@@ -35,8 +35,34 @@ const Overview = () => {
     };
   }, []);
 
+  const formatIndianNumber = (value) => {
+    // Round to handle animation decimals
+    const roundedValue = Math.round(value);
+
+    if (roundedValue < 1000) {
+      return roundedValue.toString();
+    }
+
+    // Thousands (K) - Up to 99,999
+    if (roundedValue < 100000) {
+      return `${Math.floor(roundedValue / 1000)}K`;
+    }
+
+    // Lakhs - Up to 999,999 (0.1M)
+    if (roundedValue < 1000000) {
+      const lakhs = roundedValue / 100000;
+      // parseFloat handles removing ".0" if it's a whole number
+      return `${parseFloat(lakhs.toFixed(2))} Lakh`;
+    }
+
+    // Millions (M) - 1,000,000 and above
+    const millions = roundedValue / 1000000;
+    return `${parseFloat(millions.toFixed(2))}M`;
+  };
+
+
   const animateNumbers = () => {
-    const duration = 2000; // Animation duration (ms)
+    const duration = 3000; // Animation duration (ms)
     const fps = 60;
     const interval = duration / fps;
 
@@ -81,33 +107,45 @@ const Overview = () => {
   };
   return (
     <>
-       <div ref={sectionRef} className=" w-full h-auto pl-4 md:pl-0 flex justify-center relative -top-20 ">
-      <div className="w-[90%] md:w-[86%] h-full z-10 backdrop-blur-[3px] gap-6 flex flex-col md:flex-row items-center justify-around border p-6 bg-white/70 py-11">
-        <div className="h-auto md:h-[70%] border-black md:border-r-2 px-6 flex flex-col items-center justify-center mb-4 md:mb-0 text-gray-800">
-          <h1 className="text-4xl lg:text-[64px] font-bold fira-sans bg-gradient-to-b from-black via-gray-600 py-1 to-black bg-clip-text text-transparent">{Math.floor(counts.experience)+1}+</h1>
-          <p className="text-base md:text-lg font-bold mt-4 mont">Years of Experience</p>
-        </div>
-        <div className="h-auto md:h-[70%] border-black md:border-r-2 px-6 flex flex-col items-center justify-center mb-4 md:mb-0 text-gray-800">
-          <h1 className="text-4xl lg:text-[64px] font-bold fira-sans bg-gradient-to-b from-black via-gray-600 py-1 to-black bg-clip-text text-transparent">{Math.floor(counts.projects)+1}+</h1>
-          <p className="text-base md:text-lg font-bold mt-4 mont ">Projects Done</p>
-        </div>
-        <div className="h-auto md:h-[70%] border-black md:border-r-2 px-6 flex flex-col items-center justify-center mb-4 md:mb-0 text-gray-800">
-          <h1 className="text-4xl lg:text-[64px] font-bold fira-sans bg-gradient-to-b from-black via-gray-600 py-1 to-black bg-clip-text text-transparent">{Math.floor(counts.customers)}+</h1>
-          <p className="text-base md:text-lg font-bold mt-4 mont">Customers Served</p>
-        </div>
-        <div className="h-auto md:h-[70%] px-6 flex flex-col items-center justify-center text-gray-800">
-          <h1 className="text-4xl lg:text-[64px] font-bold fira-sans bg-gradient-to-b from-black via-gray-600 py-1 to-black bg-clip-text text-transparent">
-            {
-              Math.floor(counts.sqft)+1 !==1000000 ? `${Math.floor(counts.sqft)+1}k+`:'1M+'
-            }
+      <div
+        ref={sectionRef}
+        className=" w-full h-auto pl-4 md:pl-0 flex justify-center relative -top-20 "
+      >
+        <div className="w-[90%] md:w-[86%] h-full z-10 backdrop-blur-[3px] gap-6 flex flex-col md:flex-row items-center justify-around border p-6 bg-white/70 py-11">
+          <div className="h-auto md:h-[70%] border-black md:border-r-2 px-6 flex flex-col items-center justify-center mb-4 md:mb-0 text-gray-800">
+            <h1 className="text-4xl lg:text-[64px] font-bold fira-sans bg-gradient-to-b from-black via-gray-600 py-1 to-black bg-clip-text text-transparent">
+              {Math.floor(counts.experience) + 1}+
             </h1>
-          <p className="text-base md:text-lg font-bold mt-4 mont">Sq.ft Sold</p>
+            <p className="text-base md:text-lg font-bold mt-4 mont">
+              Years of Experience
+            </p>
+          </div>
+          <div className="h-auto md:h-[70%] border-black md:border-r-2 px-6 flex flex-col items-center justify-center mb-4 md:mb-0 text-gray-800">
+            <h1 className="text-4xl lg:text-[64px] font-bold fira-sans bg-gradient-to-b from-black via-gray-600 py-1 to-black bg-clip-text text-transparent">
+              {Math.floor(counts.projects) + 1}+
+            </h1>
+            <p className="text-base md:text-lg font-bold mt-4 mont ">
+              Projects Done
+            </p>
+          </div>
+          <div className="h-auto md:h-[70%] border-black md:border-r-2 px-6 flex flex-col items-center justify-center mb-4 md:mb-0 text-gray-800">
+            <h1 className="text-4xl lg:text-[64px] font-bold fira-sans bg-gradient-to-b from-black via-gray-600 py-1 to-black bg-clip-text text-transparent">
+              {Math.floor(counts.customers)}+
+            </h1>
+            <p className="text-base md:text-lg font-bold mt-4 mont">
+              Customers Served
+            </p>
+          </div>
+          <div className="h-auto md:h-[70%] px-6 flex flex-col items-center justify-center text-gray-800">
+            <h1 className="text-4xl lg:text-[64px] font-bold fira-sans bg-gradient-to-b from-black via-gray-600 py-1 to-black bg-clip-text text-transparent">
+              {formatIndianNumber(Math.ceil(counts.sqft))}+
+            </h1>
+            <p className="text-base md:text-lg font-bold mt-4 mont">
+              Sq.ft Sold
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-
-
-
     </>
   );
 }

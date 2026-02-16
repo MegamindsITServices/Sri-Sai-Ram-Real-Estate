@@ -1,6 +1,6 @@
 import React from "react";
 import Navbar from "../component/homepage/Navbar";
-import background from "../assets/project.jpeg";
+import aboutUsBanner from "../assets/About_us_banner.png";
 import founder from "../assets/founder.png";
 import about from "../assets/about.jpeg";
 import cloud from "../assets/cloud.png";
@@ -52,7 +52,7 @@ const AboutUs = () => {
       >
         <div
           className="w-full min-h-72 max-h-72 inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${background})` }}
+          style={{ backgroundImage: `url(${aboutUsBanner})` }}
         >
           <div className="flex flex-col justify-end gap-3 h-72 pb-8 pl-14 text-white">
             <h1 className="text-4xl font-bold leading-tight fira-sans">

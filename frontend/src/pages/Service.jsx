@@ -6,7 +6,7 @@ import home from "../assets/h1.webp";
 import working from "../assets/working.jpg";
 import Footer from "../component/homepage/Footer";
 import Navbar from "../component/homepage/Navbar";
-import background from "../assets/project.jpeg";
+import servicesBanner from "../assets/services_banner.png";
 import SEO from "../component/SEO";
 
 const services = [
@@ -46,7 +46,7 @@ const Service = () => {
       {/* Header Section - Spacing Unchanged */}
       <div
         className="w-full min-h-72 max-h-72 inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${background})` }}
+        style={{ backgroundImage: `url(${servicesBanner})` }}
       >
         <div className="flex flex-col justify-end gap-3 h-72 pb-8 pl-14 text-white">
           <h1 className="text-4xl fira-sans">Services</h1>

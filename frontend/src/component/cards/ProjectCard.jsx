@@ -15,6 +15,9 @@ import Share from "../models/Share";
 import stickerImage from "../../assets/Star 6.png";
 import sold from "../../assets/sold.png";
 import logo from "../../../public/logo.png";
+import upcomingStamp from "../../assets/upcoing_stamp.png";
+import AvailableStamp from "../../assets/available_stamp.png";
+import justLaunchedStamp from "../../assets/just_launched_stamp.png";
 
 const ProjectCard = ({ product, viewMode = "list" }) => {
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -114,33 +117,49 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
       }`}
     >
       {/* Sticker - same for both views */}
-      {status !== "sold-out" ? (
+      {status === "available" && (
+        <div className="absolute -top-12 -left-12 z-10 w-32 h-32 flex items-center justify-center">
+          <img
+            src={AvailableStamp}
+            alt="Sticker"
+            className="w-full h-full absolute top-0 left-0"
+          />
+        </div>
+      )}
+
+      {status === "sold-out" && (
+        <div className="absolute -top-6 -left-6 z-10 w-20 h-20 flex items-center justify-center">
+          <img
+            src={sold}
+            alt="Sold Out"
+            className="absolute top-0 left-0 w-24 z-20"
+          />
+        </div>
+      )}
+
+      {status === "upcoming" && (
+        <div className="absolute -top-10 -left-10 z-10 w-28 h-28 flex items-center justify-center">
+          <img
+            src={upcomingStamp}
+            alt="Upcoming"
+            className="absolute top-0 left-0 w-28 z-20"
+          />
+        </div>
+      )}
+
+      {status === "newly-launched" && (
         <div className="absolute -top-6 -left-6 z-10 w-20 h-20 flex items-center justify-center">
           <img
             src={stickerImage}
             alt="Sticker"
             className="w-full h-full absolute top-0 left-0"
           />
-          <div className="relative z-20 text-center -rotate-[35deg]">
-            {status === "upcoming" ? (
-              <div className="text-xs font-bold text-black">Upcoming</div>
-            ) : status === "available" ? (
-              <div className="text-xs font-bold text-black">Available</div>
-            ) : (
-              <div>
-                <div className="text-xs font-bold text-black">New</div>
-                <div className="text-xs font-bold text-black">Arrival</div>
-              </div>
-            )}
+          <div class="relative z-20 text-center -rotate-[35deg]">
+            <div>
+              <div class="text-xs font-bold text-black">New</div>
+              <div class="text-xs font-bold text-black">Arrival</div>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="absolute -top-6 -left-6 z-10 w-20 h-20 flex items-center justify-center">
-          <img
-            src={sold}
-            alt="Sold"
-            className="w-full h-full absolute top-0 left-0"
-          />
         </div>
       )}
 
@@ -242,11 +261,17 @@ const ProjectCard = ({ product, viewMode = "list" }) => {
           <span
             className={`px-2 py-1 text-xs font-semibold ${
               status === "sold-out"
-              ? "bg-red-100 text-red-800"
-              : "bg-green-100 text-green-800"
+                ? "bg-red-100 text-red-800"
+                : "bg-green-100 text-green-800"
             }`}
           >
-            {status === "available" ? "Available" : status === "upcoming" ? "Upcoming" : status === "newly-launched" ? "Newly Launched" : "Sold Out"}
+            {status === "available"
+              ? "Available"
+              : status === "upcoming"
+                ? "Upcoming"
+                : status === "newly-launched"
+                  ? "Newly Launched"
+                  : "Sold Out"}
           </span>
         </div>
       </div>

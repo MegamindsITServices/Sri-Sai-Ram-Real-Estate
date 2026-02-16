@@ -31,6 +31,7 @@ const Projects = () => {
   const user = useSelector((state) => state.user.user);
   const [filters, setFilters] = useState({
     search: "",
+    status: "",
     minPrice: "",
     maxPrice: "",
     area: "",
@@ -293,7 +294,7 @@ const Projects = () => {
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           {/* Filter Section */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-2">
               <div className="flex flex-col">
                 <label
                   htmlFor="search"
@@ -331,6 +332,29 @@ const Projects = () => {
                   <option value="commercial_group">Commercial Plots</option>
                   <option value="apartment">Apartment</option>
                   <option value="villa">House/Villa</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col">
+                <label
+                  htmlFor="status"
+                  className="text-sm font-medium text-gray-600 mb-1"
+                >
+                  Project Status
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={filters.status}
+                  onChange={handleFilterChange}
+                  className="p-3 border border-gray-300 rounded-md bg-white
+               focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                >
+                  <option value="">All Status</option>
+                  <option value="available">Available</option>
+                  <option value="upcoming">Upcoming</option>
+                  <option value="newly-launched">Newly Launched</option>
+                  <option value="sold-out">Sold Out</option>
                 </select>
               </div>
 
