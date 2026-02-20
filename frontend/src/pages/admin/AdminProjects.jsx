@@ -213,7 +213,7 @@ const AdminProjects = () => {
                 </td>
               </tr>
             ) : (
-              projects.map((project) => (
+              projects?.map((project) => (
                 <tr key={project._id} className="hover:bg-gray-50 transition">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <img
@@ -242,7 +242,7 @@ const AdminProjects = () => {
                         <span className="text-gray-500">Draft</span>
                       )}
                       {" • "}
-                      {project.approvalType.map((type, idx) => (
+                      {project.approvalType?.map((type, idx) => (
                         <span key={idx} className="text-gray-600">
                           {type}
                           {idx < project.approvalType.length - 1 ? "," : ""}
@@ -330,7 +330,7 @@ const AdminProjects = () => {
             No projects found
           </div>
         ) : (
-          projects.map((project) => (
+          projects?.map((project) => (
             <div
               key={project._id}
               className="bg-white rounded shadow-sm overflow-hidden border border-gray-200"
