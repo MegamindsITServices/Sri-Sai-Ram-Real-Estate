@@ -185,31 +185,15 @@ const update = async (req, res) => {
 
 const getPaginatedProjects = async (req, res) => {
   try {
-    // Pagination
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 10, 50);
     const skip = (page - 1) * limit;
 
-    // Filters
-    const {
-      admin,
-      search,
-      status,
-      category,
-      area,
-      sort = "newest",
-      minPrice,
-      maxPrice,
-    } = req.query;
+    const { admin, search, status, category, area, sort, minPrice, maxPrice } =
+      req.query;
 
     const filter = {};
-
-    // 🔐 Public vs Admin
-    if (admin !== "true") {
-      filter.live = true;
-    }
-
-    // 🔍 Search (text-like search)
+    if (admin !== "true") filter.live = true;
     if (search) {
       filter.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -218,54 +202,58 @@ const getPaginatedProjects = async (req, res) => {
         { description: { $regex: search, $options: "i" } },
       ];
     }
-
-    // 🏷 Status filter
-    if (status) {
-      filter.status = status; // available | sold-out
-    }
-
-    // 🏠 Category filter
+    if (status) filter.status = status;
     if (category) {
-      if (category === "commercial_group") {
+      if (category === "commercial_group")
         filter.category = { $in: ["commercial", "commercial_layout"] };
-      } else if (category === "residential_group") {
+      else if (category === "residential_group")
         filter.category = { $in: ["residential", "residential_layout"] };
-      } else {
-        filter.category = category;
-      }
+      else filter.category = category;
     }
-
-    // 💰 Price range filter
     if (minPrice || maxPrice) {
       filter.price = {};
       if (minPrice) filter.price.$gte = Number(minPrice);
       if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
+    if (area) filter.totalArea = { $gte: Number(area) };
 
-    if (area) {
-      filter.totalArea = { $gte: Number(area) };
+    // --- CUSTOM SORT LOGIC START ---
+    let pipeline = [{ $match: filter }];
+
+    if (!sort || sort === "none") {
+      // Apply weights for custom status sorting
+      pipeline.push({
+        $addFields: {
+          sortWeight: {
+            $switch: {
+              branches: [
+                { case: { $eq: ["$status", "upcoming"] }, then: 1 },
+                { case: { $eq: ["$status", "newly-launched"] }, then: 2 },
+                { case: { $eq: ["$status", "available"] }, then: 3 },
+                { case: { $eq: ["$status", "sold-out"] }, then: 4 },
+              ],
+              default: 5,
+            },
+          },
+        },
+      });
+      pipeline.push({ $sort: { sortWeight: 1, createdAt: -1 } });
+    } else {
+      // Standard sorting
+      let sortQuery = {};
+      if (sort === "price-asc") sortQuery = { price: 1 };
+      else if (sort === "price-desc") sortQuery = { price: -1 };
+      else sortQuery = { createdAt: -1 }; // newest
+      pipeline.push({ $sort: sortQuery });
     }
+    // --- CUSTOM SORT LOGIC END ---
 
-    let sortQuery = { createdAt: -1 };
+    // Pagination in pipeline
+    pipeline.push({ $skip: skip });
+    pipeline.push({ $limit: limit });
 
-    switch (sort) {
-      case "price-asc":
-        sortQuery = { price: 1 };
-        break;
-
-      case "price-desc":
-        sortQuery = { price: -1 };
-        break;
-
-      case "newest":
-      default:
-        sortQuery = { createdAt: -1 };
-        break;
-    }
-
-    // Fetch data
     const [projects, total] = await Promise.all([
-      Listing.find(filter).sort(sortQuery).skip(skip).limit(limit),
+      Listing.aggregate(pipeline),
       Listing.countDocuments(filter),
     ]);
 
@@ -284,11 +272,7 @@ const getPaginatedProjects = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Pagination Error:", error);
-    res.status(500).json({
-      status: false,
-      message: "Error fetching paginated projects",
-    });
+    res.status(500).json({ status: false, message: "Error fetching projects" });
   }
 };
 

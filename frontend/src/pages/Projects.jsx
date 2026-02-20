@@ -17,7 +17,7 @@ import SEO from "../component/SEO";
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sort, setSort] = useState("newest");
+  const [sort, setSort] = useState("");
   const [pagination, setPagination] = useState({
     totalItems: 0,
     totalPages: 1,
@@ -463,6 +463,7 @@ const Projects = () => {
                 onChange={(e) => handleSortChange(e.target.value)}
                 className="p-2 border border-gray-300 rounded-md bg-white min-w-[180px]"
               >
+                <option value="">Sort by</option>
                 <option value="newest">Newest First</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
